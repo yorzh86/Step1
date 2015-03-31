@@ -6,7 +6,7 @@ module system_mod
 	!= Parameters =!
 	!==============!
 	
-	real(wp),parameter::G0 = 6.67E-11_wp
+
 	real(wp),parameter::kB = 1.3806488E-23
 	
 	real(wp),parameter::E0 = 1.0_wp
@@ -44,42 +44,41 @@ module system_mod
 	
 contains
 
-	subroutine buildOrbit(T0)
-		real(wp),intent(out)::T0
+	subroutine buildSystem(a,N,Ti)
+		real(wp),intent(in)::a
+		integer,intent(in)::N
+		real(wp),intent(in)::Ti
 		
-		real(wp),parameter::M0 = 1.0E100_wp
-		real(wp),parameter::R0 = 2.0_wp
+		integer::i,j,k
 		
-		real(wp),dimension(2)::a0
-		integer::k
+		box = a*real([N,N],wp)
 		
-		allocate(types(2))
-		allocate(atoms(2))
+		allocate(types(1))
+		allocate(atoms(N**2))
 		
-		box = 4.0_wp*R0
+		types%m = 1.0_wp
+		types%atom_name = 'Ar'
 		
-		types%m = [M0,1.0_wp]
-		types%atom_name = ['Au','H ']
+		atoms(:)%t = 1
+		forall(i=1:N,j=1:N)
+			atoms(i+N*(j-1))%r = a*real([i,j],wp)-a/2.0_wp
+			atoms(i+N*(j-1))%a = -delV(i+N*(j-1))/types(atoms(i+N*(j-1))%t)%m
+		end forall
 		
-		atoms(1)%r = [2.0_wp,2.0_wp]*R0
-		atoms(2)%r = [3.0_wp,2.0_wp]*R0
-		
-		atoms(1)%t = 1
-		atoms(2)%t = 2
-		
-		a0 = -delV(2)/types(atoms(2)%t)%m
-		
-		atoms(1)%v = [0.0_wp,0.0_wp]
-		atoms(2)%v = [0.0_wp,sqrt(norm2(a0)*R0)]
-		
-		do k=1,size(atoms)
-			atoms(k)%a = -delV(k)/types(atoms(k)%t)%m
+		do k=1,N**2
+			call random_number(atoms(k)%v)
+			atoms(k)%v = 2.0_wp*atoms(k)%v-1.0_wp
+			do while(norm2(atoms(k)%v)>1.0_wp .and. norm2(atoms(k)%v)<0.1_wp)
+				call random_number(atoms(k)%v)
+				atoms(k)%v = 2.0_wp*atoms(k)%v-1.0_wp
+			end do
+			atoms(k)%v = atoms(k)%v/norm2(atoms(k)%v)
+			atoms(k)%v = atoms(k)%v*sqrt(2.0_wp*kB*Ti/types(atoms(k)%t)%m)
 		end do
 		
-		t  = 0.0_wp
 		ts = 0
-		T0 = 2.0_wp*PI*R0/atoms(2)%v(2)
-	end subroutine buildOrbit
+		t  = 0.0_wp
+	end subroutine buildSystem
 
 	pure function delV(i) result(o)
 		integer,intent(in)::i
@@ -123,9 +122,9 @@ contains
 		
 		o = 0.0_wp
 		do k=1,size(atoms)
-			o = o+types(atoms(k)%t)%m*norm2(atoms(k)%v)**2
+			o = o+0.5_wp*types(atoms(k)%t)%m*norm2(atoms(k)%v)**2
 		end do
-		o = o/(3.0_wp*real(size(atoms),wp)*kB)
+		o = o/(2.0_wp*real(size(atoms),wp)*kB)
 	end function temperature
 
 end module system_mod

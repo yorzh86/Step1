@@ -5,12 +5,6 @@ module output_mod
 	
 contains
 
-	subroutine writeOrbit(iou)
-		integer,intent(in)::iou
-		
-		write(iou,*) t,atoms(2)%r-atoms(1)%r,atoms(2)%v,atoms(2)%a
-	end subroutine writeOrbit
-
 	subroutine writeStepXYZ(iou)
 		integer,intent(in)::iou
 		

@@ -5,7 +5,7 @@ module integrate_mod
 	
 	logical::doThermostat = .false.
 	real(wp)::eta = 0.0_wp
-	real(wp)::Ts = 10.0_wp
+	real(wp)::Tset = 10.0_wp
 	real(wp)::tauT = 100.0_wp
 	
 contains
@@ -57,7 +57,7 @@ contains
 	pure function DetaDt() result(o)
 		real(wp)::o
 		
-		o = (temperature()/Ts-1.0_wp)/tauT**2
+		o = (temperature()/Tset-1.0_wp)/tauT**2
 	end function DetaDt
 
 end module integrate_mod
