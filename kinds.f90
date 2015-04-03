@@ -27,6 +27,7 @@ module kinds_mod
 	public::PI,E
 	
 	public::printTypes
+	public::randomNormal
 	
 contains
 
@@ -37,5 +38,13 @@ contains
 		write(*,*) 'qp: ',qp
 		write(*,*) 'wp: ',wp
 	end subroutine printTypes
+
+	function randomNormal() result(o)
+		real(wp)::o
+		real(wp),dimension(12)::x
+		
+		call random_number(x)
+		o = sum(x)-6.0_wp
+	end function randomNormal
 
 end module kinds_mod

@@ -7,10 +7,10 @@ module system_mod
 	!==============!
 	
 
-	real(wp),parameter::kB = 1.3806488E-23
+	real(wp),parameter::kB = 8.617332478E-5_wp
 	
-	real(wp),parameter::E0 = 1.0_wp
-	real(wp),parameter::S0 = 1.0_wp
+	real(wp),parameter::E0 = 1.0298490416E-2_wp
+	real(wp),parameter::S0 = 3.4_wp 
 	
 	!=========!
 	!= Types =!
@@ -51,17 +51,17 @@ contains
 		
 		integer::i,j,k
 		
-		box = a*real([N,N],wp)
+		box = 2.0_wp*a*real([N,N],wp)
 		
 		allocate(types(1))
 		allocate(atoms(N**2))
 		
-		types%m = 1.0_wp
+		types%m = 39.9_wp
 		types%atom_name = 'Ar'
 		
 		atoms(:)%t = 1
 		forall(i=1:N,j=1:N)
-			atoms(i+N*(j-1))%r = a*real([i,j],wp)-a/2.0_wp
+			atoms(i+N*(j-1))%r = a*real([i,j],wp)-a/2.0_wp+a/2.0_wp*N
 			atoms(i+N*(j-1))%a = -delV(i+N*(j-1))/types(atoms(i+N*(j-1))%t)%m
 		end forall
 		
@@ -73,8 +73,10 @@ contains
 				atoms(k)%v = 2.0_wp*atoms(k)%v-1.0_wp
 			end do
 			atoms(k)%v = atoms(k)%v/norm2(atoms(k)%v)
-			atoms(k)%v = atoms(k)%v*sqrt(2.0_wp*kB*Ti/types(atoms(k)%t)%m)
+			atoms(k)%v = atoms(k)%v*sqrt(2.0_wp*kB*Ti/types(atoms(k)%t)%m)*abs(randomNormal()+1.0_wp)
 		end do
+		
+		forall(k=1:2) atoms(:)%v(k) = atoms(:)%v(k)-sum(atoms(:)%v(k))/real(N*N,wp)
 		
 		ts = 0
 		t  = 0.0_wp
