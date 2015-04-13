@@ -82,6 +82,32 @@ contains
 		t  = 0.0_wp
 	end subroutine buildSystem
 
+	pure function V(i) result(o)
+		integer,intent(in)::i
+		real(wp)::o
+		
+		o = 0.0_wp
+		if(enableLennardJones) call doLennardJones(o)
+		
+	contains
+	
+		pure subroutine doLennardJones(o)
+			real(wp),intent(inout)::o
+			
+			real(wp),dimension(2)::d
+			real(wp)::l
+			integer::k
+			
+			do k=1,size(atoms)
+				if(k==i) cycle
+				d = deltaR(atoms(k),atoms(i))
+				l = S0/norm2(d)
+				o = o
+			end do
+		end subroutine doLennardJones
+	
+	end function V
+
 	pure function delV(i) result(o)
 		integer,intent(in)::i
 		real(wp),dimension(2)::o
@@ -128,5 +154,27 @@ contains
 		end do
 		o = o/(2.0_wp*real(size(atoms),wp)*kB)
 	end function temperature
+
+	pure function kineticE() result (o)
+		real(wp)::o
+		integer::k
+		o = 0.0_wp
+		do k=1,size(atoms)
+			o = o + 0.5_wp*types(atoms(k)%t)%m*norm2(atoms(k)%v)**2
+		end do
+	end function kineticE
+	
+	pure function potentialE(i) result (o)
+		integer,intent(in)::i
+		real(wp)::o
+		real(wp),dimension(2)::d
+		real(wp)::l
+		integer::k
+		
+		o = 0.0_wp
+		do k=1,size(atoms)
+			o = o+V(k)
+		end do
+	end function potentialE
 
 end module system_mod

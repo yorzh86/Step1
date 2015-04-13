@@ -2,13 +2,37 @@ module integrate_mod
 	use kinds_mod
 	use system_mod
 	implicit none
+	private
 	
 	logical::doThermostat = .false.
 	real(wp)::eta = 0.0_wp
 	real(wp)::Tset = 10.0_wp
 	real(wp)::tauT = 100.0_wp
 	
+	public::setThermostat
+	public::velocityVerlet
+	public::leapFrog
+	public::doBox
+	
 contains
+
+	subroutine setThermostat(state,T,tau)
+		logical,intent(in)::state
+		real(wp),intent(in),optional::T,tau
+		
+		if(state .and. present(T) .and. present(tau) ) then
+			Tset = T
+			tauT = tau
+			eta = 0.0_wp
+		else if(state) then
+			write(*,*) 'Error: Called thermostate(true) without T and tau!'
+			stop 1
+		else
+			eta = 0.0_wp
+		end if
+		
+		doThermostat = state
+	end subroutine setThermostat
 
 	subroutine velocityVerlet(dt)
 		real(wp),intent(in)::dt

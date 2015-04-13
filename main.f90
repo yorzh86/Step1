@@ -5,26 +5,25 @@ program main_prg
 	use output_mod
 	implicit none
 	
+	real(wp)::T0 = 20.0_wp
 	real(wp)::dt
 	integer::iou,k
 	
 	open(file='out.xyz',newunit=iou)
 	
 	enableLennardJones = .true.
-	doThermostat = .true.
+	call setThermostat(.true.,T0,100.0_wp)
 	dt = 1.0_wp
-	Tset = 20.0_wp
 	
 	!subroutine buildSystem(lattice parameter,box edge,temperature)
-	call buildSystem(3.1_wp,10,Tset)
+	call buildSystem(3.1_wp,10,T0)
 	
 	do k=1,50000
 		call velocityVerlet(dt)
 		call doBox()
 		
 		if(k==10000) then
-			doThermostat = .false.
-			eta = 0.0_wp
+			call setThermostat(.false.)
 		end if
 		
 		if(mod(k,100)==0) then
