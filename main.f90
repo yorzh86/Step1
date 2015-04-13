@@ -5,7 +5,7 @@ program main_prg
 	use output_mod
 	implicit none
 	
-	real(wp)::T0 = 20.0_wp
+	real(wp)::T0 = 20.0_wppymo	
 	real(wp)::dt
 	integer::iou,k
 	
