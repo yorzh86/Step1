@@ -17,6 +17,7 @@ module integrate_mod
 contains
 
 	subroutine setThermostat(state,T,tau)
+	! turns on/off damping parameter "eta" in the Integrator
 		logical,intent(in)::state
 		real(wp),intent(in),optional::T,tau
 		
@@ -35,6 +36,7 @@ contains
 	end subroutine setThermostat
 
 	subroutine velocityVerlet(dt)
+	! Velocity-Verlet integration
 		real(wp),intent(in)::dt
 		integer::k
 		
@@ -51,6 +53,7 @@ contains
 	end subroutine velocityVerlet
 
 	subroutine leapFrog(dt)
+	! Leap frog integration
 		real(wp),intent(in)::dt
 		real(wp),dimension(2)::ao
 		integer::k
@@ -70,6 +73,7 @@ contains
 	end subroutine leapFrog
 
 	subroutine doBox
+	! returns moving atoms into the simulation box
 		integer::k
 		
 		forall(k=1:2)
@@ -79,6 +83,7 @@ contains
 	end subroutine doBox
 
 	pure function DetaDt() result(o)
+	! calculates damping parameter("eta") change over time.
 		real(wp)::o
 		
 		o = (temperature()/Tset-1.0_wp)/tauT**2

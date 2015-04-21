@@ -5,7 +5,7 @@ program main_prg
 	use output_mod
 	implicit none
 	
-	real(wp)::T0 = 20.0_wppymo	
+	real(wp)::T0 = 40.0_wp
 	real(wp)::dt
 	integer::iou,k
 	
@@ -15,10 +15,11 @@ program main_prg
 	call setThermostat(.true.,T0,100.0_wp)
 	dt = 1.0_wp
 	
-	!subroutine buildSystem(lattice parameter,box edge,temperature)
-	call buildSystem(3.1_wp,10,T0)
+	call buildSystem(5.260_wp,15,T0)
+	! (lattice parameter, box edge, temperature)
+!~ 	call writeStepXYZ(iou)
 	
-	do k=1,50000
+	do k=1,5000
 		call velocityVerlet(dt)
 		call doBox()
 		
@@ -26,9 +27,9 @@ program main_prg
 			call setThermostat(.false.)
 		end if
 		
-		if(mod(k,100)==0) then
+		if(mod(k,10)==0) then
 			call writeStepXYZ(iou)
-			write(*,*) k,temperature()
+			write(*,*) k,temperature(),PE(),KE()
 		end if
 	end do
 	
