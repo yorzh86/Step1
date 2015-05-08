@@ -118,28 +118,38 @@ contains
 	! calculates forces between atoms at employed potentials
 		integer,intent(in)::i
 		real(wp),dimension(2)::o
+		integer::j
 		
 		o = 0.0_wp
+		do j=1,size(atoms)
+			o = o+delVij(i,j)
+		end do
+		
+	end function delV
+
+	function delVij(i,j)
+		integer,intent(in)::i,j
+		real(wp),dimension(2)::o
+		
+		o = 0.0_wp
+		if(i==j) return
+		
 		if(enableLennardJones) call doLennardJones(o)
 		
 	contains
-
+		
 		pure subroutine doLennardJones(o)
 			real(wp),dimension(2),intent(inout)::o
 			
 			real(wp),dimension(2)::d
 			real(wp)::l
-			integer::k
 			
-			do k=1,size(atoms)
-				if(k==i) cycle
-				d = deltaR(atoms(k),atoms(i))
-				l = S0/norm2(d)
-				o = o+24.0_wp*E0/sum(d*d)*(2.0_wp*l**12-l**6)*d
-			end do
+			d = deltaR(atoms(i),atoms(j))
+			l = S0/norm2(d)
+			o = o+24.0_wp*E0/sum(d*d)*(2.0_wp*l**12-l**6)*d
 		end subroutine doLennardJones
-	
-	end function delV
+		
+	end function delVij
 
 	pure function deltaR(a1,a2) result(o)
 	! calculates the distance between atoms, applying 
@@ -178,14 +188,10 @@ contains
 	
 	pure function KEi(i) result (o)
 		integer,intent(in)::i
-	! calculates Ekin 
 		real(wp)::o
 		integer::k
-		o = 0.0_wp
-		do k=1,size(atoms)
-			o = o + 0.5_wp*types(atoms(k)%t)%m*norm2(atoms(k)%v)**2
-		end do
-	end function KE
+		o = 0.5_wp*types(atoms(i)%t)%m*norm2(atoms(i)%v)**2
+	end function KEi
 	
 	pure function PE() result (o)
 	! calculates Epot
@@ -201,17 +207,57 @@ contains
 	end function PE
 
 	pure function PEi(i) result (o)
+	! why do we need to separate PEi and KEi functions?
+	! why don't we calculate site energy in one function?
 		integer,intent(in)::i
-	! calculates Epot
-		real(wp)::o
-		real(wp),dimension(2)::d
-		real(wp)::l
-		integer::k
+		real(wp),dimension(2)::o
+		!real(wp)::o
+		o = 0.0_wp
+		if(enableLennardJones) call doLennardJones(o)
+	
+	contains
+		pure subroutine doLennardJones(o)
+			real(wp),dimension(2),intent(inout)::o
+			real(wp),dimension(2)::d
+			real(wp)::l
+			d = deltaR(atoms(i-1),atoms(i))
+			l = norm2(d)
+			o = 4*l**12-l**6
+		end subroutine doLennardJones
+	end function PEi
+	
+	subroutine heatfluxJ(i)
+		integer,intent(in)::i
+		real(wp),dimension(2)::o
 		
 		o = 0.0_wp
-		do k=1,size(atoms)
-			o = o+V(k)
-		end do
-	end function PEi
+		if(enableLennardJones) call doLennardJones(o)
+		write(*,*) o
+	contains
+		pure subroutine doLennardJones(o)
+			real(wp),dimension(2),intent(inout)::o
+			real(wp),dimension(2)::d, fij, first_term, second_term
+			real(wp)::l
+			integer:: k,j
+			
+			d = deltaR(atoms(i+1),atoms(i))
+			l = S0/norm2(d)
+			fij = 24.0_wp*E0/sum(d*d)*(2.0_wp*l**12-l**6)*d
+			
+			first_term = real([0,0],wp)
+			second_term = real([0,0],wp)
+			
+			do k=1, size(atoms)
+				first_term = first_term +(KEi(i)+PEi(i))*atoms(i)%v
+			end do
+			
+			do k=1, size(atoms)
+				second_term = second_term + (fij*atoms(i+1)%v)*d
+			end do
+			
+			o = (second_term + first_term)/box	
+
+		end subroutine doLennardJones
+	end subroutine heatfluxJ
 
 end module system_mod
