@@ -10,7 +10,7 @@ module kinds_mod
 	integer,parameter::dp = selected_real_kind(15)
 	integer,parameter::ep = selected_real_kind(18)
 	integer,parameter::qp = selected_real_kind(32)
-	integer,parameter::wp = ep
+	integer,parameter::wp = dp
 	
 	!==================!
 	!= Math Constants =!
