@@ -172,12 +172,15 @@ contains
 
 	pure function temperature() result(o)
 		real(wp)::o
+		
+		real(wp),dimension(2)::vBulk
 		integer::k
 		
-		! TODO: Remove bulk velocity
+		forall(k=1:2) vBulk(k) = sum(atoms%v(k))/real(size(atoms),wp)
+		
 		o = 0.0_wp
 		do k=1,size(atoms)
-			o = o+KEi(k)
+			o = o+KEi(k,vBulk)
 		end do
 		o = o/(2.0_wp*real(size(atoms),wp)*kB)
 	end function temperature
@@ -202,17 +205,23 @@ contains
 	pure function KE() result (o) 
 		real(wp)::o
 		integer::k
+		
 		o = 0.0_wp
 		do k=1,size(atoms)
 			o = o+KEi(k)
 		end do
 	end function KE
 	
-	pure function KEi(i) result (o)
+	pure function KEi(i,vBulk) result (o)
 		integer,intent(in)::i
+		real(wp),dimension(2),intent(in),optional::vBulk
 		real(wp)::o
 		
-		o = 0.5_wp*types(atoms(i)%t)%m*norm2(atoms(i)%v)**2
+		real(wp),dimension(2)::v0
+		
+		v0 = 0.0_wp
+		if(present(vBulk)) v0 = vBulk
+		o = 0.5_wp*types(atoms(i)%t)%m*norm2(atoms(i)%v-v0)**2
 	end function KEi
 	
 	pure function PE() result (o)

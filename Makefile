@@ -3,8 +3,8 @@ LINK=$(F90)
 LN=ln
 INCLUDE=$(shell pkg-config --cflags plplotd-f95)
 LIBS=$(shell pkg-config --libs plplotd-f95)
-#FLAGS=-O3 -march=native -mfpmath=sse
-FLAGS=-g -Wall -Wtabs -fcheck=all -ffpe-trap=invalid,zero,overflow -fbacktrace -fdiagnostics-color=never
+FLAGS=-O3 -march=native -mfpmath=sse
+#FLAGS=-g -Wall -Wtabs -fcheck=all -ffpe-trap=invalid,zero,overflow -fbacktrace -fdiagnostics-color=never
 VPATH=src:bin
 BPATH=bin
 SPATH=src
