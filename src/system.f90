@@ -6,10 +6,12 @@ module system_mod
 	!= Parameters =!
 	!==============!
 	
-
 	real(wp),parameter::kB = 8.617332478E-5_wp
+		!! Boltzman constant in metal units
 	real(wp),parameter::E0 = 1.0298490416E-2_wp
+		!! Lennard Jones epsilon
 	real(wp),parameter::S0 = 3.4_wp 
+		!! Lennard Jones sigma
 	
 	!=========!
 	!= Types =!
@@ -17,11 +19,14 @@ module system_mod
 	
 	type::type_t
 		real(wp)::m
+			!! Atomic mass
 		character(2)::atom_name
+			!! Atom symbol (use standard periodic tables)
 	end type
 	
 	type::atom_t
 		real(wp),dimension(2)::r
+			!! Atomic position
 		real(wp),dimension(2)::v
 		real(wp),dimension(2)::a
 		integer::t
@@ -44,11 +49,12 @@ module system_mod
 contains
 
 	subroutine buildSystem(a,N,Ti)
-	! creates a system of atoms using lattice par, box edge length and
-	! temperature
 		real(wp),intent(in)::a
+			!! Lattice constant
 		integer,intent(in)::N
+			!! Number of unit cells
 		real(wp),intent(in)::Ti
+			!! Initial temperature
 		
 		integer::i,j,k
 		
@@ -62,14 +68,12 @@ contains
 		atoms(:)%t = 1
 		
 		forall(i=1:N,j=1:N)
-		! sets initial position and acceleration of atoms
 			atoms(i+N*(j-1))%r = a*(real([i,j],wp)*[1.0_wp,1.0_wp/sqrt(2.0_wp)]+[mod(j,2)/2.0_wp,0.0_wp]) &
 			& -a/2.0_wp+a/2.0_wp*N
 			atoms(i+N*(j-1))%a = -delV(i+N*(j-1))/types(atoms(i+N*(j-1))%t)%m
 		end forall
 		
 		do k=1,N**2
-		! applies normal distribution for initial velocities
 			call random_number(atoms(k)%v)
 			atoms(k)%v = 2.0_wp*atoms(k)%v-1.0_wp
 			do while(norm2(atoms(k)%v)>1.0_wp .and. norm2(atoms(k)%v)<0.1_wp)
@@ -87,7 +91,6 @@ contains
 	end subroutine buildSystem
 
 	pure function V(i) result(o)
-	! helps to calculate Epot at different potentials
 		integer,intent(in)::i
 		real(wp)::o
 		
@@ -97,7 +100,6 @@ contains
 	contains
 	
 		pure subroutine doLennardJones(o)
-		
 			real(wp),intent(inout)::o
 			
 			real(wp),dimension(2)::d
@@ -108,7 +110,7 @@ contains
 				if(k==i) cycle
 				d = deltaR(atoms(k),atoms(i))
 				l = S0/norm2(d)
-				o = 4*l**12-l**6
+				o = o+4*l**12-l**6
 			end do
 		end subroutine doLennardJones
 	
@@ -127,7 +129,7 @@ contains
 		
 	end function delV
 
-	function delVij(i,j)
+	pure function delVij(i,j) result (o)
 		integer,intent(in)::i,j
 		real(wp),dimension(2)::o
 		
@@ -152,8 +154,6 @@ contains
 	end function delVij
 
 	pure function deltaR(a1,a2) result(o)
-	! calculates the distance between atoms, applying 
-	! minimum image convention (nint(d/box))
 		type(atom_t),intent(in)::a1,a2
 		real(wp),dimension(2)::o
 		
@@ -164,100 +164,86 @@ contains
 	end function deltaR
 
 	pure function temperature() result(o)
-	! calculates temperature of atoms
 		real(wp)::o
 		integer::k
 		
-		! Change to subtract off average velocity
+		! TODO: Remove bulk velocity
 		o = 0.0_wp
 		do k=1,size(atoms)
-			o = o+0.5_wp*types(atoms(k)%t)%m*norm2(atoms(k)%v)**2
+			o = o+KEi(k)
 		end do
 		o = o/(2.0_wp*real(size(atoms),wp)*kB)
 	end function temperature
 
-	pure function KE() result (o)
-	! calculates Ekin 
+	pure function E() result(o)
+		real(wp)::o
+		integer::k
+		
+		o = 0.0_wp
+		do k=1,size(atoms)
+			o = o+Ei(k)
+		end do
+	end function E
+
+	pure function Ei(i) result(o)
+		integer,intent(in)::i
+		real(wp)::o
+		
+		o = KEi(i)+PEi(i)
+	end function Ei
+
+	pure function KE() result (o) 
 		real(wp)::o
 		integer::k
 		o = 0.0_wp
 		do k=1,size(atoms)
-			o = o + 0.5_wp*types(atoms(k)%t)%m*norm2(atoms(k)%v)**2
+			o = o+KEi(k)
 		end do
 	end function KE
 	
 	pure function KEi(i) result (o)
 		integer,intent(in)::i
 		real(wp)::o
-		integer::k
+		
 		o = 0.5_wp*types(atoms(i)%t)%m*norm2(atoms(i)%v)**2
 	end function KEi
 	
 	pure function PE() result (o)
-	! calculates Epot
 		real(wp)::o
-		real(wp),dimension(2)::d
-		real(wp)::l
 		integer::k
 		
 		o = 0.0_wp
 		do k=1,size(atoms)
-			o = o+V(k)
+			o = o+PEi(k)
 		end do
 	end function PE
 
 	pure function PEi(i) result (o)
-	! why do we need to separate PEi and KEi functions?
-	! why don't we calculate site energy in one function?
 		integer,intent(in)::i
-		real(wp),dimension(2)::o
-		!real(wp)::o
-		o = 0.0_wp
-		if(enableLennardJones) call doLennardJones(o)
-	
-	contains
-		pure subroutine doLennardJones(o)
-			real(wp),dimension(2),intent(inout)::o
-			real(wp),dimension(2)::d
-			real(wp)::l
-			d = deltaR(atoms(i-1),atoms(i))
-			l = norm2(d)
-			o = 4*l**12-l**6
-		end subroutine doLennardJones
+		real(wp)::o
+		
+		o = V(i)
 	end function PEi
 	
-	subroutine heatfluxJ(i)
-		integer,intent(in)::i
+	pure function heatflux() result(o)
 		real(wp),dimension(2)::o
 		
+		real(wp),dimension(2)::fij,vj,rij
+		integer::i,j
+		
 		o = 0.0_wp
-		if(enableLennardJones) call doLennardJones(o)
-		write(*,*) o
-	contains
-		pure subroutine doLennardJones(o)
-			real(wp),dimension(2),intent(inout)::o
-			real(wp),dimension(2)::d, fij, first_term, second_term
-			real(wp)::l
-			integer:: k,j
-			
-			d = deltaR(atoms(i+1),atoms(i))
-			l = S0/norm2(d)
-			fij = 24.0_wp*E0/sum(d*d)*(2.0_wp*l**12-l**6)*d
-			
-			first_term = real([0,0],wp)
-			second_term = real([0,0],wp)
-			
-			do k=1, size(atoms)
-				first_term = first_term +(KEi(i)+PEi(i))*atoms(i)%v
+		do i=1,size(atoms)
+			o = o+Ei(i)*atoms(i)%v
+		end do
+		
+		do j=1,size(atoms)
+			do i=1,j-1
+				fij = delVij(i,j)
+				vj  = atoms(j)%v
+				rij = deltaR(atoms(i),atoms(j))
+				o = o+dot_product(fij,vj)*rij
 			end do
-			
-			do k=1, size(atoms)
-				second_term = second_term + (fij*atoms(i+1)%v)*d
-			end do
-			
-			o = (second_term + first_term)/box	
-
-		end subroutine doLennardJones
-	end subroutine heatfluxJ
+		end do
+	end function heatflux
 
 end module system_mod

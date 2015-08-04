@@ -6,7 +6,6 @@ module output_mod
 contains
 
 	subroutine writeStepXYZ(iou)
-	! writes atom name, 2-d atom distance and 0.0  into file
 		integer,intent(in)::iou
 		
 		character(32)::buf

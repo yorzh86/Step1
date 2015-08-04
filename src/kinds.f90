@@ -17,14 +17,14 @@ module kinds_mod
 	!==================!
 	
 	real(wp),parameter::PI = 4.0_wp*atan(1.0_wp)
-	real(wp),parameter::E  = exp(1.0_wp)
+!~ 	real(wp),parameter::E  = exp(1.0_wp)
 	
 	!===========!
 	!= Exports =!
 	!===========!
 	
 	public::wp
-	public::PI,E
+	public::PI
 	
 	public::printTypes
 	public::randomNormal
