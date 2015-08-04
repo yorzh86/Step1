@@ -7,8 +7,8 @@ module system_mod
 	!==============!
 	
 	real(wp),parameter::kB = 8.617332478E-5_wp
-		!! Boltzman constant in metal units
-	real(wp),parameter::E0 = 1.0298490416E-2_wp
+		!! Boltzmann constant in metal units
+	real(wp),parameter::E0 = 119.8*kB ! = 1.0298490416E-2_wp
 		!! Lennard Jones epsilon
 	real(wp),parameter::S0 = 3.4_wp 
 		!! Lennard Jones sigma
@@ -28,7 +28,9 @@ module system_mod
 		real(wp),dimension(2)::r
 			!! Atomic position
 		real(wp),dimension(2)::v
+			!! Atomic velocity
 		real(wp),dimension(2)::a
+			!! Atomic acceleration
 		integer::t
 	end type
 	
@@ -37,14 +39,20 @@ module system_mod
 	!===============!
 	
 	logical::enableLennardJones = .false.
+		!! Run Lennard-Jones potential
 	
 	type(type_t),dimension(:),allocatable::types
+		!! Types for all atoms in system
 	type(atom_t),dimension(:),allocatable::atoms
+		!! All atoms in system
 	
 	real(wp),dimension(2)::box
+		!! Bounds of the simulation box
 	
 	integer::ts
+		!! Time step counter
 	real(wp)::t
+		!! Sytem time
 	
 contains
 
@@ -110,14 +118,13 @@ contains
 				if(k==i) cycle
 				d = deltaR(atoms(k),atoms(i))
 				l = S0/norm2(d)
-				o = o+4*l**12-l**6
+				o = o+4.0_wp*E0*(l**12-l**6)
 			end do
 		end subroutine doLennardJones
 	
 	end function V
 
 	pure function delV(i) result(o)
-	! calculates forces between atoms at employed potentials
 		integer,intent(in)::i
 		real(wp),dimension(2)::o
 		integer::j
@@ -148,7 +155,7 @@ contains
 			
 			d = deltaR(atoms(i),atoms(j))
 			l = S0/norm2(d)
-			o = o+24.0_wp*E0/sum(d*d)*(2.0_wp*l**12-l**6)*d
+			o = o+24.0_wp*E0/sum(d*d)*(l**6-2.0_wp*l**12)*d
 		end subroutine doLennardJones
 		
 	end function delVij

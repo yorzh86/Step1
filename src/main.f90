@@ -13,29 +13,27 @@ program main_prg
 	
 	enableLennardJones = .true.
 	call setThermostat(.true.,T0,100.0_wp)
-	dt = 0.1_wp
+	dt = 1.0_wp
 	
 	call buildSystem(5.260_wp,15,T0)
 	!(lattice parameter, box edge, temperature)
 	call doBox()
 	call writeStepXYZ(iou)
 	
-	do k=1,150
+	do k=1,5000
 		call velocityVerlet(dt)
 		call doBox()
 		if(k==10000) call setThermostat(.false.)
 		
-		if(mod(k,1)==0) then
+		if(mod(k,10)==0) then
 			call writeStepXYZ(iou)
-			write(*,*) k,temperature(),PE(),KE(),heatflux()
+			write(*,'(1I5,10ES15.3)') k,temperature(),PE(),KE(),heatflux()
 		end if
 	end do
 	
 	close(iou)
 	
 contains
-
-
 
 end program main_prg 
 
