@@ -5,17 +5,17 @@ program main_prg
 	use output_mod
 	implicit none
 	
-	integer,parameter::Ns = 2000
+	integer,parameter::Ns = 1000
 	integer,parameter::skip = 1
 	
 	real(wp),dimension(Ns/skip,6)::plotData
 	real(wp)::T0 = 40.0_wp
-	real(wp)::dt = 5.0_wp
+	real(wp)::dt = 1.0_wp
 	integer::iou
 	
 	call setupSim()
 	call runSim()
-	call doPlots()
+	call doPlots(plotData)
 	
 contains
 
@@ -25,7 +25,7 @@ contains
 		enableLennardJones = .true.
 		call setThermostat(.true.,T0,100.0_wp)
 		
-		call buildSystem(5.260_wp,15,T0)
+		call buildSystem(5.260_wp,25,T0)
 		!(lattice parameter, box edge, temperature)
 		call doBox()
 		call writeStepXYZ(iou)
@@ -37,7 +37,7 @@ contains
 		do k=1,Ns
 			call velocityVerlet(dt)
 			call doBox()
-			if(k==1000) call setThermostat(.false.)
+			if(k==Ns/2) call setThermostat(.false.)
 			
 			if(mod(k,skip)==0) then
 				call writeStepXYZ(iou)
@@ -49,18 +49,26 @@ contains
 		close(iou)
 	end subroutine runSim
 
-	subroutine doPlots
+	subroutine doPlots(plotData)
 		use plplotlib_mod
+		real(wp),dimension(:,:),intent(in)::plotData
 		
 		real(wp),dimension(:),allocatable::t,Tp,KE,PE,Jx,Jy
 		real(wp),dimension(:),allocatable::JJx,JJy,IJJ
 		
-		t  = plotData(:,1)
-		Tp = plotData(:,2)
-		PE = plotData(:,3)
-		KE = plotData(:,4)
-		Jx = plotData(:,5)
-		Jy = plotData(:,6)
+		integer::N
+		
+		N = size(plotData,1)
+		
+		t  = plotData(N/2:,1)
+		Tp = plotData(N/2:,2)
+		PE = plotData(N/2:,3)
+		KE = plotData(N/2:,4)
+		Jx = plotData(N/2:,5)
+		Jy = plotData(N/2:,6)
+		
+		N = N/2
+		t = t-t(1)
 		
 		JJx = autocorrelate(Jx)
 		JJy = autocorrelate(Jy)
@@ -115,8 +123,8 @@ contains
 		
 		call figure()
 		call subplot(1,1,1)
-		call xylim(mixval(t),mixval(IJJ))
-		call plot(t,IJJ,lineColor='b',lineWidth=2.0_wp)
+		call xylim(mixval(t(1:N/2)),mixval(IJJ(1:N/2)))
+		call plot(t(1:N/2),IJJ(1:N/2),lineColor='b',lineWidth=2.0_wp)
 		call ticks()
 		call labels('Integration Variable #fi#gt#fn [ps]','Cumulative ACF Inegral [TODO]','')
 		
@@ -127,17 +135,12 @@ contains
 		real(wp),dimension(:),intent(in)::A
 		real(wp),dimension(:),allocatable::o
 		
-		integer::i,j
+		integer::N,i,j
 		
-		allocate(o(size(A)))
+		N = size(A)
+		allocate(o(N))
 		
-		do i=1,size(A)
-			o(i) = 0.0
-			do j=i,size(A)
-				o(i) = o(i)+A(j)*A(j-i)
-			end do
-			o(i) = o(i)/real(size(A)-1,wp)
-		end do
+		forall(i=1:N) o(i) = sum(A(i:N)*A(1:N-i+1))/real(N-i+1,wp)
 	end function autocorrelate
 
 	function cumtrapz(A,t) result(o)

@@ -12,12 +12,12 @@ EXE=main
 
 all: $(EXE)
 
-OBJS=main.o plplotlib.o output.o integrate.o system.o kinds.o
-main.o: output.o integrate.o system.o kinds.o Makefile
-plplotlib.o: kinds.o Makefile
+OBJS=main.o output.o integrate.o system.o plplotlib.o kinds.o
+main.o: output.o integrate.o system.o plplotlib.o kinds.o Makefile
 output.o: system.o kinds.o Makefile
 integrate.o: system.o kinds.o Makefile
 system.o: kinds.o Makefile
+plplotlib.o: kinds.o Makefile
 
 $(EXE): $(OBJS) Makefile
 	@echo 'Linking [$(EXE)] from [$(OBJS)] using [$(LINK)]'
