@@ -5,11 +5,11 @@ program main_prg
 	use output_mod
 	implicit none
 	
-	integer,parameter::Ns = 1000
-	integer,parameter::skip = 1
+	integer,parameter::Ns = 10000
+	integer,parameter::skip = 10
 	
 	real(wp),dimension(Ns/skip,6)::plotData
-	real(wp)::T0 = 40.0_wp
+	real(wp)::T0 = 300.0_wp
 	real(wp)::dt = 1.0_wp
 	integer::iou
 	
@@ -41,9 +41,14 @@ contains
 			
 			if(mod(k,skip)==0) then
 				call writeStepXYZ(iou)
-				write(*,'(1I5,10ES15.3)') k,temperature(),PE(),KE(),heatflux()
-				plotData(k/skip,:) = [t,temperature(),PE(),KE(),heatflux()]
+				!write(*,'(1I5,10EN15.3)') k,temperature(),KE(),PE()
+				plotData(k/skip,:) = [t,temperature(),KE(),PE(),heatflux()]
 			end if
+			
+			if(mod(k,100)==0) then
+				write(*,'(1I5,10EN15.3)') k,temperature(),KE(),PE()
+			end if
+			
 		end do
 		
 		close(iou)

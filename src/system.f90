@@ -8,7 +8,7 @@ module system_mod
 	
 	real(wp),parameter::kB = 8.617332478E-5_wp
 		!! Boltzmann constant in metal units
-	real(wp),parameter::E0 = 119.8*kB ! = 1.0298490416E-2_wp
+	real(wp),parameter::E0 = 1.04233e-2
 		!! Lennard Jones epsilon
 	real(wp),parameter::S0 = 3.4_wp 
 		!! Lennard Jones sigma
@@ -66,18 +66,19 @@ contains
 		
 		integer::i,j,k
 		
-		box = a*real([N,N],wp)*[1.0_wp,1.0_wp/sqrt(2.0_wp)]
+		box = a*real([N,N],wp)*[1.0_wp/sqrt(2.0_wp),1.0_wp/sqrt(2.0_wp)]
 		
 		allocate(types(1))
 		allocate(atoms(N**2))
 		
-		types%m = 39.9_wp
+		types%m = 39.948_wp
 		types%atom_name = 'Ar'
 		atoms(:)%t = 1
 		
 		forall(i=1:N,j=1:N)
-			atoms(i+N*(j-1))%r = a*(real([i,j],wp)*[1.0_wp,1.0_wp/sqrt(2.0_wp)]+[mod(j,2)/2.0_wp,0.0_wp]) &
-			& -a/2.0_wp+a/2.0_wp*N
+			!atoms(i+N*(j-1))%r = a*(real([i,j],wp)*[1.0_wp,1.0_wp/sqrt(2.0_wp)]+[mod(j,2)/2.0_wp,0.0_wp]) &
+			!& -a/2.0_wp+a/2.0_wp*N
+			atoms(i+N*(j-1))%r = a*(real([i,j],wp)*[1.0_wp/sqrt(2.0_wp),1.0_wp/sqrt(2.0_wp)])
 			atoms(i+N*(j-1))%a = -delV(i+N*(j-1))/types(atoms(i+N*(j-1))%t)%m
 		end forall
 		
