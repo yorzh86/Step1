@@ -13,5 +13,11 @@ author_description: Assistant Professor
 email: kyle.horne@unt.edu
 github: https://github.com/hornekyle/
 summary: Simple molecular dynamics code
+title: Mark1 MD Code
+graph: true
+display: public
+display: private
+display: protected
+source: true
 
 

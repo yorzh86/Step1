@@ -9,13 +9,14 @@ program main_prg
 	integer,parameter::skip = 1
 	
 	real(wp),dimension(Ns/skip,6)::plotData
-	real(wp)::T0 = 40.0_wp
+	real(wp)::T0 = 3.0_wp
 	real(wp)::dt = 1.0_wp
 	integer::iou
 	
 	call setupSim()
-	call runSim()
-	call doPlots(plotData)
+	call writeLammpsData('lattice.xyz')
+!~ 	call runSim()
+!~ 	call doPlots(plotData)
 	
 contains
 

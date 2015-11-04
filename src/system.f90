@@ -32,6 +32,7 @@ module system_mod
 		real(wp),dimension(2)::a
 			!! Atomic acceleration
 		integer::t
+			!! Atomic type
 	end type
 	
 	!===============!
@@ -66,7 +67,7 @@ contains
 		
 		integer::i,j,k
 		
-		box = a*real([N,N],wp)*[1.0_wp,1.0_wp/sqrt(2.0_wp)]
+		box = a*real([N,N],wp)!*[1.0_wp,1.0_wp/sqrt(2.0_wp)]
 		
 		allocate(types(1))
 		allocate(atoms(N**2))
@@ -97,6 +98,35 @@ contains
 		ts = 0
 		t  = 0.0_wp
 	end subroutine buildSystem
+
+	subroutine writeLammpsData(fn)
+		character(*),intent(in)::fn
+		
+		integer::N,k,iou
+		
+		open(file=fn,newunit=iou)
+		
+		write(iou,'(1A)') '# Input geometry for lammps'
+		write(iou,'(1I9,1X,1A)') size(atoms),'atoms'
+		write(iou,'(1I9,1X,1A)') size(types),'atom types'
+		write(iou,'(2F13.6,1X,1A,1X,1A)') 0.0_wp,box(1),'xlo','xhi'
+		write(iou,'(2F13.6,1X,1A,1X,1A)') 0.0_wp,box(2),'ylo','yhi'
+		write(iou,'(2F13.6,1X,1A,1X,1A)') -0.5_wp,0.5_wp,'zlo','zhi'
+		write(iou,'(1A)') ''
+		write(iou,'(1A)') 'Masses'
+		write(iou,'(1A)') ''
+		do k=1,size(types)
+			write(iou,'(1I4,1X,1F13.6)') k,types(k)%m
+		end do
+		write(iou,'(1A)') ''
+		write(iou,'(1A)') 'Atoms'
+		write(iou,'(1A)') ''
+		do k=1,size(atoms)
+			write(iou,'(1I9,1X,1I2,1X,3F13.6)') k,atoms(k)%t,atoms(k)%r,0.0_wp
+		end do
+		
+		close(iou)
+	end subroutine writeLammpsData
 
 	pure function V(i) result(o)
 		integer,intent(in)::i
