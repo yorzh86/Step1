@@ -5,17 +5,18 @@ program main_prg
 	use output_mod
 	implicit none
 	
-	integer,parameter::Ns = 10000
+	integer,parameter::Ns = 70000
 	integer,parameter::skip = 10
 	
 	real(wp),dimension(Ns/skip,6)::plotData
-	real(wp)::T0 = 300.0_wp
-	real(wp)::dt = 1.0_wp
+	real(wp)::T0 = 40.0_wp
+	real(wp)::dt = 1E-15_wp
+	real(wp)::lattice_constant = 5.26E-10_wp
 	integer::iou
 	
 	call setupSim()
 	call runSim()
-	call doPlots(plotData)
+! 	call doPlots(plotData)
 	
 contains
 
@@ -23,30 +24,34 @@ contains
 		open(file='out.xyz',newunit=iou)
 		
 		enableLennardJones = .true.
-		call setThermostat(.true.,T0,100.0_wp)
+		call setThermostat(.true.,T0,100.0_wp*dt)
 		
-		call buildSystem(5.260_wp,25,T0)
+		call buildSystem(lattice_constant,25,T0)
 		!(lattice parameter, box edge, temperature)
 		call doBox()
 		call writeStepXYZ(iou)
 	end subroutine setupSim
 
 	subroutine runSim
-		integer::k
-		
-		do k=1,Ns
+		integer::i,k
+		write(*,*) box
+		write(*,*) "   k   Temperature[K]    KE[units]     PE[units]	   Heat flux[units]"
+		do k=0,Ns
 			call velocityVerlet(dt)
+			!call leapFrog(dt)
 			call doBox()
 			if(k==Ns/2) call setThermostat(.false.)
-			
+						
 			if(mod(k,skip)==0) then
 				call writeStepXYZ(iou)
-				!write(*,'(1I5,10EN15.3)') k,temperature(),KE(),PE()
-				plotData(k/skip,:) = [t,temperature(),KE(),PE(),heatflux()]
+				write(*,'(1I5,10EN15.3)') k,temperature(),KE(),PE(), heatflux()
+! 				plotData(k/skip,:) = [t,temperature(),KE(),PE(),heatflux()]
 			end if
 			
-			if(mod(k,100)==0) then
-				write(*,'(1I5,10EN15.3)') k,temperature(),KE(),PE()
+			if(mod(k,20)==0) then
+				do i=1,size(atoms)
+					call updateNeighbors(i)
+				end do
 			end if
 			
 		end do
@@ -140,7 +145,7 @@ contains
 		real(wp),dimension(:),intent(in)::A
 		real(wp),dimension(:),allocatable::o
 		
-		integer::N,i,j
+		integer::N,i
 		
 		N = size(A)
 		allocate(o(N))

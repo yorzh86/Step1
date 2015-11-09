@@ -38,14 +38,26 @@ contains
 	subroutine velocityVerlet(dt)
 	! Velocity-Verlet integration
 		real(wp),intent(in)::dt
+		
+		real(wp),dimension(2)::d
 		integer::k
 		
-		forall(k=1:size(atoms))
-			atoms(k)%r =  atoms(k)%r+atoms(k)%v*dt+0.5_wp*atoms(k)%a*dt**2
+		do k=1,size(atoms)
+			d = atoms(k)%v*dt+0.5_wp*atoms(k)%a*dt**2
+			atoms(k)%r =  atoms(k)%r+d
+		end do
+		
+		do k=1,size(atoms)
 			atoms(k)%v =  atoms(k)%v+atoms(k)%a*0.5_wp*dt
+		end do
+		
+		do k=1,size(atoms)
 			atoms(k)%a = -delV(k)/types(atoms(k)%t)%m-eta*atoms(k)%v
+		end do
+		
+		do k=1,size(atoms)
 			atoms(k)%v =  atoms(k)%v+atoms(k)%a*0.5_wp*dt
-		end forall
+		end do
 		
 		if(doThermostat) eta = eta+DetaDt()*dt
 		t  = t+dt
@@ -55,11 +67,13 @@ contains
 	subroutine leapFrog(dt)
 	! Leap frog integration
 		real(wp),intent(in)::dt
-		real(wp),dimension(2)::ao
+		
+		real(wp),dimension(2)::d,ao
 		integer::k
 		
 		do k=1,size(atoms)
-			atoms(k)%r = atoms(k)%r+atoms(k)%v*dt+0.5_wp*atoms(k)%a*dt**2
+			d = atoms(k)%v*dt+0.5_wp*atoms(k)%a*dt**2
+			atoms(k)%r = atoms(k)%r+d
 		end do
 		do k=1,size(atoms)
 			ao = atoms(k)%a
