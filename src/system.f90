@@ -14,7 +14,7 @@ module system_mod
 	real(wp),parameter::S0 = 3.345E-10_wp 
 		!! Lennard Jones sigma in SI units
 	real(wp),parameter::cutoff = 2.5_wp*S0
-	real(wp),parameter::neighborRadius = cutoff*1.3_wp
+	real(wp),parameter::neighborRadius = cutoff + 5E-10_wp
 	
 	!=========!
 	!= Types =!
@@ -58,7 +58,7 @@ module system_mod
 	integer::ts
 		!! Time step counter
 	real(wp)::t
-		!! Sytem time
+		!! System time
 	
 contains
 
@@ -92,7 +92,7 @@ contains
 		end do
 		
 		do k=1,N**2
-			!! Create random direct
+			!! Create random direction of velocities
 			call random_number(atoms(k)%v)
 			atoms(k)%v = 2.0_wp*atoms(k)%v-1.0_wp
 			do while(norm2(atoms(k)%v)>1.0_wp .and. norm2(atoms(k)%v)<0.1_wp)
@@ -130,8 +130,8 @@ contains
 	contains
 	
 		pure subroutine doLennardJones(o)
-			real(wp),intent(inout)::o
-			
+			!real(wp),intent(inout)::o
+			real(wp),intent(out)::o
 			real(wp),dimension(2)::d
 			real(wp)::l
 			integer::k
@@ -140,7 +140,7 @@ contains
 				if(k==i) cycle
 				d = deltaR(atoms(k),atoms(i))
 				l = S0/norm2(d)
-				o = o+4.0_wp*E0*(l**12-l**6)
+				o = o+4.0_wp*E0*(l**12.0_wp-l**6.0_wp)
 			end do
 		end subroutine doLennardJones
 	
@@ -175,11 +175,13 @@ contains
 	contains
 		
 		pure subroutine doLennardJones(o)
-			real(wp),dimension(2),intent(inout)::o
+			!real(wp),dimension(2),intent(inout)::o
+			real(wp),dimension(2),intent(out)::o
 			real(wp)::l
 			
 			l = S0/norm2(d)
-			o = o+24.0_wp*E0/sum(d*d)*(l**6-2.0_wp*l**12)*d
+			!o = o+24.0_wp*E0/sum(d*d)*(l**6-2.0_wp*l**12)*d
+			o = o-(48.0_wp*E0/sum(d*d))*(l**12.0_wp-0.5_wp*l**6.0_wp)*d
 		end subroutine doLennardJones
 		
 	end function delVij
@@ -190,7 +192,7 @@ contains
 		
 		real(wp),dimension(2)::d
 		d = a1%r-a2%r
-		o = d-box*nint(d/box)
+		o = d-box*anint(d/box)
 		
 	end function deltaR
 
@@ -246,7 +248,7 @@ contains
 		
 		v0 = 0.0_wp
 		if(present(vBulk)) v0 = vBulk
-		o = 0.5_wp*types(atoms(i)%t)%m*norm2(atoms(i)%v-v0)**2
+		o = 0.5_wp*types(atoms(i)%t)%m*norm2(atoms(i)%v-v0)**2.0_wp
 	end function KEi
 	
 	pure function PE() result (o)

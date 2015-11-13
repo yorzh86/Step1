@@ -5,13 +5,16 @@ program main_prg
 	use output_mod
 	implicit none
 	
-	integer,parameter::Ns = 70000
+	integer,parameter::Ns = 10000
 	integer,parameter::skip = 10
 	
 	real(wp),dimension(Ns/skip,6)::plotData
 	real(wp)::T0 = 40.0_wp
-	real(wp)::dt = 1E-15_wp
-	real(wp)::lattice_constant = 5.26E-10_wp
+	!! initial temperature [K]
+	real(wp)::dt = 10E-15_wp
+	!! timestep [seconds]
+	real(wp)::latticeConstant = 5.26E-10_wp
+	!real(wp)::latticeConstant = 5.00E-10_wp
 	integer::iou
 	
 	call setupSim()
@@ -22,12 +25,11 @@ contains
 
 	subroutine setupSim
 		open(file='out.xyz',newunit=iou)
-		
 		enableLennardJones = .true.
 		call setThermostat(.true.,T0,100.0_wp*dt)
-		
-		call buildSystem(lattice_constant,25,T0)
+		call buildSystem(latticeConstant,25,T0)
 		!(lattice parameter, box edge, temperature)
+		
 		call doBox()
 		call writeStepXYZ(iou)
 	end subroutine setupSim
@@ -41,6 +43,7 @@ contains
 			!call leapFrog(dt)
 			call doBox()
 			if(k==Ns/2) call setThermostat(.false.)
+			!if(k==5) call setThermostat(.false.)
 						
 			if(mod(k,skip)==0) then
 				call writeStepXYZ(iou)

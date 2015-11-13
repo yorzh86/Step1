@@ -43,7 +43,7 @@ contains
 		integer::k
 		
 		do k=1,size(atoms)
-			d = atoms(k)%v*dt+0.5_wp*atoms(k)%a*dt**2
+			d = atoms(k)%v*dt+0.5_wp*atoms(k)%a*dt**2.0_wp
 			atoms(k)%r =  atoms(k)%r+d
 		end do
 		
@@ -72,7 +72,7 @@ contains
 		integer::k
 		
 		do k=1,size(atoms)
-			d = atoms(k)%v*dt+0.5_wp*atoms(k)%a*dt**2
+			d = atoms(k)%v*dt+0.5_wp*atoms(k)%a*dt**2.0_wp
 			atoms(k)%r = atoms(k)%r+d
 		end do
 		do k=1,size(atoms)
@@ -100,7 +100,7 @@ contains
 	! calculates damping parameter("eta") change over time.
 		real(wp)::o
 		
-		o = (temperature()/Tset-1.0_wp)/tauT**2
+		o = (temperature()/Tset-1.0_wp)/tauT**2.0_wp
 	end function DetaDt
 
 end module integrate_mod
