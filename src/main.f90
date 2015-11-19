@@ -9,7 +9,7 @@ program main_prg
 	integer,parameter::skip = 10
 	
 	real(wp),dimension(Ns/skip,6)::plotData
-	real(wp)::T0 = 40.0_wp
+	real(wp)::T0 = 60.0_wp
 	!! initial temperature [K]
 	real(wp)::dt = 10E-15_wp
 	!! timestep [seconds]
@@ -27,7 +27,7 @@ contains
 		open(file='out.xyz',newunit=iou)
 		enableLennardJones = .true.
 		call setThermostat(.true.,T0,100.0_wp*dt)
-		call buildSystem(latticeConstant,25,T0)
+		call buildSystem(latticeConstant,8,T0)
 		!(lattice parameter, box edge, temperature)
 		
 		call doBox()

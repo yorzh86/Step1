@@ -11,7 +11,7 @@ module integrate_mod
 	
 	public::setThermostat
 	public::velocityVerlet
-	public::leapFrog
+	!public::leapFrog
 	public::doBox
 	
 contains
@@ -39,7 +39,7 @@ contains
 	! Velocity-Verlet integration
 		real(wp),intent(in)::dt
 		
-		real(wp),dimension(2)::d
+		real(wp),dimension(3)::d
 		integer::k
 		
 		do k=1,size(atoms)
@@ -64,27 +64,27 @@ contains
 		ts = ts+1
 	end subroutine velocityVerlet
 
-	subroutine leapFrog(dt)
-	! Leap frog integration
-		real(wp),intent(in)::dt
+!	subroutine leapFrog(dt)
+!	! Leap frog integration
+!		real(wp),intent(in)::dt
 		
-		real(wp),dimension(2)::d,ao
-		integer::k
+!		real(wp),dimension(2)::d,ao
+!		integer::k
 		
-		do k=1,size(atoms)
-			d = atoms(k)%v*dt+0.5_wp*atoms(k)%a*dt**2.0_wp
-			atoms(k)%r = atoms(k)%r+d
-		end do
-		do k=1,size(atoms)
-			ao = atoms(k)%a
-			atoms(k)%a = -delV(k)/types(atoms(k)%t)%m-eta*atoms(k)%v
-			atoms(k)%v = atoms(k)%v+0.5_wp*(ao+atoms(k)%a)*dt
-		end do
+!		do k=1,size(atoms)
+!			d = atoms(k)%v*dt+0.5_wp*atoms(k)%a*dt**2.0_wp
+!			atoms(k)%r = atoms(k)%r+d
+!		end do
+!		do k=1,size(atoms)
+!			ao = atoms(k)%a
+!			atoms(k)%a = -delV(k)/types(atoms(k)%t)%m-eta*atoms(k)%v
+!			atoms(k)%v = atoms(k)%v+0.5_wp*(ao+atoms(k)%a)*dt
+!		end do
 		
-		if(doThermostat) eta = eta+DetaDt()*dt
-		t  = t+dt
-		ts = ts+1
-	end subroutine leapFrog
+!		if(doThermostat) eta = eta+DetaDt()*dt
+!		t  = t+dt
+!		ts = ts+1
+!	end subroutine leapFrog
 
 	subroutine doBox
 	! returns moving atoms into the simulation box
