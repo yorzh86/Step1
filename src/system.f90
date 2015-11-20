@@ -70,44 +70,44 @@ contains
 			!! Number of unit cells
 		real(wp),intent(in)::Ti
 			!! Initial temperature
-		
-		integer::i,j,k,x,y,z,L
+		real(wp):: x,y,z
+		integer::i,j,k,L
 		integer, parameter::nbase=4
 		real(wp), dimension(3)::rands
 		real(wp), parameter::displac = 0.15E-10_wp !5.26 - 2*Wand.Vaal_rad(Ar))/10
 		real(wp), dimension(3,4), parameter::rcell= &
 		reshape((/0.0_wp, 0.0_wp, 0.0_wp, &
-				  0.5_wp, 0.5_wp, 0.0_wp, &
-				  0.0_wp, 0.5_wp, 0.5_wp, &
-				  0.5_wp, 0.0_wp, 0.5_wp/), (/3,4/))
+				0.5_wp, 0.5_wp, 0.0_wp, &
+				0.0_wp, 0.5_wp, 0.5_wp, &
+				0.5_wp, 0.0_wp, 0.5_wp/), (/3,4/))
 		
 		box = a*real([N,N,N],wp) !3D
 				
 		allocate(types(1))
-		allocate(atoms(4*(N**3))) !3D !!!If make (N**3) - send to output.mod segm error
+		allocate(atoms(4*N**3)) !3D !!!If make (N**3) - send to output.mod segm error
 		
 		!types%m = 39.948_wp
 		types%m = 6.6335209E-26_wp
 		types%atom_name = 'Ar'
 		atoms(:)%t = 1
 		
-		do k=0,N-1
-			do j=0,N-1
-				do i=0,N-1
+		do k=1,N
+			do j=1,N
+				do i=1,N
 					do L=1,nbase
 						call random_number(rands)
 						x = a*(i+rcell(1,L)) + 2.0_wp*displac*(rands(1)-0.5_wp)
 						y = a*(j+rcell(2,L)) + 2.0_wp*displac*(rands(2)-0.5_wp)
 						z = a*(k+rcell(3,L)) + 2.0_wp*displac*(rands(3)-0.5_wp)
-						atoms(k+N*N*(j-1)+N*(i-1))%r = real([z,y,i], wp) !number of atoms is not N*N*N now
+						atoms(k+N*N*(j-1)+N*(i-1))%r = real([x,y,z], wp)
 					 enddo
 				  enddo
 			   enddo
 			enddo
-!		do z=1,N
+!		do k=1,N
 !			do i=1,N
 !				do j=1,N
-!				atoms(z+N*N*(i-1)+N*(j-1))%r = a*real([z,i,j],wp)
+!				atoms(k+N*N*(i-1)+N*(j-1))%r = a*real([k,i,j],wp)
 !				end do
 !			end do
 !		end do
@@ -130,10 +130,10 @@ contains
 			call updateNeighbors(i)
 		end do
 		
-		do z=1,N
+		do k=1,N
 			do i=1,N
 				do j=1,N
-					atoms(z+N*N*(i-1)+N*(j-1))%a = -delV(z+N*N*(i-1)+N*(j-1))/types(atoms(z+N*N*(i-1)+N*(j-1))%t)%m
+					atoms(k+N*N*(i-1)+N*(j-1))%a = -delV(k+N*N*(i-1)+N*(j-1))/types(atoms(k+N*N*(i-1)+N*(j-1))%t)%m
 				end do
 			end do
 		end do
