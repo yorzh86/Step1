@@ -81,10 +81,10 @@ contains
 				  0.0_wp, 0.5_wp, 0.5_wp, &
 				  0.5_wp, 0.0_wp, 0.5_wp/), (/3,4/))
 		
-		box = a*real([4*N,4*N,4*N],wp) !3D
+		box = a*real([N,N,N],wp) !3D
 				
 		allocate(types(1))
-		allocate(atoms(N**3)) !3D
+		allocate(atoms(4*(N**3))) !3D !!!If make (N**3) - send to output.mod segm error
 		
 		!types%m = 39.948_wp
 		types%m = 6.6335209E-26_wp
@@ -99,7 +99,7 @@ contains
 						x = a*(i+rcell(1,L)) + 2.0_wp*displac*(rands(1)-0.5_wp)
 						y = a*(j+rcell(2,L)) + 2.0_wp*displac*(rands(2)-0.5_wp)
 						z = a*(k+rcell(3,L)) + 2.0_wp*displac*(rands(3)-0.5_wp)
-						atoms(k+N*N*(i-1)+N*(j-1))%r = real([x,y,z], wp)
+						atoms(k+N*N*(j-1)+N*(i-1))%r = real([z,y,i], wp) !number of atoms is not N*N*N now
 					 enddo
 				  enddo
 			   enddo
