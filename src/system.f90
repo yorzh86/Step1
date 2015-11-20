@@ -52,7 +52,7 @@ module system_mod
 	type(atom_t),dimension(:),allocatable::atoms
 		!! All atoms in system
 	
-	real(wp),dimension(3)::box
+	real(wp),dimension(3)::box !3D
 		!! Bounds of the simulation box
 	
 	integer::ts
@@ -63,6 +63,7 @@ module system_mod
 contains
 
 	subroutine buildSystem(a,N,Ti)
+		implicit none
 		real(wp),intent(in)::a
 			!! Lattice constant
 		integer,intent(in)::N
@@ -70,30 +71,49 @@ contains
 		real(wp),intent(in)::Ti
 			!! Initial temperature
 		
-		integer::i,j,k,z
+		integer::i,j,k,x,y,z,L
+		integer, parameter::nbase=4
+		real(wp), dimension(3)::rands
+		real(wp), parameter::displac = 0.15E-10_wp !5.26 - 2*Wand.Vaal_rad(Ar))/10
+		real(wp), dimension(3,4), parameter::rcell= &
+		reshape((/0.0_wp, 0.0_wp, 0.0_wp, &
+				  0.5_wp, 0.5_wp, 0.0_wp, &
+				  0.0_wp, 0.5_wp, 0.5_wp, &
+				  0.5_wp, 0.0_wp, 0.5_wp/), (/3,4/))
 		
-		box = a*real([N,N,N],wp)
-		!! if we change box size (increase) - we lose Potential energy and atoms behave as liquid
-		
+		box = a*real([4*N,4*N,4*N],wp) !3D
+				
 		allocate(types(1))
-		allocate(atoms(N**3))
+		allocate(atoms(N**3)) !3D
 		
 		!types%m = 39.948_wp
 		types%m = 6.6335209E-26_wp
 		types%atom_name = 'Ar'
 		atoms(:)%t = 1
 		
-		do z=1,N
-			do i=1,N
-				do j=1,N
-				!atoms(i+N*(j-1))%r = a*(real([i,j],wp)*[1.0_wp,1.0_wp/sqrt(2.0_wp)]+[mod(j,2)/2.0_wp,0.0_wp]) &
-				!& -a/2.0_wp+a/2.0_wp*N
-				atoms(z+N*N*(i-1)+N*(j-1))%r = a*real([z,i,j],wp)
-				end do
-			end do
-		end do
+		do k=0,N-1
+			do j=0,N-1
+				do i=0,N-1
+					do L=1,nbase
+						call random_number(rands)
+						x = a*(i+rcell(1,L)) + 2.0_wp*displac*(rands(1)-0.5_wp)
+						y = a*(j+rcell(2,L)) + 2.0_wp*displac*(rands(2)-0.5_wp)
+						z = a*(k+rcell(3,L)) + 2.0_wp*displac*(rands(3)-0.5_wp)
+						atoms(k+N*N*(i-1)+N*(j-1))%r = real([x,y,z], wp)
+					 enddo
+				  enddo
+			   enddo
+			enddo
+!		do z=1,N
+!			do i=1,N
+!				do j=1,N
+!				atoms(z+N*N*(i-1)+N*(j-1))%r = a*real([z,i,j],wp)
+!				end do
+!			end do
+!		end do
+		!3D atoms(z+N*N*(i-1)+N*(j-1)) Simple Cubic
 		
-		do k=1,N**3
+		do k=1,N**3 !3D N**3. No other changes made in the loop
 			!! Create random direction of velocities
 			call random_number(atoms(k)%v)
 			atoms(k)%v = 2.0_wp*atoms(k)%v-1.0_wp
@@ -117,8 +137,9 @@ contains
 				end do
 			end do
 		end do
+		! 3D: atoms(z+N*N*(i-1)+N*(j-1)
 		
-		forall(k=1:3) atoms(:)%v(k) = atoms(:)%v(k)-sum(atoms(:)%v(k))/real(N*N*N,wp)
+		forall(k=1:3) atoms(:)%v(k) = atoms(:)%v(k)-sum(atoms(:)%v(k))/real(N*N*N,wp) !3D: forall(1:3)
 		
 		ts = 0
 		t  = 0.0_wp
@@ -136,7 +157,7 @@ contains
 		pure subroutine doLennardJones(o)
 			!real(wp),intent(inout)::o
 			real(wp),intent(out)::o
-			real(wp),dimension(3)::d
+			real(wp),dimension(3)::d !3D
 			real(wp)::l
 			integer::k
 			
@@ -152,8 +173,8 @@ contains
 
 	pure function delV(i) result(o)
 		integer,intent(in)::i
-		real(wp),dimension(3)::o
-		real(wp),dimension(3)::r
+		real(wp),dimension(3)::o !3D
+		real(wp),dimension(3)::r !3D
 		
 		integer::j,aj
 		
@@ -168,8 +189,8 @@ contains
 
 	pure function delVij(i,j,d) result (o)
 		integer,intent(in)::i,j
-		real(wp),dimension(3),intent(in)::d
-		real(wp),dimension(3)::o
+		real(wp),dimension(3),intent(in)::d !3D
+		real(wp),dimension(3)::o			!3D
 		
 		o = 0.0_wp
 		if(i==j) return
@@ -179,8 +200,7 @@ contains
 	contains
 		
 		pure subroutine doLennardJones(o)
-			!real(wp),dimension(2),intent(inout)::o
-			real(wp),dimension(3),intent(out)::o
+			real(wp),dimension(3),intent(out)::o !3D
 			real(wp)::l
 			
 			l = S0/norm2(d)
@@ -192,9 +212,9 @@ contains
 
 	pure function deltaR(a1,a2) result(o)
 		type(atom_t),intent(in)::a1,a2
-		real(wp),dimension(3)::o
+		real(wp),dimension(3)::o !3D
 		
-		real(wp),dimension(3)::d
+		real(wp),dimension(3)::d !3D
 		d = a1%r-a2%r
 		o = d-box*anint(d/box)
 		
@@ -203,10 +223,10 @@ contains
 	pure function temperature() result(o)
 		real(wp)::o
 		
-		real(wp),dimension(3)::vBulk
+		real(wp),dimension(3)::vBulk !3D
 		integer::k
 		
-		forall(k=1:3) vBulk(k) = sum(atoms%v(k))/real(size(atoms),wp)
+		forall(k=1:3) vBulk(k) = sum(atoms%v(k))/real(size(atoms),wp) !3D forall (1:3)
 		
 		o = 0.0_wp
 		do k=1,size(atoms)
@@ -245,10 +265,10 @@ contains
 	
 	pure function KEi(i,vBulk) result (o)
 		integer,intent(in)::i
-		real(wp),dimension(3),intent(in),optional::vBulk
+		real(wp),dimension(3),intent(in),optional::vBulk !3D
 		real(wp)::o
 		
-		real(wp),dimension(3)::v0
+		real(wp),dimension(3)::v0 !3D
 		
 		v0 = 0.0_wp
 		if(present(vBulk)) v0 = vBulk
@@ -273,9 +293,9 @@ contains
 	end function PEi
 
 	pure function heatflux() result(o)
-		real(wp),dimension(3)::o
+		real(wp),dimension(3)::o !3D
 		
-		real(wp),dimension(3)::fij,vj,rij
+		real(wp),dimension(3)::fij,vj,rij !3D
 		integer::i,j
 		
 		o = 0.0_wp
@@ -297,7 +317,7 @@ contains
 	subroutine updateNeighbors(i)
 		integer,intent(in)::i
 		
-		real(wp),dimension(3)::r
+		real(wp),dimension(3)::r !3D
 		integer::k
 		
 		atoms(i)%neighbors = [integer::]

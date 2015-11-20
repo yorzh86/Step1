@@ -5,11 +5,11 @@ program main_prg
 	use output_mod
 	implicit none
 	
-	integer,parameter::Ns = 10000
+	integer,parameter::Ns = 30000
 	integer,parameter::skip = 10
 	
 	real(wp),dimension(Ns/skip,6)::plotData
-	real(wp)::T0 = 60.0_wp
+	real(wp)::T0 = 40.0_wp
 	!! initial temperature [K]
 	real(wp)::dt = 10E-15_wp
 	!! timestep [seconds]
@@ -39,8 +39,8 @@ contains
 		write(*,*) box
 		write(*,*) "   k   Temperature[K]    KE[units]     PE[units]	   Heat flux[units]"
 		do k=0,Ns
-			call velocityVerlet(dt)
-			!call leapFrog(dt)
+			!call velocityVerlet(dt)
+			call leapFrog(dt)
 			call doBox()
 			if(k==Ns/2) call setThermostat(.false.)
 			!if(k==5) call setThermostat(.false.)
