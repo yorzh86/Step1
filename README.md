@@ -1,8 +1,15 @@
-# Mark1
-Mark 1 MD Code
+Mark1
+=====
 
+The Mark 1 MD code is a developmental MD code with the intent of first duplicating the basic operation of Lammps.
+After comparison with Lammps suggests that all basic operations are implemented correctly the real numbers will be replaced with dual numbers for automatic differentiation of the code's results.
 
-| Quatitity         | Unit                        |
+Units
+-----
+
+The units commonly used for MD simulations vary, but are frequently the so-called metal units, as shown in the table below.
+
+| Quantity          | Unit                        |
 |-------------------|-----------------------------|
 | mass              | grams/mole                  |
 | distance          | Angstroms                   |
@@ -18,3 +25,5 @@ Mark 1 MD Code
 | density           | gram/cm^dim                 |
 | dynamic viscosity | Poise                       |
 | electric field    | volts/Angstrom              |
+
+The Mark 1 code currently does all calculations in standard SI units and relies on proper floating point arithmetic to handle the scale differences.

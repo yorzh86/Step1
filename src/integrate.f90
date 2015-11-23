@@ -38,14 +38,26 @@ contains
 	subroutine velocityVerlet(dt)
 	! Velocity-Verlet integration
 		real(wp),intent(in)::dt
+		
+		real(wp),dimension(3)::d !3D
 		integer::k
 		
-		forall(k=1:size(atoms))
-			atoms(k)%r =  atoms(k)%r+atoms(k)%v*dt+0.5_wp*atoms(k)%a*dt**2
+		do k=1,size(atoms)
+			d = atoms(k)%v*dt+0.5_wp*atoms(k)%a*dt**2.0_wp
+			atoms(k)%r =  atoms(k)%r+d
+		end do
+		
+		do k=1,size(atoms)
 			atoms(k)%v =  atoms(k)%v+atoms(k)%a*0.5_wp*dt
+		end do
+		
+		do k=1,size(atoms)
 			atoms(k)%a = -delV(k)/types(atoms(k)%t)%m-eta*atoms(k)%v
+		end do
+		
+		do k=1,size(atoms)
 			atoms(k)%v =  atoms(k)%v+atoms(k)%a*0.5_wp*dt
-		end forall
+		end do
 		
 		if(doThermostat) eta = eta+DetaDt()*dt
 		t  = t+dt
@@ -55,11 +67,13 @@ contains
 	subroutine leapFrog(dt)
 	! Leap frog integration
 		real(wp),intent(in)::dt
-		real(wp),dimension(2)::ao
+		
+		real(wp),dimension(3)::d,ao !3D
 		integer::k
 		
 		do k=1,size(atoms)
-			atoms(k)%r = atoms(k)%r+atoms(k)%v*dt+0.5_wp*atoms(k)%a*dt**2
+			d = atoms(k)%v*dt+0.5_wp*atoms(k)%a*dt**2.0_wp
+			atoms(k)%r = atoms(k)%r+d
 		end do
 		do k=1,size(atoms)
 			ao = atoms(k)%a
@@ -76,7 +90,7 @@ contains
 	! returns moving atoms into the simulation box
 		integer::k
 		
-		forall(k=1:2)
+		forall(k=1:3)
 			where(atoms(:)%r(k)>box(k)) atoms(:)%r(k) = atoms(:)%r(k)-box(k)
 			where(atoms(:)%r(k)<0.0_wp) atoms(:)%r(k) = atoms(:)%r(k)+box(k)
 		end forall
@@ -86,7 +100,7 @@ contains
 	! calculates damping parameter("eta") change over time.
 		real(wp)::o
 		
-		o = (temperature()/Tset-1.0_wp)/tauT**2
+		o = (temperature()/Tset-1.0_wp)/tauT**2.0_wp
 	end function DetaDt
 
 end module integrate_mod

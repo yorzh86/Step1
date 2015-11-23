@@ -1,3 +1,7 @@
+! Draw a bounding box in pymol
+!
+! http://www.pymolwiki.org/index.php/DrawBoundingBox
+
 program main_prg
 	use kinds_mod
 	use system_mod
@@ -5,46 +9,60 @@ program main_prg
 	use output_mod
 	implicit none
 	
-	integer,parameter::Ns = 1000
-	integer,parameter::skip = 1
+	integer,parameter::Ns = 30000
+	integer,parameter::skip = 10
 	
 	real(wp),dimension(Ns/skip,6)::plotData
-	real(wp)::T0 = 3.0_wp
-	real(wp)::dt = 1.0_wp
+	real(wp)::T0 = 87.0_wp
+	!! initial temperature [K]
+	real(wp)::dt = 10E-15_wp
+	!! timestep [seconds]
+	real(wp)::latticeConstant = 5.26E-10_wp
+	!real(wp)::latticeConstant = 5.00E-10_wp
 	integer::iou
 	
 	call setupSim()
-	call writeLammpsData('lattice.xyz')
-!~ 	call runSim()
-!~ 	call doPlots(plotData)
+	call runSim()
+! 	call doPlots(plotData)
 	
 contains
 
 	subroutine setupSim
 		open(file='out.xyz',newunit=iou)
-		
 		enableLennardJones = .true.
-		call setThermostat(.true.,T0,100.0_wp)
-		
-		call buildSystem(5.260_wp,25,T0)
+		call setThermostat(.true.,T0,100.0_wp*dt)
+		call buildSystem(latticeConstant,[3,3,3],T0)
 		!(lattice parameter, box edge, temperature)
+		
 		call doBox()
 		call writeStepXYZ(iou)
 	end subroutine setupSim
 
 	subroutine runSim
-		integer::k
-		
-		do k=1,Ns
-			call velocityVerlet(dt)
+		integer::i,k
+		write(*,*) box
+		write(*,*) "   k   Temperature[K]    KE[units]     PE[units]	   Heat flux[units]"
+		do k=0,Ns
+			!call velocityVerlet(dt)
+			call leapFrog(dt)
 			call doBox()
 			if(k==Ns/2) call setThermostat(.false.)
-			
+						
 			if(mod(k,skip)==0) then
 				call writeStepXYZ(iou)
-				write(*,'(1I5,10ES15.3)') k,temperature(),PE(),KE(),heatflux()
-				plotData(k/skip,:) = [t,temperature(),PE(),KE(),heatflux()]
+				write(*,'(1I5,10EN15.3)') k,temperature(),KE(),PE(), heatflux()
+! 				plotData(k/skip,:) = [t,temperature(),KE(),PE(),heatflux()]
 			end if
+			if(mod(k,1000)==0) then
+				write(*,*) 'Average Neighbors: ', averageNeighbors()
+			end if
+			
+			if(mod(k,20)==0) then
+				do i=1,size(atoms)
+					call updateNeighbors(i)
+				end do
+			end if
+			
 		end do
 		
 		close(iou)
@@ -136,7 +154,7 @@ contains
 		real(wp),dimension(:),intent(in)::A
 		real(wp),dimension(:),allocatable::o
 		
-		integer::N,i,j
+		integer::N,i
 		
 		N = size(A)
 		allocate(o(N))
