@@ -11,10 +11,10 @@ module system_mod
 	!real(wp),parameter::E0 = 1.04233e-2
 	real(wp),parameter::E0 = kB*125.7_wp
 		!! Lennard Jones epsilon in SI units
-	real(wp),parameter::S0 = 3.345E-10_wp
+	real(wp),parameter::S0 = 3.345E-10_wp 
 		!! Lennard Jones sigma in SI units
-	real(wp),parameter::cutoff = 2.0_wp*S0
-	real(wp),parameter::neighborRadius = cutoff + 1.0E-10
+	real(wp),parameter::cutoff = 2.5_wp*S0
+	real(wp),parameter::neighborRadius = cutoff + 5E-10_wp
 	
 	!=========!
 	!= Types =!
@@ -66,39 +66,54 @@ contains
 		implicit none
 		real(wp),intent(in)::a
 			!! Lattice constant
-		integer,dimension(3),intent(in)::N
+		integer,intent(in)::N
 			!! Number of unit cells
 		real(wp),intent(in)::Ti
 			!! Initial temperature
-		integer::i,j,k,l,idx
+		real(wp):: x,y,z
+		integer::i,j,k,L
+		integer, parameter::nbase=4
+		real(wp), dimension(3)::rands
+		real(wp), parameter::displac = 0.15E-10_wp !5.26 - 2*Wand.Vaal_rad(Ar))/10
 		real(wp), dimension(3,4), parameter::rcell= &
-		reshape([0.0_wp, 0.0_wp, 0.0_wp, &
-		         0.5_wp, 0.5_wp, 0.0_wp, &
-		         0.0_wp, 0.5_wp, 0.5_wp, &
-		         0.5_wp, 0.0_wp, 0.5_wp  ], [3,4])
+		reshape((/0.0_wp, 0.0_wp, 0.0_wp, &
+				0.5_wp, 0.5_wp, 0.0_wp, &
+				0.0_wp, 0.5_wp, 0.5_wp, &
+				0.5_wp, 0.0_wp, 0.5_wp/), (/3,4/))
 		
-		box = a*real(N,wp)
+		box = a*real([N,N,N],wp) !3D
 				
 		allocate(types(1))
-		allocate(atoms(size(rcell,2)*product(N)))
+		allocate(atoms(4*N**3)) !3D !!!If make (N**3) - send to output.mod segm error
 		
-		types%m = 39.948_wp*1.6605402E-27
+		!types%m = 39.948_wp
+		types%m = 6.6335209E-26_wp
 		types%atom_name = 'Ar'
 		atoms(:)%t = 1
 		
-		idx = 1
-		do k=1,N(3)
-			do j=1,N(2)
-				do i=1,N(1)
-					do l=1,size(rcell,2)
-						atoms(idx)%r = a*(real([i,j,k]-1,wp)+rcell(1:3,l))
-						idx = idx+1
-					end do
-				end do
-			end do
-		end do
+		do k=1,N
+			do j=1,N
+				do i=1,N
+					do L=1,nbase
+						call random_number(rands)
+						x = a*(i+rcell(1,L)) + 2.0_wp*displac*(rands(1)-0.5_wp)
+						y = a*(j+rcell(2,L)) + 2.0_wp*displac*(rands(2)-0.5_wp)
+						z = a*(k+rcell(3,L)) + 2.0_wp*displac*(rands(3)-0.5_wp)
+						atoms(k+N*N*(j-1)+N*(i-1))%r = real([x,y,z], wp)
+					 enddo
+				  enddo
+			   enddo
+			enddo
+!		do k=1,N
+!			do i=1,N
+!				do j=1,N
+!				atoms(k+N*N*(i-1)+N*(j-1))%r = a*real([k,i,j],wp)
+!				end do
+!			end do
+!		end do
+		!3D atoms(z+N*N*(i-1)+N*(j-1)) Simple Cubic
 		
-		do k=1,size(atoms)
+		do k=1,N**3 !3D N**3. No other changes made in the loop
 			!! Create random direction of velocities
 			call random_number(atoms(k)%v)
 			atoms(k)%v = 2.0_wp*atoms(k)%v-1.0_wp
@@ -110,15 +125,21 @@ contains
 			!! Set velocity magnitude
 			atoms(k)%v = atoms(k)%v*sqrt(2.0_wp*kB*Ti/types(atoms(k)%t)%m)*abs(randomNormal()+1.0_wp)
 		end do
-		forall(k=1:3) atoms(:)%v(k) = atoms(:)%v(k)-sum(atoms(:)%v(k))/real(size(atoms),wp)
 		
 		do i=1,size(atoms)
 			call updateNeighbors(i)
 		end do
 		
-		do k=1,size(atoms)
-			atoms(k)%a = -delV(k)/types(atoms(k)%t)%m
+		do k=1,N
+			do i=1,N
+				do j=1,N
+					atoms(k+N*N*(i-1)+N*(j-1))%a = -delV(k+N*N*(i-1)+N*(j-1))/types(atoms(k+N*N*(i-1)+N*(j-1))%t)%m
+				end do
+			end do
 		end do
+		! 3D: atoms(z+N*N*(i-1)+N*(j-1)
+		
+		forall(k=1:3) atoms(:)%v(k) = atoms(:)%v(k)-sum(atoms(:)%v(k))/real(N*N*N,wp) !3D: forall(1:3)
 		
 		ts = 0
 		t  = 0.0_wp
@@ -307,12 +328,5 @@ contains
 			atoms(i)%neighbors = [atoms(i)%neighbors,k]
 		end do
 	end subroutine updateNeighbors
-
-	function averageNeighbors() result(o)
-		real(wp)::o
-		integer::k
-		
-		o = sum([( size(atoms(k)%neighbors) , k=1,size(atoms) )]) / real(size(atoms),wp)
-	end function averageNeighbors
 
 end module system_mod
