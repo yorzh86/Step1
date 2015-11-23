@@ -1,4 +1,5 @@
 module kinds_mod
+	!! Module to manage kinds for the program
 	implicit none
 	private
 	
@@ -7,17 +8,24 @@ module kinds_mod
 	!==============!
 	
 	integer,parameter::sp = selected_real_kind(6)
+		!! Single precision
 	integer,parameter::dp = selected_real_kind(15)
+		!! Double precision
 	integer,parameter::ep = selected_real_kind(18)
+		!! Extended precision
 	integer,parameter::qp = selected_real_kind(32)
-	integer,parameter::wp = dp
+		!! Quad precision
+	integer,parameter::wp = ep
+		!! Set working precision to double
 	
 	!==================!
 	!= Math Constants =!
 	!==================!
 	
 	real(wp),parameter::PI = 4.0_wp*atan(1.0_wp)
-!~ 	real(wp),parameter::E  = exp(1.0_wp)
+		!! Archimedes' constant
+	real(wp),parameter::E  = exp(1.0_wp)
+		!! Euler's constant
 	
 	!===========!
 	!= Exports =!
@@ -27,11 +35,11 @@ module kinds_mod
 	public::PI
 	
 	public::printTypes
-	public::randomNormal
 	
 contains
 
 	subroutine printTypes
+		!! Print the integer kinds for each real type
 		write(*,*) 'sp: ',sp
 		write(*,*) 'dp: ',dp
 		write(*,*) 'ep: ',ep
@@ -39,12 +47,5 @@ contains
 		write(*,*) 'wp: ',wp
 	end subroutine printTypes
 
-	function randomNormal() result(o)
-		real(wp)::o
-		real(wp),dimension(12)::x
-		
-		call random_number(x)
-		o = sum(x)-6.0_wp
-	end function randomNormal
-
 end module kinds_mod
+ 
