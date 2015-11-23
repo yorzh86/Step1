@@ -90,7 +90,7 @@ contains
 	! returns moving atoms into the simulation box
 		integer::k
 		
-		forall(k=1:2)
+		forall(k=1:3)
 			where(atoms(:)%r(k)>box(k)) atoms(:)%r(k) = atoms(:)%r(k)-box(k)
 			where(atoms(:)%r(k)<0.0_wp) atoms(:)%r(k) = atoms(:)%r(k)+box(k)
 		end forall

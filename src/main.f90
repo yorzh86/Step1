@@ -1,3 +1,7 @@
+! Draw a bounding box in pymol
+!
+! http://www.pymolwiki.org/index.php/DrawBoundingBox
+
 program main_prg
 	use kinds_mod
 	use system_mod
@@ -9,7 +13,7 @@ program main_prg
 	integer,parameter::skip = 10
 	
 	real(wp),dimension(Ns/skip,6)::plotData
-	real(wp)::T0 = 40.0_wp
+	real(wp)::T0 = 87.0_wp
 	!! initial temperature [K]
 	real(wp)::dt = 10E-15_wp
 	!! timestep [seconds]
@@ -27,7 +31,7 @@ contains
 		open(file='out.xyz',newunit=iou)
 		enableLennardJones = .true.
 		call setThermostat(.true.,T0,100.0_wp*dt)
-		call buildSystem(latticeConstant,8,T0)
+		call buildSystem(latticeConstant,[3,3,3],T0)
 		!(lattice parameter, box edge, temperature)
 		
 		call doBox()
@@ -43,12 +47,14 @@ contains
 			call leapFrog(dt)
 			call doBox()
 			if(k==Ns/2) call setThermostat(.false.)
-			!if(k==5) call setThermostat(.false.)
 						
 			if(mod(k,skip)==0) then
 				call writeStepXYZ(iou)
 				write(*,'(1I5,10EN15.3)') k,temperature(),KE(),PE(), heatflux()
 ! 				plotData(k/skip,:) = [t,temperature(),KE(),PE(),heatflux()]
+			end if
+			if(mod(k,1000)==0) then
+				write(*,*) 'Average Neighbors: ', averageNeighbors()
 			end if
 			
 			if(mod(k,20)==0) then
