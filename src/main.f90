@@ -33,7 +33,7 @@ contains
 		
 		enableLennardJones = .true.
 		call setThermostat(.true.,T0,100.0_wp*dt)
-		call buildSystem(latticeConstant,[3,3,3],T0)
+		call buildSystem(latticeConstant,[5,5,5],T0)
 		
 		call doBox()
 		call writeStepXYZ(iou_xyz)
@@ -46,7 +46,7 @@ contains
 		
 		do k=0,N_steps-1
 			
-			call leapFrog(dt)
+			call velocityVerlet(dt)
 			call doBox()
 			
 ! 			if(k==Ns/2) call setThermostat(.false.)

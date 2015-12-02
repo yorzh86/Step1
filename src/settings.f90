@@ -54,8 +54,6 @@ module settings_mod
 	real(wp)::dt
 		!! Timestep [seconds]
 	
-
-	
 contains
 
 	subroutine initialize()
@@ -73,11 +71,15 @@ contains
 		!= Simulation =!
 		N_steps       = 3000
 		skip_thermo   = 100
-		skip_dump     = 1
-		skip_neighbor = 100
+		skip_dump     = 100
+		skip_neighbor = 20
 		
 		T0 = convert(40.0_wp,'K','K')
 		dt = convert(10.0_wp,'fs','s')
+		
+		!= Thermostat =!
+		thermostat%eta = 0.0_wp
+		thermostat%tau = convert(100.0_wp*dt,'s','ps')
 	end subroutine initialize
 
 	subroutine writeLammpsVars(fn)

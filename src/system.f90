@@ -41,7 +41,7 @@ module system_mod
 	type(atom_t),dimension(:),allocatable::atoms
 		!! All atoms in system
 	
-	real(wp),dimension(3)::box !3D
+	real(wp),dimension(3)::box
 		!! Bounds of the simulation box
 	
 	integer::ts
@@ -173,14 +173,14 @@ contains
 			
 			real(wp),dimension(3)::d
 			real(wp)::l,E0,S0
-			integer::k
+			integer::j,aj
 			
 			E0 = lj%coeffs(1)
 			S0 = lj%coeffs(2)
 			
-			do k=1,size(atoms)
-				if(k==i) cycle
-				d = deltaR(atoms(k),atoms(i))
+			do j=1,size(atoms(i)%neighbors)
+				aj = atoms(i)%neighbors(j)
+				d = deltaR(atoms(aj),atoms(i))
 				l = S0/norm2(d)
 				o = o+( 0.5_wp ) * ( 4.0_wp*E0*l**6*(l**6-1.0_wp) )
 					!! Only include half of the bond energy for each atom in the bond

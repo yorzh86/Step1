@@ -95,6 +95,8 @@ contains
 				if(abs(co(i,j))<2.0_wp**5*epsilon(1.0_wp)) co(i,j) = -co(j,i)
 			end do
 		end do
+		
+		isSetup = .true.
 	end subroutine setup
 
 	function getIndex(un) result(k)

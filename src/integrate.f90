@@ -97,7 +97,7 @@ contains
 	! calculates damping parameter("eta") change over time.
 		real(wp)::o
 		
-		o = (temperature()/thermostat%set-1.0_wp)/thermostat%tau**2
+		o = (1.0_wp/thermostat%tau**2)*(temperature()/thermostat%set-1.0_wp)
 	end function DetaDt
 
 end module integrate_mod
