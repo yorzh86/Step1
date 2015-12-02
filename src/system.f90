@@ -1,21 +1,9 @@
 module system_mod
 	use kinds_mod
 	use utilities_mod
+	use units_mod
+	use settings_mod
 	implicit none
-	
-	!==============!
-	!= Parameters =!
-	!==============!
-	
-	real(wp),parameter::kB = 1.3806488E-23_wp
-		!! Boltzmann constant in SI units
-	!real(wp),parameter::E0 = 1.04233e-2
-	real(wp),parameter::E0 = kB*125.7_wp
-		!! Lennard Jones epsilon in SI units
-	real(wp),parameter::S0 = 3.345E-10_wp
-		!! Lennard Jones sigma in SI units
-	real(wp),parameter::cutoff = 2.0_wp*S0
-	real(wp),parameter::neighborRadius = cutoff + 1.0E-10
 	
 	!=========!
 	!= Types =!
@@ -71,19 +59,19 @@ contains
 			!! Number of unit cells
 		real(wp),intent(in)::Ti
 			!! Initial temperature
-		integer::i,j,k,l,idx
 		real(wp), dimension(3,4), parameter::rcell= &
 		reshape([0.0_wp, 0.0_wp, 0.0_wp, &
 		         0.5_wp, 0.5_wp, 0.0_wp, &
 		         0.0_wp, 0.5_wp, 0.5_wp, &
 		         0.5_wp, 0.0_wp, 0.5_wp  ], [3,4])
+		integer::i,j,k,l,idx
 		
 		box = a*real(N,wp)
 		
 		allocate(types(1))
 		allocate(atoms(size(rcell,2)*product(N)))
 		
-		types%m = 39.948_wp*1.6605402E-27
+		types%m = convert(39.948_wp,'u','kg')
 		types%atom_name = 'Ar'
 		atoms(:)%t = 1
 		
@@ -91,10 +79,12 @@ contains
 		do k=1,N(3)
 			do j=1,N(2)
 				do i=1,N(1)
+				
 					do l=1,size(rcell,2)
 						atoms(idx)%r = a*(real([i,j,k]-1,wp)+rcell(1:3,l))
 						idx = idx+1
 					end do
+					
 				end do
 			end do
 		end do
@@ -128,27 +118,36 @@ contains
 	subroutine writeLammpsData(fn)
 		character(*),intent(in)::fn
 		
-		integer::N,k,iou
+		integer::i,k,iou
+		real(wp)::E0,S0
+		
+		E0 = lj%coeffs(1)
+		S0 = lj%coeffs(2)
 		
 		open(file=fn,newunit=iou)
 		
 		write(iou,'(1A)') '# Input geometry for lammps'
 		write(iou,'(1I9,1X,1A)') size(atoms),'atoms'
 		write(iou,'(1I9,1X,1A)') size(types),'atom types'
-		write(iou,'(2F13.6,1X,1A,1X,1A)') 0.0_wp,box(1),'xlo','xhi'
-		write(iou,'(2F13.6,1X,1A,1X,1A)') 0.0_wp,box(2),'ylo','yhi'
-		write(iou,'(2F13.6,1X,1A,1X,1A)') -0.5_wp,0.5_wp,'zlo','zhi'
+		write(iou,'(2F13.6,1X,1A,1X,1A)') 0.0_wp,convert(box(1),'m','A'),'xlo','xhi'
+		write(iou,'(2F13.6,1X,1A,1X,1A)') 0.0_wp,convert(box(2),'m','A'),'ylo','yhi'
+		write(iou,'(2F13.6,1X,1A,1X,1A)') 0.0_wp,convert(box(3),'m','A'),'zlo','zhi'
 		write(iou,'(1A)') ''
 		write(iou,'(1A)') 'Masses'
 		write(iou,'(1A)') ''
 		do k=1,size(types)
-			write(iou,'(1I4,1X,1F13.6)') k,types(k)%m
+			write(iou,'(1I4,1X,1F13.6)') k,convert(types(k)%m,'kg','u')
 		end do
+		write(iou,'(1A)') ''
+		write(iou,'(1A)') 'PairIJ Coeffs # lj/cut'
+		write(iou,'(1A)') ''
+		write(iou,'(2I3,3F13.6)') 1, 1 , convert(E0,'J','eV'), convert(S0,'m','A'), convert(lj%cutoff,'m','A')
 		write(iou,'(1A)') ''
 		write(iou,'(1A)') 'Atoms'
 		write(iou,'(1A)') ''
+		
 		do k=1,size(atoms)
-			write(iou,'(1I9,1X,1I2,1X,3F13.6)') k,atoms(k)%t,atoms(k)%r,0.0_wp
+			write(iou,'(1I9,1X,1I2,1X,3F13.6)') k,atoms(k)%t,[( convert(atoms(k)%r(i),'m','A') , i=1,3 )]
 		end do
 		
 		close(iou)
@@ -166,15 +165,20 @@ contains
 		pure subroutine doLennardJones(o)
 			!real(wp),intent(inout)::o
 			real(wp),intent(out)::o
-			real(wp),dimension(3)::d !3D
-			real(wp)::l
+			
+			real(wp),dimension(3)::d
+			real(wp)::l,E0,S0
 			integer::k
+			
+			E0 = lj%coeffs(1)
+			S0 = lj%coeffs(2)
 			
 			do k=1,size(atoms)
 				if(k==i) cycle
 				d = deltaR(atoms(k),atoms(i))
 				l = S0/norm2(d)
-				o = o+4.0_wp*E0*(l**12.0_wp-l**6.0_wp)
+				o = o+( 0.5_wp ) * ( 4.0_wp*E0*l**6*(l**6-1.0_wp) )
+					!! Only include half of the bond energy for each atom in the bond
 			end do
 		end subroutine doLennardJones
 	
@@ -182,8 +186,8 @@ contains
 
 	pure function delV(i) result(o)
 		integer,intent(in)::i
-		real(wp),dimension(3)::o !3D
-		real(wp),dimension(3)::r !3D
+		real(wp),dimension(3)::o
+		real(wp),dimension(3)::r
 		
 		integer::j,aj
 		
@@ -191,15 +195,15 @@ contains
 		do j=1,size(atoms(i)%neighbors)
 			aj = atoms(i)%neighbors(j)
 			r  = deltaR(atoms(i),atoms(aj))
-			if(norm2(r)>cutoff) cycle
+			if( norm2(r)>lj%cutoff ) cycle
 			o = o+delVij(i,aj,r)
 		end do
 	end function delV
 
 	pure function delVij(i,j,d) result (o)
 		integer,intent(in)::i,j
-		real(wp),dimension(3),intent(in)::d !3D
-		real(wp),dimension(3)::o			!3D
+		real(wp),dimension(3),intent(in)::d
+		real(wp),dimension(3)::o
 		
 		o = 0.0_wp
 		if(i==j) return
@@ -209,33 +213,36 @@ contains
 	contains
 		
 		pure subroutine doLennardJones(o)
-			real(wp),dimension(3),intent(out)::o !3D
-			real(wp)::l
+			real(wp),dimension(3),intent(out)::o
+			real(wp)::l,E0,S0
+			
+			E0 = lj%coeffs(1)
+			S0 = lj%coeffs(2)
 			
 			l = S0/norm2(d)
-			!o = o+24.0_wp*E0/sum(d*d)*(l**6-2.0_wp*l**12)*d
-			o = o-(48.0_wp*E0/sum(d*d))*(l**12.0_wp-0.5_wp*l**6.0_wp)*d
+			o = o+24.0_wp*E0/sum(d*d)*(l**6)*(1.0_wp-2.0_wp*l**6)*d
+			!o = o-(48.0_wp*E0/sum(d*d))*(l**12-0.5_wp*l**6)*d
 		end subroutine doLennardJones
 		
 	end function delVij
 
 	pure function deltaR(a1,a2) result(o)
 		type(atom_t),intent(in)::a1,a2
-		real(wp),dimension(3)::o !3D
+		real(wp),dimension(3)::o
 		
-		real(wp),dimension(3)::d !3D
+		real(wp),dimension(3)::d
 		d = a1%r-a2%r
-		o = d-box*anint(d/box)
+		o = d-box*real(nint(d/box),wp)
 		
 	end function deltaR
 
 	pure function temperature() result(o)
 		real(wp)::o
 		
-		real(wp),dimension(3)::vBulk !3D
+		real(wp),dimension(3)::vBulk
 		integer::k
 		
-		forall(k=1:3) vBulk(k) = sum(atoms%v(k))/real(size(atoms),wp) !3D forall (1:3)
+		forall(k=1:3) vBulk(k) = sum(atoms%v(k))/real(size(atoms),wp)
 		
 		o = 0.0_wp
 		do k=1,size(atoms)
@@ -274,10 +281,10 @@ contains
 	
 	pure function KEi(i,vBulk) result (o)
 		integer,intent(in)::i
-		real(wp),dimension(3),intent(in),optional::vBulk !3D
+		real(wp),dimension(3),intent(in),optional::vBulk
 		real(wp)::o
 		
-		real(wp),dimension(3)::v0 !3D
+		real(wp),dimension(3)::v0
 		
 		v0 = 0.0_wp
 		if(present(vBulk)) v0 = vBulk
@@ -302,9 +309,9 @@ contains
 	end function PEi
 
 	pure function heatflux() result(o)
-		real(wp),dimension(3)::o !3D
+		real(wp),dimension(3)::o
 		
-		real(wp),dimension(3)::fij,vj,rij !3D
+		real(wp),dimension(3)::fij,vj,rij
 		integer::i,j
 		
 		o = 0.0_wp
@@ -323,17 +330,25 @@ contains
 		end do
 	end function heatflux
 
+	subroutine updateAllNeighbors()
+		integer::k
+		
+		do k=1,size(atoms)
+			call updateNeighbors(k)
+		end do
+	end subroutine updateAllNeighbors
+
 	subroutine updateNeighbors(i)
 		integer,intent(in)::i
 		
-		real(wp),dimension(3)::r !3D
+		real(wp),dimension(3)::r
 		integer::k
 		
 		atoms(i)%neighbors = [integer::]
 		do k=1,size(atoms)
 			if(i==k) cycle
 			r  = deltaR(atoms(i),atoms(k))
-			if(norm2(r)>neighborRadius) cycle
+			if( norm2(r)>(lj%cutoff+lj%skin) ) cycle
 			atoms(i)%neighbors = [atoms(i)%neighbors,k]
 		end do
 	end subroutine updateNeighbors

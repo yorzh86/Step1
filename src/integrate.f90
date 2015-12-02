@@ -5,9 +5,6 @@ module integrate_mod
 	private
 	
 	logical::doThermostat = .false.
-	real(wp)::eta = 0.0_wp
-	real(wp)::Tset = 10.0_wp
-	real(wp)::tauT = 100.0_wp
 	
 	public::setThermostat
 	public::velocityVerlet
@@ -22,14 +19,14 @@ contains
 		real(wp),intent(in),optional::T,tau
 		
 		if(state .and. present(T) .and. present(tau) ) then
-			Tset = T
-			tauT = tau
-			eta = 0.0_wp
+			thermostat%set = T
+			thermostat%tau = tau
+			thermostat%eta = 0.0_wp
 		else if(state) then
 			write(*,*) 'Error: Called thermostate(true) without T and tau!'
 			stop 1
 		else
-			eta = 0.0_wp
+			thermostat%eta = 0.0_wp
 		end if
 		
 		doThermostat = state
@@ -52,14 +49,14 @@ contains
 		end do
 		
 		do k=1,size(atoms)
-			atoms(k)%a = -delV(k)/types(atoms(k)%t)%m-eta*atoms(k)%v
+			atoms(k)%a = -delV(k)/types(atoms(k)%t)%m-thermostat%eta*atoms(k)%v
 		end do
 		
 		do k=1,size(atoms)
 			atoms(k)%v =  atoms(k)%v+atoms(k)%a*0.5_wp*dt
 		end do
 		
-		if(doThermostat) eta = eta+DetaDt()*dt
+		if(doThermostat) thermostat%eta = thermostat%eta+DetaDt()*dt
 		t  = t+dt
 		ts = ts+1
 	end subroutine velocityVerlet
@@ -77,11 +74,11 @@ contains
 		end do
 		do k=1,size(atoms)
 			ao = atoms(k)%a
-			atoms(k)%a = -delV(k)/types(atoms(k)%t)%m-eta*atoms(k)%v
+			atoms(k)%a = -delV(k)/types(atoms(k)%t)%m-thermostat%eta*atoms(k)%v
 			atoms(k)%v = atoms(k)%v+0.5_wp*(ao+atoms(k)%a)*dt
 		end do
 		
-		if(doThermostat) eta = eta+DetaDt()*dt
+		if(doThermostat) thermostat%eta = thermostat%eta+DetaDt()*dt
 		t  = t+dt
 		ts = ts+1
 	end subroutine leapFrog
@@ -100,7 +97,7 @@ contains
 	! calculates damping parameter("eta") change over time.
 		real(wp)::o
 		
-		o = (temperature()/Tset-1.0_wp)/tauT**2.0_wp
+		o = (temperature()/thermostat%set-1.0_wp)/thermostat%tau**2.0_wp
 	end function DetaDt
 
 end module integrate_mod
