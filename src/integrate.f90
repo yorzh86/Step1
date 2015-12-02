@@ -14,7 +14,7 @@ module integrate_mod
 contains
 
 	subroutine setThermostat(state,T,tau)
-	! turns on/off damping parameter "eta" in the Integrator
+		!! Turns on/off damping parameter "eta" in the Integrator
 		logical,intent(in)::state
 		real(wp),intent(in),optional::T,tau
 		
@@ -23,7 +23,7 @@ contains
 			thermostat%tau = tau
 			thermostat%eta = 0.0_wp
 		else if(state) then
-			write(*,*) 'Error: Called thermostate(true) without T and tau!'
+			write(stdout,'(1A)') colorize('Error: Called thermostate(true) without T and tau.',[5,0,0])
 			stop 1
 		else
 			thermostat%eta = 0.0_wp
@@ -40,7 +40,7 @@ contains
 		integer::k
 		
 		do k=1,size(atoms)
-			d = atoms(k)%v*dt+0.5_wp*atoms(k)%a*dt**2.0_wp
+			d = atoms(k)%v*dt+0.5_wp*atoms(k)%a*dt**2
 			atoms(k)%r =  atoms(k)%r+d
 		end do
 		
@@ -69,7 +69,7 @@ contains
 		integer::k
 		
 		do k=1,size(atoms)
-			d = atoms(k)%v*dt+0.5_wp*atoms(k)%a*dt**2.0_wp
+			d = atoms(k)%v*dt+0.5_wp*atoms(k)%a*dt**2
 			atoms(k)%r = atoms(k)%r+d
 		end do
 		do k=1,size(atoms)
@@ -97,7 +97,7 @@ contains
 	! calculates damping parameter("eta") change over time.
 		real(wp)::o
 		
-		o = (temperature()/thermostat%set-1.0_wp)/thermostat%tau**2.0_wp
+		o = (temperature()/thermostat%set-1.0_wp)/thermostat%tau**2
 	end function DetaDt
 
 end module integrate_mod

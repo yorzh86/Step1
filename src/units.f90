@@ -1,16 +1,18 @@
 module units_mod
 	use kinds_mod
+	use utilities_mod
 	implicit none
 	private
 	
-	integer,parameter::Nu = 19
+	integer,parameter::Nu = 21
 	
-	character(2),dimension(Nu),parameter::names = [ character(2):: &
+	character(5),dimension(Nu),parameter::names = [ character(5):: &
 		& 'm','mm','um','nm','pm','fm','A', &
 		& 's','ms','us','ns','ps','fs', &
 		& 'J','eV', &
 		& 'kg','u', &
-		& 'K', 'C'  &
+		& 'K', 'C', &
+		& 'm/s', 'A/ps' &
 		& ]
 	
 	logical::isSetup = .false.
@@ -37,8 +39,12 @@ contains
 		ki = getIndex(iu)
 		ko = getIndex(ou)
 		
-		if(ki<0) write(*,*) 'Error:',iu
-		if(ko<0) write(*,*) 'Error:',ou
+		if(ki<0 .or. ko<0) then
+			write(stdout,'(1A)') colorize('Units Error: Cannot find specified units.',[5,0,0])
+			if(ki<0) write(stdout,'(1A)') colorize('   Unit: ',[5,5,0])//trim(adjustl(iu))
+			if(ko<0) write(stdout,'(1A)') colorize('   Unit: ',[5,5,0])//trim(adjustl(ou))
+			stop 1
+		end if
 		
 		o = v*cf(ki,ko)+co(ki,ko)
 	end function convert
@@ -68,6 +74,8 @@ contains
 		cf( getIndex('kg') , getIndex('u' ) ) = 6.02213665168E26_wp
 		
 		cf( getIndex('K' ) , getIndex('C' ) ) = 1.0_wp
+		
+		cf( getIndex('m/s' ) , getIndex('A/ps' ) ) = 1.0E-2_wp
 		
 		! Assert inverse conversions
 		do j=1,Nu

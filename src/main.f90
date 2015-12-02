@@ -32,7 +32,7 @@ contains
 		call initialize()
 		
 		enableLennardJones = .true.
-! 		call setThermostat(.true.,T0,100.0_wp*dt)
+		call setThermostat(.true.,T0,100.0_wp*dt)
 		call buildSystem(latticeConstant,[3,3,3],T0)
 		
 		call doBox()
@@ -70,10 +70,10 @@ contains
 		
 		if(mod(c,20)==0) then
 			write(buf,'(1A5,4A15)') 'k [#]','t [ps]','T [K]','KE [eV]','PE [eV]'
-			write(*,'(1A,1G10.2)') colorize(trim(buf),[5,5,0]),averageNeighbors()
+			write(stdout,'(2A,1G10.2)') colorize(trim(buf),[5,5,0]),' Nc = ',averageNeighbors()
 			write(iou_thermo,'(1A)') '#'//trim(buf)
 		end if
-		write(*,'(1I5,4G15.3)') k,convert(t,'s','ps'),temperature(),convert(KE(),'J','eV'),convert(PE(),'J','eV')
+		write(stdout,'(1I5,4G15.7)') k,convert(t,'s','ps'),temperature(),convert(KE(),'J','eV'),convert(PE(),'J','eV')
 		write(iou_thermo,'(1I5,4G15.3)') k,convert(t,'s','ps'),temperature(),convert(KE(),'J','eV'),convert(PE(),'J','eV')
 		
 		c = c+1

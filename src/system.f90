@@ -145,9 +145,14 @@ contains
 		write(iou,'(1A)') ''
 		write(iou,'(1A)') 'Atoms'
 		write(iou,'(1A)') ''
-		
 		do k=1,size(atoms)
-			write(iou,'(1I9,1X,1I2,1X,3F13.6)') k,atoms(k)%t,[( convert(atoms(k)%r(i),'m','A') , i=1,3 )]
+			write(iou,'(1I9,1X,1I2,1X,3E25.15)') k,atoms(k)%t,[( convert(atoms(k)%r(i),'m','A') , i=1,3 )]
+		end do
+		write(iou,'(1A)') ''
+		write(iou,'(1A)') 'Velocities'
+		write(iou,'(1A)') ''
+		do k=1,size(atoms)
+			write(iou,'(1I9,1X,1X,3E25.15)') k,[( convert(atoms(k)%v(i),'m/s','A/ps') , i=1,3 )]
 		end do
 		
 		close(iou)
@@ -288,7 +293,7 @@ contains
 		
 		v0 = 0.0_wp
 		if(present(vBulk)) v0 = vBulk
-		o = 0.5_wp*types(atoms(i)%t)%m*norm2(atoms(i)%v-v0)**2.0_wp
+		o = 0.5_wp*types(atoms(i)%t)%m*norm2(atoms(i)%v-v0)**2
 	end function KEi
 	
 	pure function PE() result (o)

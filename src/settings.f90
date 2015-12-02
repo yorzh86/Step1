@@ -86,11 +86,20 @@ contains
 		
 		open(file=fn,newunit=iou)
 		
-		write(iou,'(1A,1E25.5)') 'variable dt equal ',convert(dt,'s','ps')
-		write(iou,'(1A,1E25.5)') 'variable dt_nh equal ',convert(thermostat%tau,'s','ps')
-		write(iou,'(1A,1E25.5)') 'variable T0 equal ',convert(T0,'K','K')
-		write(iou,'(1A)') 'variable t equal step*${dt}'
-		write(iou,'(1A)') 'variable T equal temp'
+		write(iou,'(1A,1I10)')   'variable N_steps       equal ',N_steps
+		write(iou,'(1A,1I10)')   'variable skip_thermo   equal ',skip_thermo
+		write(iou,'(1A,1I10)')   'variable skip_dump     equal ',skip_dump
+		write(iou,'(1A,1I10)')   'variable skip_neighbor equal ',skip_neighbor
+		
+		write(iou,'(1A,1E25.5)') 'variable dt            equal ',convert(dt,'s','ps')
+		write(iou,'(1A,1E25.5)') 'variable dt_nh         equal ',convert(thermostat%tau,'s','ps')
+		write(iou,'(1A,1E25.5)') 'variable T0            equal ',convert(T0,'K','K')
+		
+		write(iou,'(1A,1E25.5)') 'variable cutoff        equal ',convert(lj%cutoff,'m','A')
+		write(iou,'(1A,1E25.5)') 'variable skin          equal ',convert(lj%skin,'m','A')
+		
+		write(iou,'(1A)')        'variable t             equal step*${dt}'
+		write(iou,'(1A)')        'variable T             equal temp'
 		
 		close(iou)
 	end subroutine writeLammpsVars
