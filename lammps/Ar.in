@@ -1,0 +1,22 @@
+units            metal
+atom_style       atomic
+boundary         p p p
+
+include          vars.inc
+pair_style       lj/cut ${cutoff}
+neighbor         ${skin} bin
+neigh_modify     every ${skip_neighbor} delay 0
+read_data        Ar.data
+
+timestep         ${dt}
+
+thermo           ${skip_thermo}
+thermo_style     custom v_t v_T etotal ke pe
+
+fix              NVT all nvt temp ${T0} ${T0} ${dt_nh}
+#fix              NVE all nve
+
+dump             XYZ all xyz ${skip_dump} Ar.xyz
+dump_modify      XYZ element Ar
+
+run              ${N_steps}
