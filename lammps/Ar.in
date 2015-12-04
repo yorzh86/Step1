@@ -2,7 +2,7 @@ units            metal
 atom_style       atomic
 boundary         p p p
 
-include          vars.inc
+include          Ar.vars
 pair_style       lj/cut ${cutoff}
 neighbor         ${skin} bin
 neigh_modify     every ${skip_neighbor} delay 0
@@ -10,13 +10,28 @@ read_data        Ar.data
 
 timestep         ${dt}
 
-thermo           ${skip_thermo}
-thermo_style     custom v_t v_T etotal ke pe
+variable         t  equal step*${dt}
+variable         s  equal step
 
-fix              NVT all nvt temp ${T0} ${T0} ${dt_nh}
+compute          T all temp
+compute          P all pressure T
+
+thermo           ${skip_thermo}
+thermo_style     custom step v_t c_T etotal ke pe c_P 
+
+variable         T  equal c_T
+variable         TE equal etotal
+variable         KE equal ke
+variable         PE equal pe
+variable         P  equal c_P
+
+fix              PRINT all print ${skip_thermo} "${s} ${t} ${T} ${TE} ${KE} ${PE} ${P}" file lammps.thermo screen no title "# k [#] t [ps] T [K] TE [eV] KE [eV] PE [eV] P [bar]"
+
+fix              NVP all npt temp ${T0} ${T0} ${tau_T} tchain 1 iso ${P0} ${P0} ${tau_P} pchain 1
+#fix              NVT all nvt temp ${T0} ${T0} ${dt_nh} tchain 1
 #fix              NVE all nve
 
-dump             XYZ all xyz ${skip_dump} Ar.xyz
+dump             XYZ all xyz ${skip_dump} lammps.xyz
 dump_modify      XYZ element Ar
 
 run              ${N_steps}

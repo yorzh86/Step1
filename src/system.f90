@@ -41,6 +41,10 @@ module system_mod
 	type(atom_t),dimension(:),allocatable::atoms
 		!! All atoms in system
 	
+	real(wp)::Teta = 0.0_wp
+		!! Thermostat DOF
+	real(wp)::Pepsilon = 0.01_wp
+		!! Barostat DOF
 	real(wp),dimension(3)::box
 		!! Bounds of the simulation box
 	
@@ -103,9 +107,7 @@ contains
 		end do
 		forall(k=1:3) atoms(:)%v(k) = atoms(:)%v(k)-sum(atoms(:)%v(k))/real(size(atoms),wp)
 		
-		do i=1,size(atoms)
-			call updateNeighbors(i)
-		end do
+		call updateAllNeighbors()
 		
 		do k=1,size(atoms)
 			atoms(k)%a = -delV(k)/types(atoms(k)%t)%m
@@ -181,6 +183,7 @@ contains
 			do j=1,size(atoms(i)%neighbors)
 				aj = atoms(i)%neighbors(j)
 				d = deltaR(atoms(aj),atoms(i))
+				if( norm2(d)>lj%cutoff ) cycle
 				l = S0/norm2(d)
 				o = o+( 0.5_wp ) * ( 4.0_wp*E0*l**6*(l**6-1.0_wp) )
 					!! Only include half of the bond energy for each atom in the bond
@@ -226,7 +229,6 @@ contains
 			
 			l = S0/norm2(d)
 			o = o+24.0_wp*E0/sum(d*d)*(l**6)*(1.0_wp-2.0_wp*l**6)*d
-			!o = o-(48.0_wp*E0/sum(d*d))*(l**12-0.5_wp*l**6)*d
 		end subroutine doLennardJones
 		
 	end function delVij
@@ -245,15 +247,16 @@ contains
 		real(wp)::o
 		
 		real(wp),dimension(3)::vBulk
+		real(wp)::SKE
 		integer::k
 		
 		forall(k=1:3) vBulk(k) = sum(atoms%v(k))/real(size(atoms),wp)
 		
-		o = 0.0_wp
+		SKE = 0.0_wp
 		do k=1,size(atoms)
-			o = o+KEi(k,vBulk)
+			SKE = SKE+KEi(k,vBulk)
 		end do
-		o = o/(2.0_wp*real(size(atoms),wp)*kB)
+		o = (2.0_wp*SKE)/(3.0_wp*real(size(atoms),wp)*kB)
 	end function temperature
 
 	pure function E() result(o)
@@ -353,7 +356,7 @@ contains
 		do k=1,size(atoms)
 			if(i==k) cycle
 			r  = deltaR(atoms(i),atoms(k))
-			if( norm2(r)>(lj%cutoff+lj%skin) ) cycle
+ 			if( norm2(r)>(lj%cutoff+lj%skin) ) cycle
 			atoms(i)%neighbors = [atoms(i)%neighbors,k]
 		end do
 	end subroutine updateNeighbors
@@ -362,7 +365,31 @@ contains
 		real(wp)::o
 		integer::k
 		
-		o = sum([( size(atoms(k)%neighbors) , k=1,size(atoms) )]) / real(size(atoms),wp)
+		o = sum([( size(atoms(k)%neighbors) , k=1,size(atoms) )]) / real(size(atoms),wp)/2.0_wp
 	end function averageNeighbors
+
+	pure function virial() result(o)
+		real(wp)::o
+		
+		real(wp),dimension(3)::F,r
+		integer::i,j,aj
+		
+		o = 0.0_wp
+		do i=1,size(atoms)
+			do j=1,size(atoms(i)%neighbors)
+				aj = atoms(i)%neighbors(j)
+				r  = deltaR(atoms(i),atoms(aj))
+				if( norm2(r)>lj%cutoff ) cycle
+				F = delVij(i,aj,r)
+				o = o+0.5_wp*dot_product(F,r)
+			end do
+		end do
+	end function virial
+
+	pure function pressure() result(o)
+		real(wp)::o
+		
+		o = (real(size(atoms),wp)*kB*temperature()-virial()/3.0_wp)/product(box)
+	end function pressure
 
 end module system_mod

@@ -55,6 +55,8 @@ module utilities_mod
 	
 	public::showProgress
 	
+	public::deDup
+	
 contains
 
 	function mixval_1(x) result(b)
@@ -380,5 +382,21 @@ contains
 		
 		o = sqrt(sum((d-mean(d))**2)/real(size(d)-1,wp))
 	end function stdev
+
+	function deDup(l) result(o)
+		integer,dimension(:),intent(in)::l
+		integer,dimension(:),allocatable::o
+		
+		integer::k,v
+		
+		o = l
+		
+		do k=1,size(o)
+			v = o(k)
+			where(o==v) o = -1
+			o(k) = v
+		end do
+		o = pack(o,o>=0)
+	end function deDup
 
 end module utilities_mod

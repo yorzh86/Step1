@@ -4,7 +4,7 @@ module units_mod
 	implicit none
 	private
 	
-	integer,parameter::Nu = 21
+	integer,parameter::Nu = 23
 	
 	character(5),dimension(Nu),parameter::names = [ character(5):: &
 		& 'm','mm','um','nm','pm','fm','A', &
@@ -12,6 +12,7 @@ module units_mod
 		& 'J','eV', &
 		& 'kg','u', &
 		& 'K', 'C', &
+		& 'Pa', 'bar', &
 		& 'm/s', 'A/ps' &
 		& ]
 	
@@ -57,23 +58,24 @@ contains
 		cf = -1.0_wp
 		
 		forall(k=1:Nu) cf(k,k) = 1.0_wp
-		cf( getIndex('m' ) , getIndex('A' ) ) = 1.0E10_wp
-		cf( getIndex('m' ) , getIndex('fm') ) = 1.0E15_wp
-		cf( getIndex('m' ) , getIndex('pm') ) = 1.0E12_wp
-		cf( getIndex('m' ) , getIndex('nm') ) = 1.0E9_wp
-		cf( getIndex('m' ) , getIndex('um') ) = 1.0E6_wp
-		cf( getIndex('m' ) , getIndex('mm') ) = 1.0E3_wp
+		cf( getIndex('m' ) , getIndex('A'  ) ) = 1.0E10_wp
+		cf( getIndex('m' ) , getIndex('fm' ) ) = 1.0E15_wp
+		cf( getIndex('m' ) , getIndex('pm' ) ) = 1.0E12_wp
+		cf( getIndex('m' ) , getIndex('nm' ) ) = 1.0E9_wp
+		cf( getIndex('m' ) , getIndex('um' ) ) = 1.0E6_wp
+		cf( getIndex('m' ) , getIndex('mm' ) ) = 1.0E3_wp
 		
-		cf( getIndex('s' ) , getIndex('fs') ) = 1.0E15_wp
-		cf( getIndex('s' )  , getIndex('ps') ) = 1.0E12_wp
-		cf( getIndex('s' ) , getIndex('ns') ) = 1.0E9_wp
-		cf( getIndex('s' ) , getIndex('us') ) = 1.0E6_wp
-		cf( getIndex('s' ) , getIndex('ms') ) = 1.0E3_wp
+		cf( getIndex('s' ) , getIndex('fs' ) ) = 1.0E15_wp
+		cf( getIndex('s' ) , getIndex('ps' ) ) = 1.0E12_wp
+		cf( getIndex('s' ) , getIndex('ns' ) ) = 1.0E9_wp
+		cf( getIndex('s' ) , getIndex('us' ) ) = 1.0E6_wp
+		cf( getIndex('s' ) , getIndex('ms' ) ) = 1.0E3_wp
 		
-		cf( getIndex('J' ) , getIndex('eV') ) = 6.24150636309E18_wp
-		cf( getIndex('kg') , getIndex('u' ) ) = 6.02213665168E26_wp
+		cf( getIndex('J' ) , getIndex('eV' ) ) = 6.24150636309E18_wp
+		cf( getIndex('kg') , getIndex('u'  ) ) = 6.02213665168E26_wp
 		
-		cf( getIndex('K' ) , getIndex('C' ) ) = 1.0_wp
+		cf( getIndex('K' ) , getIndex('C'  ) ) = 1.0_wp
+		cf( getIndex('Pa') , getIndex('bar') ) = 1.0E-5_wp
 		
 		cf( getIndex('m/s' ) , getIndex('A/ps' ) ) = 1.0E-2_wp
 		
