@@ -31,7 +31,8 @@ contains
 		enableLennardJones = .true.
 		call setThermostat(.true.,T0,10.0_wp*dt)
 		call setBarostat(.true.,P0,5.0E10_wp*dt)
-		call buildSystem(convert(5.181_wp,'A','m'),[7,7,7],T0) !5.26_wp
+		!call setBarostat(.true.,P0,1000*dt)
+		call buildSystem(convert(5.40_wp,'A','m'),[5,5,5],T0) !5.26_wp
 		
 		call doBox()
 		call writeStepXYZ(iou_xyz)
@@ -43,7 +44,6 @@ contains
 		integer::k
 		
 		do k=0,N_steps
-			
 			if(mod(k,skip_thermo)==0) call thermoReport(k)
 			if(mod(k,skip_dump  )==0) call writeStepXYZ(iou_xyz)
 			if(mod(k,skip_neighbor)==0) call updateAllNeighbors()
@@ -51,7 +51,8 @@ contains
 			call velocityVerlet(dt)
 			call doBox()
 			
-! 			if(k==Ns/2) call setThermostat(.false.)
+ 			!if(k==N_steps/2) call setThermostat(.false.)
+ 			
 			
 		end do
 	end subroutine runSim
@@ -67,7 +68,7 @@ contains
 		character(128)::buf
 		
 		if(mod(c,20)==0) then
-			write(buf,'(1A5,6A15)') 'k [#]','t [ps]','T [K]','TE [eV]','KE [eV]','PE [eV]','P [bar]'
+			write(buf,'(1A5,6A12)') 'k [#]','t [ps]','T [K]','	TE [eV]','	KE [eV]','PE [eV]','P [bar]'
 			write(stdout,'(2A,1I4)') colorize(trim(buf),[5,5,0]),' Nc = ',nint(averageNeighbors())
 			if(c==0) write(iou_thermo,'(1A)') '#'//trim(buf)
 		end if

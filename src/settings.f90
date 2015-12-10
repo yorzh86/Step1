@@ -72,12 +72,12 @@ contains
 		lj%coeffs = [E0,S0]
 		
 		!= Simulation =!
-		N_steps       = 5000
-		skip_thermo   = 1
-		skip_dump     = 10000
-		skip_neighbor = 100
+		N_steps       = 2000
+		skip_thermo   = 100
+		skip_dump     = 1
+		skip_neighbor = 20
 		
-		T0 = convert(30.0_wp,'K','K')
+		T0 = convert(45.0_wp,'K','K')
 		P0 = convert(1.0_wp,'bar','Pa')
 		dt = convert(10.0_wp,'fs','s')
 		
