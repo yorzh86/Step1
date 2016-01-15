@@ -13,7 +13,8 @@ module units_mod
 		& 'kg','u', &
 		& 'K', 'C', &
 		& 'Pa', 'bar', &
-		& 'm/s', 'A/ps' &
+		& 'm/s', 'A/ps', &
+		& 'W/m2', 'eV/ps/A2'&
 		& ]
 	
 	logical::isSetup = .false.
@@ -78,6 +79,8 @@ contains
 		cf( getIndex('Pa') , getIndex('bar') ) = 1.0E-5_wp
 		
 		cf( getIndex('m/s' ) , getIndex('A/ps' ) ) = 1.0E-2_wp
+		
+		cf( getIndex('W/m2') , getIndex('eV/ps/A2') ) = 6.24150636309E-14
 		
 		! Assert inverse conversions
 		do j=1,Nu
