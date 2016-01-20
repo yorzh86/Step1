@@ -47,6 +47,8 @@ module system_mod
 		!! Barostat DOF
 	real(wp),dimension(3)::box
 		!! Bounds of the simulation box
+	real(wp)::sys_vol
+		!! Volume of the system
 	
 	integer::ts
 		!! Time step counter
@@ -71,6 +73,7 @@ contains
 		integer::i,j,k,l,idx
 		
 		box = a*real(N,wp)
+		sys_vol = (a*real(N(1)))**3
 		
 		allocate(types(1))
 		allocate(atoms(size(rcell,2)*product(N)))
@@ -260,7 +263,6 @@ contains
 	end function temperature
 
 	pure function E() result(o)
-	!! we never use it
 		real(wp)::o
 		integer::k
 		
@@ -319,22 +321,27 @@ contains
 	pure function heatflux() result(o)
 		real(wp),dimension(3)::o
 		
-		real(wp),dimension(3)::fij,vj,rij
+		real(wp),dimension(3)::fij,vj, vi, rij
 		integer::i,j
 		
 		o = 0.0_wp
 		
 		do i=1,size(atoms)
-			o = o+Ei(i)*atoms(i)%v
+			o = o + Ei(i)*atoms(i)%v
 		end do
 		
-		do j=1,size(atoms)
-			do i=1,j-1
-				rij = deltaR(atoms(i),atoms(j))
-				fij = delVij(i,j,rij)
-				vj  = atoms(j)%v
-				o = o+dot_product(fij,vj)*rij
-			end do
+		!do j=1,size(atoms)
+		!	do i=1,j-1
+		!		rij = deltaR(atoms(i),atoms(j))
+		!		fij = delVij(i,j,rij)
+		!		vj  = atoms(j)%v
+		!		o = o+dot_product(fij,vj)*rij
+		!	end do
+		!end do
+		
+		do i=1, size(atoms)
+			vi = atoms(i)%v
+			o = o - virial()*vi
 		end do
 	end function heatflux
 
