@@ -58,7 +58,7 @@ module utilities_mod
 	public::deDup
 	
 	public::autocorrelate
-	public:cumtrapz
+	public::cumtrapz
 	
 contains
 
