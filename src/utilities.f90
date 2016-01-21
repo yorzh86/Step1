@@ -57,6 +57,9 @@ module utilities_mod
 	
 	public::deDup
 	
+	public::autocorrelate
+	public:cumtrapz
+	
 contains
 
 	function mixval_1(x) result(b)
@@ -398,5 +401,30 @@ contains
 		end do
 		o = pack(o,o>=0)
 	end function deDup
+	
+	function autocorrelate(A) result(o)
+ 		real(wp),dimension(:),intent(in)::A
+ 		real(wp),dimension(:),allocatable::o
+ 		
+ 		integer::N,i
+ 		
+ 		N = size(A)
+ 		allocate(o(N))
+ 		
+ 		forall(i=1:N) o(i) = sum(A(i:N)*A(1:N-i+1))/real(N-i+1,wp)
+ 	end function autocorrelate
+ 
+ 	function cumtrapz(A,t) result(o)
+ 		real(wp),dimension(:),intent(in)::A,t
+ 		real(wp),dimension(:),allocatable::o
+ 		
+ 		integer::k
+ 		allocate(o(size(A)))
+ 		
+ 		o(1) = 0.0_wp
+ 		do k=2,size(A)
+ 			o(k) = o(k-1)+(A(k)+A(k-1))/2.0_wp*(t(k)-t(k-1))
+ 		end do
+ 	end function cumtrapz
 
 end module utilities_mod

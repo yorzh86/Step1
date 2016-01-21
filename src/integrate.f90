@@ -34,7 +34,6 @@ contains
 		doThermostat = state
 	end subroutine setThermostat
 
-
 	subroutine setBarostat(state,P,tau)
 		!! Turns on/off damping parameter "eta" in the Integrator
 		logical,intent(in)::state
