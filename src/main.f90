@@ -30,7 +30,7 @@ contains
 		
 		enableLennardJones = .true.
 		!call setThermostat(.true.,T0,10.0_wp*dt)
-		!call setBarostat(.true.,P0,5.0E10_wp*dt)
+		!call setBarostat(.true.,P0, 5.0E10_wp*dt)
 		call buildSystem(convert(5.40_wp,'A','m'),[5,5,5],T0) !5.26_wp
 		
 		call doBox()
@@ -41,7 +41,6 @@ contains
 
 	subroutine runSim
 		integer::k
-		
 		do k=0,N_steps
 			if(mod(k,skip_thermo)==0) call thermoReport(k)
 			if(mod(k,skip_dump  )==0) call writeStepXYZ(iou_xyz)
@@ -51,7 +50,6 @@ contains
 			call doBox()
 			
  			!if(k==N_steps/2) call setThermostat(.false.)
- 			
 			
 		end do
 	end subroutine runSim
@@ -76,8 +74,7 @@ contains
 		!
 		!write(iou_thermo,'(1I5,6G25.15)') k,convert(t,'s','ps'),temperature(),convert(E(),'J','eV'), &
 		!	& convert(KE(),'J','eV'),convert(PE(),'J','eV'),convert(pressure(),'Pa','bar')
-		write(stdout,*) k, temperature(),convert(E(),'J','eV'),heatflux()*6.24150636309E18_wp/(1.0E12_wp*1.0E10_wp*1.0E10_wp)/sys_vol, &
-		& virial()
+		write(stdout,*) k, temperature(),convert(E(),'J','eV'), heatflux()*6.24150636309E-14_wp/product(box)
 	
 		c = c+1
 	end subroutine thermoReport

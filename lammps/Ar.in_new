@@ -33,6 +33,9 @@ variable        Jz equal c_flux[3]/vol
 thermo           ${skip_thermo}
 #thermo_style     custom step v_t c_T etotal ke pe c_P
 thermo_style     custom step temp etotal v_Jx v_Jy v_Jz
+thermo_modify	 format 4 %16.15g
+thermo_modify	 format 5 %16.15g
+thermo_modify	 format 6 %16.15g
 
 variable         T  equal c_T
 variable         TE equal etotal
@@ -43,12 +46,12 @@ variable         P  equal c_P
 # fix below print data to lammps.thermo file
 fix              PRINT all print ${skip_thermo} "${s} ${t} ${T} ${TE} ${KE} ${PE} ${P}" file lammps.thermo screen no title "# k [#] t [ps] T [K] TE [eV] KE [eV] PE [eV] P [bar]"
 
-#fix              NPT all npt temp ${T0} ${T0} ${tau_T} tchain 1 iso ${P0} ${P0} ${tau_P} pchain 1
+fix              NPT all npt temp ${T0} ${T0} ${tau_T} tchain 1 iso ${P0} ${P0} ${tau_P} pchain 1
 #fix              NVT all nvt temp ${T0} ${T0} ${dt_nh} tchain 1
-fix              NVE all nve
+#fix              NVE all nve
 
 dump             XYZ all xyz ${skip_dump} lammps.xyz
 dump_modify      XYZ element Ar
 
-run              ${N_steps}
-#run					50
+#run              ${N_steps}
+run					50

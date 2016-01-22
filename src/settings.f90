@@ -66,8 +66,8 @@ contains
 		
 		E0 = kB*convert(125.7_wp,'K','K')
 		S0 = convert(3.345_wp,'A','m')
-		lj%cutoff = 3.0_wp*S0
-		lj%skin = 0.5_wp*S0
+		lj%cutoff = 3.0_wp*S0 !3.0
+		lj%skin = 0.5_wp*S0	!0.5
 		
 		lj%coeffs = [E0,S0]
 		
@@ -75,7 +75,7 @@ contains
 		N_steps       = 1000
 		skip_thermo   = 1
 		skip_dump     = 1
-		skip_neighbor = 20
+		skip_neighbor = 5 !20
 		
 		T0 = convert(45.0_wp,'K','K')
 		P0 = convert(1.0_wp,'bar','Pa')

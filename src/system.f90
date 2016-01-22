@@ -43,13 +43,11 @@ module system_mod
 	
 	real(wp)::Teta = 0.0_wp
 		!! Thermostat DOF
-	real(wp)::Pepsilon = 0.01_wp
+	real(wp)::Pepsilon = 0.0_wp !was used as 0.01
 		!! Barostat DOF
 	real(wp),dimension(3)::box
 		!! Bounds of the simulation box
-	real(wp)::sys_vol
-		!! Volume of the system
-	
+		
 	integer::ts
 		!! Time step counter
 	real(wp)::t
@@ -73,7 +71,6 @@ contains
 		integer::i,j,k,l,idx
 		
 		box = a*real(N,wp)
-		sys_vol = (a*real(N(1)))**3
 		
 		allocate(types(1))
 		allocate(atoms(size(rcell,2)*product(N)))
@@ -191,6 +188,13 @@ contains
 				o = o+( 0.5_wp ) * ( 4.0_wp*E0*l**6*(l**6-1.0_wp) )
 					!! Only include half of the bond energy for each atom in the bond
 			end do
+			!do j=1,size(atoms)
+			!	if(j==i) cycle
+			!	d = deltaR(atoms(j),atoms(i))
+			!	l = S0/norm2(d)
+			!	o = o+(0.5_wp) * 4.0_wp*E0*(l**12.0_wp-l**6.0_wp)
+			!end do
+			
 		end subroutine doLennardJones
 	
 	end function V
