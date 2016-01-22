@@ -46,9 +46,9 @@ variable         P  equal c_P
 # fix below print data to lammps.thermo file
 fix              PRINT all print ${skip_thermo} "${s} ${t} ${T} ${TE} ${KE} ${PE} ${P}" file lammps.thermo screen no title "# k [#] t [ps] T [K] TE [eV] KE [eV] PE [eV] P [bar]"
 
-fix              NPT all npt temp ${T0} ${T0} ${tau_T} tchain 1 iso ${P0} ${P0} ${tau_P} pchain 1
+#fix              NPT all npt temp ${T0} ${T0} ${tau_T} tchain 1 iso ${P0} ${P0} ${tau_P} pchain 1
 #fix              NVT all nvt temp ${T0} ${T0} ${dt_nh} tchain 1
-#fix              NVE all nve
+fix              NVE all nve
 
 dump             XYZ all xyz ${skip_dump} lammps.xyz
 dump_modify      XYZ element Ar

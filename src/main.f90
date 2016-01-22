@@ -63,6 +63,8 @@ contains
 		integer,intent(in)::k
 		integer,save::c = 0
 		character(128)::buf
+		real(wp), dimension(3)::o
+		o = heatflux()
 		
 		!if(mod(c,20)==0) then
 		!	write(buf,'(1A5,6A12)') 'k [#]','t [ps]','T [K]','	TE [eV]','	KE [eV]','PE [eV]','P [bar]'
@@ -74,8 +76,9 @@ contains
 		!
 		!write(iou_thermo,'(1I5,6G25.15)') k,convert(t,'s','ps'),temperature(),convert(E(),'J','eV'), &
 		!	& convert(KE(),'J','eV'),convert(PE(),'J','eV'),convert(pressure(),'Pa','bar')
-		write(stdout,*) k, temperature(),convert(E(),'J','eV'), heatflux()*6.24150636309E-14_wp/product(box)
-	
+		
+		write(stdout,*) k, temperature(),convert(E(),'J','eV'), o(1)*6.24150636309E-14_wp/product(box), virial()
+
 		c = c+1
 	end subroutine thermoReport
 
