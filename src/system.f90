@@ -322,30 +322,64 @@ contains
 		o = V(i)
 	end function PEi
 
+	pure function Si(i) result(o)
+		integer,intent(in)::i
+		real(wp),dimension(3,3)::o
+		
+		real(wp),dimension(3)::v,r,F
+		integer::j,aj
+		
+		v = atoms(i)%v
+		o = -types(atoms(i)%t)%m*matmul(asCol(v),asRow(v))
+		
+		do j=1,size(atoms(i)%neighbors)
+			aj = atoms(i)%neighbors(j)
+			r  = deltaR(atoms(i),atoms(aj))
+			if( norm2(r)>lj%cutoff ) cycle
+			F = delVij(i,aj,r)
+			
+			o = o-0.5_wp*(matmul(asCol(r),asRow(F))+matmul(asCol(F),asRow(r)))
+		end do
+	
+	contains
+	
+		pure function asCol(v) result(o)
+			real(wp),dimension(:),intent(in)::v
+			real(wp),dimension(size(v),1)::o
+			
+			o(:,1) = v(:)
+		end function asCol
+
+		pure function asRow(v) result(o)
+			real(wp),dimension(:),intent(in)::v
+			real(wp),dimension(1,size(v))::o
+			
+			o(1,:) = v(:)
+		end function asRow
+		
+	end function Si
+
 	pure function heatflux() result(o)
 		real(wp),dimension(3)::o
 		
-		real(wp),dimension(3)::fij,vj, vi, rij
-		integer::i,j
+		integer::i,j,aj
+		real(wp),dimension(3)::Fij,rij
 		
 		o = 0.0_wp
-		
+
+! 		do i=1,size(atoms)
+! 			o = o+ ( Ei(i)*atoms(i)%v-matmul(Si(i),atoms(i)%v) )
+! 		end do
+
 		do i=1,size(atoms)
-			o = o + Ei(i)*atoms(i)%v
-		end do
-		
-		!do j=1,size(atoms)
-		!	do i=1,j-1
-		!		rij = deltaR(atoms(i),atoms(j))
-		!		fij = delVij(i,j,rij)
-		!		vj  = atoms(j)%v
-		!		o = o+dot_product(fij,vj)*rij
-		!	end do
-		!end do
-		
-		do i=1, size(atoms)
-			vi = atoms(i)%v
-			o = o - virial()*vi
+			o = o+Ei(i)*atoms(i)%v
+			do j=1,size(atoms(i)%neighbors)
+				aj = atoms(i)%neighbors(j)
+				rij  = deltaR(atoms(i),atoms(aj))
+				if( norm2(rij)>lj%cutoff ) cycle
+				Fij = delVij(i,aj,rij)
+				o = o+dot_product(Fij,atoms(i)%v)*rij
+			end do
 		end do
 	end function heatflux
 

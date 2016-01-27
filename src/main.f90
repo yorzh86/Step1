@@ -64,6 +64,8 @@ contains
 		integer,save::c = 0
 		character(128)::buf
 		real(wp), dimension(3)::o
+		integer::i
+		
 		o = heatflux()
 		
 		!if(mod(c,20)==0) then
@@ -77,7 +79,8 @@ contains
 		!write(iou_thermo,'(1I5,6G25.15)') k,convert(t,'s','ps'),temperature(),convert(E(),'J','eV'), &
 		!	& convert(KE(),'J','eV'),convert(PE(),'J','eV'),convert(pressure(),'Pa','bar')
 		
-		write(stdout,*) k, temperature(),convert(E(),'J','eV'), o(1)*6.24150636309E-14_wp/product(box), virial()
+		write(stdout,'(1I5,100ES15.6)') k, temperature(),convert(E(),'J','eV'), &
+			& (convert(o(i),'W/m2','eV/ps/A2')/product(box),i=1,3)
 
 		c = c+1
 	end subroutine thermoReport

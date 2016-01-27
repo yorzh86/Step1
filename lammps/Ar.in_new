@@ -2,11 +2,11 @@ units            metal
 atom_style       atomic
 boundary         p p p
 
-include          ../src/Ar.vars
+include          Ar.vars
 pair_style       lj/cut ${cutoff}
 neighbor         ${skin} bin
 neigh_modify     every ${skip_neighbor} delay 0
-read_data		 ../src/Ar.data
+read_data		     Ar.data
 
 timestep         ${dt}
 
