@@ -33,6 +33,7 @@ variable        Jz equal c_flux[3]/vol
 thermo           ${skip_thermo}
 #thermo_style     custom step v_t c_T etotal ke pe c_P
 thermo_style     custom step temp etotal v_Jx v_Jy v_Jz
+
 thermo_modify	 format 4 %16.15g
 thermo_modify	 format 5 %16.15g
 thermo_modify	 format 6 %16.15g
@@ -54,4 +55,4 @@ dump             XYZ all xyz ${skip_dump} lammps.xyz
 dump_modify      XYZ element Ar
 
 #run              ${N_steps}
-run					50
+run					20
