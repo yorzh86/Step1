@@ -23,6 +23,8 @@ module system_mod
 			!! Atomic velocity
 		real(wp),dimension(3)::a
 			!! Atomic acceleration
+		real(wp),dimension(3)::f
+			!! Atomic force
 		integer::t
 			!! Atom type
 		integer,dimension(:),allocatable::neighbors
@@ -111,6 +113,7 @@ contains
 		
 		do k=1,size(atoms)
 			atoms(k)%a = -delV(k)/types(atoms(k)%t)%m
+			atoms(k)%f = -delV(k)
 		end do
 		
 		ts = 0
@@ -200,6 +203,7 @@ contains
 	end function V
 
 	pure function delV(i) result(o)
+	!! Total force on atom
 		integer,intent(in)::i
 		real(wp),dimension(3)::o
 		real(wp),dimension(3)::r

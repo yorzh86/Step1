@@ -72,14 +72,14 @@ contains
 		lj%coeffs = [E0,S0]
 		
 		!= Simulation =!
-		N_steps       = 80
+		N_steps       = 50
 		skip_thermo   = 1
 		skip_dump     = 1
 		skip_neighbor = 20 !20
 		
 		T0 = convert(45.0_wp,'K','K')
 		P0 = convert(1.0_wp,'bar','Pa')
-		dt = convert(2.5_wp,'fs','s')
+		dt = convert(10.0_wp,'fs','s')
 		
 		!= Thermostat =!
 		thermostat%tau = convert(100.0_wp*dt,'s','ps')

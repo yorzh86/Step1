@@ -23,18 +23,18 @@ program main_prg
 contains
 
 	subroutine setupSim
-		open(file='mark1.vel',newunit=iou_xyz)
+		!open(file='../scripts/mark1.vel',newunit=iou_xyz)
+		open(file='../scripts/mark1.fij',newunit=iou_xyz)
 		open(file='mark1.thermo',newunit=iou_thermo)
 		
 		call initialize()
 		
 		enableLennardJones = .true.
-		!call setThermostat(.true.,T0,10.0_wp*dt)
-		!call setBarostat(.true.,P0, 5.0E10_wp*dt)
+		call setThermostat(.false.,T0,10.0_wp*dt)
+		call setBarostat(.false.,P0, 5.0E10_wp*dt)
 		call buildSystem(convert(5.40_wp,'A','m'),[2,2,2],T0) !5.26_wp
 		
 		call doBox()
-! 		call writeStepXYZ(iou_xyz)
 		call writeLammpsData('Ar.data')
 		call writeLammpsVars('Ar.vars')
 	end subroutine setupSim
@@ -46,7 +46,7 @@ contains
 			if(mod(k,skip_dump  )==0) call writeStepXYZ(iou_xyz)
 			if(mod(k,skip_neighbor)==0) call updateAllNeighbors()
 			
-			call leapFrog(dt)
+			call velocityVerlet(dt)
 			call doBox()
 			
  			!if(k==N_steps/2) call setThermostat(.false.)

@@ -2,11 +2,11 @@ units            metal
 atom_style       atomic
 boundary         p p p
 
-include          ../src/Ar.vars
+include          ../build/Ar.vars
 pair_style       lj/cut ${cutoff}
 neighbor         ${skin} bin
 neigh_modify     every ${skip_neighbor} delay 0
-read_data		 ../src/Ar.data
+read_data		 ../build/Ar.data
 
 timestep         ${dt}
 
@@ -52,7 +52,8 @@ fix              PRINT all print ${skip_thermo} "${s} ${t} ${T} ${TE} ${KE} ${PE
 fix              NVE all nve
 
 #dump           XYZ all xyz ${skip_dump} lammps.xyz
-dump 			XYZ all custom 	${skip_dump} lammps.vel vx vy vz
+#dump 			XYZ all custom 	${skip_dump} ../scripts/lammps.vel vx vy vz
+dump 			XYZ all custom 	${skip_dump} ../scripts/lammps.fij fx fy fz
 dump_modify      XYZ element Ar
 
 run              ${N_steps}
