@@ -31,7 +31,7 @@ contains
 		enableLennardJones = .true.
 		!call setThermostat(.true.,T0,10.0_wp*dt)
 		!call setBarostat(.true.,P0, 5.0E10_wp*dt)
-		call buildSystem(convert(5.40_wp,'A','m'),[5,5,5],T0) !5.26_wp
+		call buildSystem(convert(5.40_wp,'A','m'),[2,2,2],T0) !5.26_wp
 		
 		call doBox()
 		call writeStepXYZ(iou_xyz)
