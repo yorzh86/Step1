@@ -23,8 +23,9 @@ program main_prg
 contains
 
 	subroutine setupSim
+		open(file='mark1.xyz',newunit=iou_xyz)
 		!open(file='../scripts/mark1.vel',newunit=iou_xyz)
-		open(file='../scripts/mark1.fij',newunit=iou_xyz)
+		!open(file='../scripts/mark1.fij',newunit=iou_xyz)
 		open(file='mark1.thermo',newunit=iou_thermo)
 		
 		call initialize()
@@ -49,7 +50,7 @@ contains
 			call velocityVerlet(dt)
 			call doBox()
 			
- 			!if(k==N_steps/2) call setThermostat(.false.)
+ 			if(k==N_steps/2) call setThermostat(.false.)
 			
 		end do
 	end subroutine runSim
