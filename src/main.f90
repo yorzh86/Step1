@@ -33,7 +33,7 @@ contains
 		enableLennardJones = .true.
 		call setThermostat(.false.,T0,10.0_wp*dt)
 		call setBarostat(.false.,P0, 5.0E10_wp*dt)
-		call buildSystem(convert(5.40_wp,'A','m'),[2,2,2],T0) !5.26_wp
+		call buildSystem(convert(5.40_wp,'A','m'),[2,2,2],T0) !5.26_wp 0K
 		
 		call doBox()
 		call writeLammpsData('Ar.data')
@@ -80,11 +80,20 @@ contains
 		!write(iou_thermo,'(1I5,6G25.15)') k,convert(t,'s','ps'),temperature(),convert(E(),'J','eV'), &
 		!	& convert(KE(),'J','eV'),convert(PE(),'J','eV'),convert(pressure(),'Pa','bar')
 		
-		write(stdout,'(1I5,100ES15.6)') k, temperature(),convert(E(),'J','eV'), &
+		if (mod(c,50)==0) then
+			write(*,*)
+			write(stdout,'(1X,1A17,1A5, 3F6.2)')"\x1B[96mSystem size:","\x1B[97m", [(convert(box(i), 'm', 'A'), i=1,3)]
+			write(stdout,'(1X,1A21, 1A5, 1I5)') "\x1B[96mNumber of atoms:","\x1B[97m", size(atoms)
+			write(stdout,'(1X,1A29, 1A5, 1I3)') "\x1B[96mAv. number of neighbors:", "\x1B[97m", nint(averageNeighbors())
+			write(*,*)			
+			write (stdout, '(1X, 1A5, 1A4, 1A12, 1A10, 1A11, 2A18, 1A4)') "\x1B[93m", 'k[#]','temperature', &
+				& 'tEnergy','Jx','Jy','Jz',  "\x1B[0m"
+		end if
+		
+		write(stdout,'(1X,1I3,1F11.3,1F13.5,3ES17.6)') k, temperature(),convert(E(),'J','eV'), &
 			& (convert(o(i),'W/m2','eV/ps/A2')/product(box),i=1,3)
 
 		c = c+1
 	end subroutine thermoReport
 
 end program main_prg 
-

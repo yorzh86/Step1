@@ -7,7 +7,7 @@ set(source
 	"src/kinds.f90"
 	"src/main.f90"
 	"src/output.f90"
-	"src/plplotlib.f90"
+	#"src/plplotlib.f90"
 	"src/settings.f90"
 	"src/system.f90"
 	"src/units.f90"
@@ -15,13 +15,13 @@ set(source
 	)
 
 set(CMAKE_Fortran_FLAGS "")
-set(CMAKE_Fortran_FLAGS_DEBUG "-g -Wall -Wtabs -fcheck=all -ffpe-trap=invalid,zero,overflow -fbacktrace -finit-real=snan")
+set(CMAKE_Fortran_FLAGS_DEBUG "-g -Wall -Wtabs -fcheck=all -ffpe-trap=invalid,zero,overflow -fbacktrace -finit-real=snan -fbackslash")
 set(CMAKE_Fortran_FLAGS_RELEASE "-O3 -mtune=native -march=native")
 
-include(FindPkgConfig)
-pkg_search_module(PLPLOT REQUIRED plplot-f95 plplotd-f95)
-include_directories(${PLPLOT_INCLUDE_DIRS})
-link_directories(${PLPLOT_LIBRARY_DIRS})
+#include(FindPkgConfig)
+#pkg_search_module(PLPLOT REQUIRED plplot-f95 plplotd-f95)
+#include_directories(${PLPLOT_INCLUDE_DIRS})
+#link_directories(${PLPLOT_LIBRARY_DIRS})
 
 add_custom_target(symlink
 	COMMAND ${CMAKE_COMMAND} -E create_symlink "${CMAKE_SOURCE_DIR}/scripts" "${CMAKE_BINARY_DIR}/scripts"
@@ -29,8 +29,8 @@ add_custom_target(symlink
 	WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
 
 add_executable(main ${source})
-target_link_libraries(main ${PLPLOT_LIBRARIES})
-add_dependencies(main symlink)
+#target_link_libraries(main ${PLPLOT_LIBRARIES})
+#add_dependencies(main symlink)
 
 set(FORD_EXECUTABLE "ford")
 add_custom_target(ford

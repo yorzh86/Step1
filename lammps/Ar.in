@@ -6,7 +6,7 @@ include          ../build/Ar.vars
 pair_style       lj/cut ${cutoff}
 neighbor         ${skin} bin
 neigh_modify     every ${skip_neighbor} delay 0
-read_data		 ../build/Ar.data
+read_data	 ../build/Ar.data
 
 timestep         ${dt}
 
