@@ -58,3 +58,4 @@ dump		XYZ all custom ${skip_dump} lammps.all id x y z vx vy vz fx fy fz
 dump_modify     XYZ element Ar
 
 run              ${N_steps}
+#run_style		verlet/split

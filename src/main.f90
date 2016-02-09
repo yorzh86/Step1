@@ -24,16 +24,15 @@ contains
 
 	subroutine setupSim
 		open(file='mark1.xyz',newunit=iou_xyz)
-		!open(file='../scripts/mark1.vel',newunit=iou_xyz)
-		!open(file='../scripts/mark1.fij',newunit=iou_xyz)
 		open(file='mark1.thermo',newunit=iou_thermo)
 		
-		call initialize()
-		
 		enableLennardJones = .true.
+		
+		call initialize_parameters()
+		!! Initialize E0, S0, cutoff, N-steps, etc (settings.f90)
 		call setThermostat(.false.,T0,10.0_wp*dt)
 		call setBarostat(.false.,P0, 5.0E10_wp*dt)
-		call buildSystem(convert(5.40_wp,'A','m'),[2,2,2],T0) !5.26_wp 0K
+		call buildSystem(convert(lattice_const,'A','m'),[5,5,5],T0)
 		
 		call doBox()
 		call writeLammpsData('Ar.data')
@@ -46,12 +45,10 @@ contains
 			if(mod(k,skip_thermo)==0) call thermoReport(k)
 			if(mod(k,skip_dump  )==0) call writeStepXYZ(iou_xyz)
 			if(mod(k,skip_neighbor)==0) call updateAllNeighbors()
-			
 			call velocityVerlet(dt)
 			call doBox()
-			
  			if(k==N_steps/2) call setThermostat(.false.)
-			
+
 		end do
 	end subroutine runSim
 
@@ -63,22 +60,11 @@ contains
 	subroutine thermoReport(k)
 		integer,intent(in)::k
 		integer,save::c = 0
-		character(128)::buf
+		!character(128)::buf
 		real(wp), dimension(3)::o
-		integer::i
+		integer::i	
 		
 		o = heatflux()
-		
-		!if(mod(c,20)==0) then
-		!	write(buf,'(1A5,6A12)') 'k [#]','t [ps]','T [K]','	TE [eV]','	KE [eV]','PE [eV]','P [bar]'
-		!	write(stdout,'(2A,1I4)') colorize(trim(buf),[5,5,0]),' Nc = ',nint(averageNeighbors())
-		!	if(c==0) write(iou_thermo,'(1A)') '#'//trim(buf)
-		!end if
-		!write(stdout,*) k,convert(t,'s','ps'),temperature(),convert(E(),'J','eV'), &
-		!	& convert(KE(),'J','eV'),convert(PE(),'J','eV'),convert(pressure(),'Pa','bar'), heatflux(),convert(mean(box),'m','A')
-		!
-		!write(iou_thermo,'(1I5,6G25.15)') k,convert(t,'s','ps'),temperature(),convert(E(),'J','eV'), &
-		!	& convert(KE(),'J','eV'),convert(PE(),'J','eV'),convert(pressure(),'Pa','bar')
 		
 		if (mod(c,50)==0) then
 			write(*,*)
@@ -92,7 +78,7 @@ contains
 		
 		write(stdout,'(1X,1I3,1F11.3,1F13.5,3ES17.6)') k, temperature(),convert(E(),'J','eV'), &
 			& (convert(o(i),'W/m2','eV/ps/A2')/product(box),i=1,3)
-
+		
 		c = c+1
 	end subroutine thermoReport
 

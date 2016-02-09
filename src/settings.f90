@@ -49,6 +49,7 @@ module settings_mod
 		!! Number of steps between xyz file dumps
 	integer::skip_neighbor
 		!! Number of steps between neighbor list rebuilds
+	real(wp)::lattice_const
 	
 	real(wp)::T0
 		!! Target temperature [K]
@@ -59,14 +60,14 @@ module settings_mod
 	
 contains
 
-	subroutine initialize()
+	subroutine initialize_parameters()
 		real(wp)::E0,S0
 		
 		!= Potential =!
 		
 		E0 = kB*convert(125.7_wp,'K','K')
 		S0 = convert(3.345_wp,'A','m')
-		lj%cutoff = 3.0_wp*S0 !3.0
+		lj%cutoff = 2.4_wp*S0 !3.0
 		lj%skin = 0.5_wp*S0	!0.5
 		
 		lj%coeffs = [E0,S0]
@@ -76,6 +77,7 @@ contains
 		skip_thermo   = 1
 		skip_dump     = 1
 		skip_neighbor = 10 !20
+		lattice_const = 5.40_wp
 		
 		T0 = convert(45.0_wp,'K','K')
 		P0 = convert(1.0_wp,'bar','Pa')
@@ -86,7 +88,7 @@ contains
 		
 		!= Barostat =!
 		barostat%tau = convert(1000.0_wp*dt,'s','ps')
-	end subroutine initialize
+	end subroutine initialize_parameters
 
 	subroutine writeLammpsVars(fn)
 		character(*),intent(in)::fn
