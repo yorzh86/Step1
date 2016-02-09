@@ -23,6 +23,8 @@ module system_mod
 			!! Atomic velocity
 		real(wp),dimension(3)::a
 			!! Atomic acceleration
+		real(wp),dimension(3)::f
+			!! Atomic force
 		integer::t
 			!! Atom type
 		integer,dimension(:),allocatable::neighbors
@@ -43,13 +45,11 @@ module system_mod
 	
 	real(wp)::Teta = 0.0_wp
 		!! Thermostat DOF
-	real(wp)::Pepsilon = 0.01_wp
+	real(wp)::Pepsilon = 0.0_wp !was used as 0.01
 		!! Barostat DOF
 	real(wp),dimension(3)::box
 		!! Bounds of the simulation box
-	real(wp)::sys_vol
-		!! Volume of the system
-	
+		
 	integer::ts
 		!! Time step counter
 	real(wp)::t
@@ -73,7 +73,6 @@ contains
 		integer::i,j,k,l,idx
 		
 		box = a*real(N,wp)
-		sys_vol = (a*real(N(1)))**3
 		
 		allocate(types(1))
 		allocate(atoms(size(rcell,2)*product(N)))
@@ -114,6 +113,7 @@ contains
 		
 		do k=1,size(atoms)
 			atoms(k)%a = -delV(k)/types(atoms(k)%t)%m
+			atoms(k)%f = -delV(k)
 		end do
 		
 		ts = 0
@@ -191,11 +191,19 @@ contains
 				o = o+( 0.5_wp ) * ( 4.0_wp*E0*l**6*(l**6-1.0_wp) )
 					!! Only include half of the bond energy for each atom in the bond
 			end do
+			!do j=1,size(atoms)
+			!	if(j==i) cycle
+			!	d = deltaR(atoms(j),atoms(i))
+			!	l = S0/norm2(d)
+			!	o = o+(0.5_wp) * 4.0_wp*E0*(l**12.0_wp-l**6.0_wp)
+			!end do
+			
 		end subroutine doLennardJones
 	
 	end function V
 
 	pure function delV(i) result(o)
+	!! Total force on atom
 		integer,intent(in)::i
 		real(wp),dimension(3)::o
 		real(wp),dimension(3)::r
@@ -318,30 +326,64 @@ contains
 		o = V(i)
 	end function PEi
 
+	pure function Si(i) result(o)
+		integer,intent(in)::i
+		real(wp),dimension(3,3)::o
+		
+		real(wp),dimension(3)::v,r,F
+		integer::j,aj
+		
+		v = atoms(i)%v
+		o = -types(atoms(i)%t)%m*matmul(asCol(v),asRow(v))
+		
+		do j=1,size(atoms(i)%neighbors)
+			aj = atoms(i)%neighbors(j)
+			r  = deltaR(atoms(i),atoms(aj))
+			if( norm2(r)>lj%cutoff ) cycle
+			F = delVij(i,aj,r)
+			
+			o = o-0.5_wp*(matmul(asCol(r),asRow(F))+matmul(asCol(F),asRow(r)))
+		end do
+	
+	contains
+	
+		pure function asCol(v) result(o)
+			real(wp),dimension(:),intent(in)::v
+			real(wp),dimension(size(v),1)::o
+			
+			o(:,1) = v(:)
+		end function asCol
+
+		pure function asRow(v) result(o)
+			real(wp),dimension(:),intent(in)::v
+			real(wp),dimension(1,size(v))::o
+			
+			o(1,:) = v(:)
+		end function asRow
+		
+	end function Si
+
 	pure function heatflux() result(o)
 		real(wp),dimension(3)::o
 		
-		real(wp),dimension(3)::fij,vj, vi, rij
-		integer::i,j
+		integer::i,j,aj
+		real(wp),dimension(3)::Fij,rij
 		
 		o = 0.0_wp
-		
+
+! 		do i=1,size(atoms)
+! 			o = o+ ( Ei(i)*atoms(i)%v-matmul(Si(i),atoms(i)%v) )
+! 		end do
+
 		do i=1,size(atoms)
-			o = o + Ei(i)*atoms(i)%v
-		end do
-		
-		!do j=1,size(atoms)
-		!	do i=1,j-1
-		!		rij = deltaR(atoms(i),atoms(j))
-		!		fij = delVij(i,j,rij)
-		!		vj  = atoms(j)%v
-		!		o = o+dot_product(fij,vj)*rij
-		!	end do
-		!end do
-		
-		do i=1, size(atoms)
-			vi = atoms(i)%v
-			o = o - virial()*vi
+			o = o+Ei(i)*atoms(i)%v
+			do j=1,size(atoms(i)%neighbors)
+				aj = atoms(i)%neighbors(j)
+				rij  = deltaR(atoms(i),atoms(aj))
+				if( norm2(rij)>lj%cutoff ) cycle
+				Fij = delVij(i,aj,rij)
+				o = o+dot_product(Fij,atoms(i)%v)*rij
+			end do
 		end do
 	end function heatflux
 

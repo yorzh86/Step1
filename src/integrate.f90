@@ -71,6 +71,7 @@ contains
 		
 		do k=1,size(atoms)
 			atoms(k)%a = -delV(k)/types(atoms(k)%t)%m-(Teta+Pepsilon)*atoms(k)%v
+			atoms(k)%f = -delV(k)
 		end do
 		
 		do k=1,size(atoms)

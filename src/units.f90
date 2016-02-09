@@ -5,9 +5,9 @@ module units_mod
 	implicit none
 	private
 	
-	integer,parameter::Nu = 23
+	integer,parameter::Nu = 29
 	
-	character(5),dimension(Nu),parameter::names = [ character(5):: &
+	character(16),dimension(Nu),parameter::names = [ character(16):: &
 		& 'm','mm','um','nm','pm','fm','A', &
 		& 's','ms','us','ns','ps','fs', &
 		& 'J','eV', &
@@ -15,7 +15,9 @@ module units_mod
 		& 'K', 'C', &
 		& 'Pa', 'bar', &
 		& 'm/s', 'A/ps', &
-		& 'W/m2', 'eV/ps/A2' &
+		& 'W/m2', 'eV/ps/A2', &
+		& 'm/s2', 'A/ps2', &
+		& 'N', 'eV/A' &
 		& ]
 	
 	logical::isSetup = .false.
@@ -81,7 +83,11 @@ contains
 		
 		cf( getIndex('m/s' ) , getIndex('A/ps' ) ) = 1.0E-2_wp
 		
-		cf( getIndex('W/m2') , getIndex('eV/ps/A2') )=6.24150636309E-14
+		cf( getIndex('W/m2') , getIndex('eV/ps/A2') ) = 6.24150636309E-14
+		
+		cf( getIndex('m/s2') , getIndex('A/ps2') ) = 1.0E-14_wp
+		
+		cf( getIndex('N') , getIndex('eV/A') ) = 6.24150636309E8_wp
 		
 		! Assert inverse conversions
 		do j=1,Nu
