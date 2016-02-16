@@ -6,7 +6,7 @@ include          ../build/Ar.vars
 pair_style       lj/cut ${cutoff}
 neighbor         ${skin} bin
 neigh_modify     every ${skip_neighbor} delay 0
-read_data	 ../build/Ar.data
+read_data	 	../build/Ar.data
 
 timestep         ${dt}
 
@@ -34,9 +34,9 @@ thermo           ${skip_thermo}
 #thermo_style     custom step v_t c_T etotal ke pe c_P
 thermo_style     custom step temp etotal v_Jx v_Jy v_Jz
 
-thermo_modify	 format 4 %14.13g
-thermo_modify	 format 5 %14.13g
-thermo_modify	 format 6 %14.13g
+thermo_modify	 format 4 %17.6g
+thermo_modify	 format 5 %17.6g
+thermo_modify	 format 6 %17.6g
 
 variable         T  equal c_T
 variable         TE equal etotal
