@@ -58,9 +58,9 @@ contains
 			
 		do k=1, size(atoms)
 			read(1, '(1I4, 3F5.1, 6F13.9)') atoms(k)%atom_id, posit, velocity, force
-			atoms(k)%r = posit/1.0E10_wp
-			atoms(k)%v = velocity/1.0E-2_wp
-			atoms(k)%f = force/6.24150636309E8_wp
+			atoms(k)%r = posit!/1.0E10_wp
+			atoms(k)%v = velocity!/1.0E-2_wp
+			atoms(k)%f = force!/6.24150636309E8_wp
 			atoms(k)%a = -delV(k)/types(atoms(k)%t)%m
 		end do
 		

@@ -61,6 +61,7 @@ contains
 
 	subroutine buildSystem(a,N,Ti)
 		implicit none
+		real(wp), dimension(3)::posit, velocity, force
 		real(wp),intent(in)::a
 			!! Lattice constant
 		integer,dimension(3),intent(in)::N
@@ -116,6 +117,18 @@ contains
  			atoms(k)%a = -delV(k)/types(atoms(k)%t)%m
  			!atoms(k)%f = -delV(k)
  		end do
+ 		
+ 		do k=1, 9
+			read(1,*)
+		end do
+			
+		do k=1, size(atoms)
+			read(1, '(1I4, 3F5.1, 6F13.9)') atoms(k)%atom_id, posit, velocity, force
+			atoms(k)%r = posit!/1.0E10_wp
+			atoms(k)%v = velocity!/1.0E-2_wp
+			atoms(k)%f = force!/6.24150636309E8_wp
+			atoms(k)%a = -delV(k)/types(atoms(k)%t)%m
+		end do
  		ts = 0.0
  		t  = 0.0_wp
 	end subroutine buildSystem
