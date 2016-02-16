@@ -28,7 +28,7 @@ contains
 		real(wp), dimension(3)::posit, velocity, force
 		open(file='mark1.xyz',newunit=iou_xyz)
 		open(file='mark1.thermo',newunit=iou_thermo)
-		open(1, file='lammps.all', status= 'old')
+		open(1, file='../lammps/lammps.all', status= 'old')
 		
 		
 		
@@ -39,7 +39,7 @@ contains
 		call setThermostat(.false.,T0,10.0_wp*dt)
 		call setBarostat(.false.,P0, 5.0E10_wp*dt)
 		call buildSystem(convert(lattice_const,'A','m'),[2,2,2],T0)
-
+		rewind(1)
 		call doBox()
 		call writeLammpsData('Ar.data')
 		call writeLammpsVars('Ar.vars')
@@ -48,12 +48,13 @@ contains
 		
 	subroutine runSim
 		integer::k
-		
+		open(1, file='../lammps/lammps.all', status= 'old')
 		do k=0,N_steps
+			call integrateLammps(dt)
 			if(mod(k,skip_thermo)==0) call thermoReport(k)
 			if(mod(k,skip_dump  )==0) call writeStepXYZ(iou_xyz)
 			if(mod(k,skip_neighbor)==0) call updateAllNeighbors()
-			call integrateLammps(dt)
+			
 			!call velocityVerlet(dt)
 			call doBox()
  			if(k==N_steps/2) call setThermostat(.false.)

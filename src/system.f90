@@ -129,7 +129,7 @@ contains
 			atoms(k)%f = force!/6.24150636309E8_wp
 			atoms(k)%a = -delV(k)/types(atoms(k)%t)%m
 		end do
- 		ts = 0.0
+ 		ts = -1
  		t  = 0.0_wp
 	end subroutine buildSystem
 
