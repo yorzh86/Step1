@@ -124,9 +124,9 @@ contains
 			
 		do k=1, size(atoms)
 			read(1, '(1I4, 3F5.1, 6F13.9)') atoms(k)%atom_id, posit, velocity, force
-			atoms(k)%r = posit!/1.0E10_wp
-			atoms(k)%v = velocity!/1.0E-2_wp
-			atoms(k)%f = force!/6.24150636309E8_wp
+			atoms(k)%r = posit/1.0E10_wp
+			atoms(k)%v = velocity/1.0E-2_wp
+			atoms(k)%f = force/6.24150636309E8_wp
 			atoms(k)%a = -delV(k)/types(atoms(k)%t)%m
 		end do
  		ts = -1
@@ -354,8 +354,8 @@ contains
 			aj = atoms(i)%neighbors(j)
 			r  = deltaR(atoms(i),atoms(aj))
 			if( norm2(r)>lj%cutoff ) cycle
-			F = delVij(i,aj,r)
-			
+			!F = delVij(i,aj,r)
+			F = atoms(i)%f
 			o = o-0.5_wp*(matmul(asCol(r),asRow(F))+matmul(asCol(F),asRow(r)))
 		end do
 	
