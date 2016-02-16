@@ -32,11 +32,11 @@ variable        Jz equal c_flux[3]/vol
 
 thermo           ${skip_thermo}
 #thermo_style     custom step v_t c_T etotal ke pe c_P
-thermo_style     custom step temp etotal v_Jx v_Jy v_Jz
+thermo_style     custom step temp ke pe etotal v_Jx v_Jy v_Jz fnorm
 
-thermo_modify	 format 4 %17.6g
-thermo_modify	 format 5 %17.6g
 thermo_modify	 format 6 %17.6g
+thermo_modify	 format 7 %17.6g
+thermo_modify	 format 8 %17.6g
 
 variable         T  equal c_T
 variable         TE equal etotal

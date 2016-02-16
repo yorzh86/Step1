@@ -85,11 +85,15 @@ contains
 !			write(*,*)			
 !			write (stdout, '(1X, 1A5, 1A4, 1A8, 1A10, 1A11, 2A18, 1A4)') "\x1B[93m", 'k[#]','temperature', &
 !				& 'tEnergy', 'Jx','Jy','Jz',  "\x1B[0m"
-		write(*, '(1X, 1A3, 1A10, 4A15)') 'k#', 'Temp', 'TotEng', 'Jx', 'Jy', 'Jz'
+		write(*, '(1X, 1A5, 1A10, 6A13)') 'Step', 'Temp', 'KE()', 'PE()', 'TotEng', 'Jx', 'Jy', 'Jz'
 		end if
 
-		write(stdout,'(1X,1I3,1F11.3,1F13.6,3ES17.6)') k, temperature(), convert(E(),'J','eV'), &
-			& (convert(o(i),'W/m2','eV/ps/A2')/product(box),i=1,3)
+		write(stdout,'(1X,1I3,1F11.3,3F13.6,3ES17.6, 1F13.6)') k, temperature(), &
+			& convert(KE(),'J','eV'), &
+			& convert(PE(),'J','eV'), &
+			& convert(E(),'J','eV'),  &
+			& (convert(o(i),'W/m2','eV/ps/A2')/product(box),i=1,3), &
+			& convert(sumdelV(),'N','eV/A')
 		
 		!write(stdout,'(1X,1I3,1F11.3,3F13.5,3ES17.6)') k, temperature(), E(), KE(), PE(), o(i)/product(box)
 		

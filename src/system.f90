@@ -228,10 +228,20 @@ contains
 			aj = atoms(i)%neighbors(j)
 			r  = deltaR(atoms(i),atoms(aj))
 			if( norm2(r)>lj%cutoff ) cycle
-			!o = o+delVij(i,aj,r)
-			o = o + atoms(j)%f
+			o = o+delVij(i,aj,r)
+			!o = o + atoms(i)%f
 		end do
 	end function delV
+	
+	pure function sumdelV() result(o)
+		real(wp)::o
+		integer::k
+		
+		o = 0.0_wp
+		do k=1,size(atoms)
+			o = o+norm2(delV(k))
+		end do
+	end function sumdelV
 
 	pure function delVij(i,j,d) result (o)
 		integer,intent(in)::i,j
@@ -253,7 +263,8 @@ contains
 			S0 = lj%coeffs(2)
 			
 			l = S0/norm2(d)
-			o = o+24.0_wp*E0/sum(d*d)*(l**6)*(1.0_wp-2.0_wp*l**6)*d
+			!o = o+24.0_wp*E0/sum(d*d)*(l**6)*(1.0_wp-2.0_wp*l**6)*d
+			o = atoms(i)%f
 		end subroutine doLennardJones
 		
 	end function delVij
@@ -354,8 +365,8 @@ contains
 			aj = atoms(i)%neighbors(j)
 			r  = deltaR(atoms(i),atoms(aj))
 			if( norm2(r)>lj%cutoff ) cycle
-			!F = delVij(i,aj,r)
-			F = atoms(i)%f
+			F = delVij(i,aj,r)
+			!F = atoms(i)%f
 			o = o-0.5_wp*(matmul(asCol(r),asRow(F))+matmul(asCol(F),asRow(r)))
 		end do
 	
@@ -395,8 +406,8 @@ contains
 				aj = atoms(i)%neighbors(j)
 				rij  = deltaR(atoms(i),atoms(aj))
 				if( norm2(rij)>lj%cutoff ) cycle
-				!Fij = delVij(i,aj,rij)
-				Fij = atoms(i)%f
+				Fij = delVij(i,aj,rij)
+				!Fij = atoms(i)%f
 				o = o+dot_product(Fij,atoms(i)%v)*rij
 			end do
 		end do

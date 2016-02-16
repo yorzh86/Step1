@@ -7,7 +7,7 @@ module settings_mod
 	!= Universal Constants =!
 	!=======================!
 	
-	real(wp),parameter::kB = 1.3806488E-23_wp
+	real(wp),parameter::kB = 1.3806504E-23_wp!1.3806488E-23_wp
 		!! Boltzmann constant in SI units
 	
 	!=========!
@@ -67,7 +67,7 @@ contains
 		
 		E0 = kB*convert(125.7_wp,'K','K')
 		S0 = convert(3.345_wp,'A','m')
-		lj%cutoff = 2.4_wp*S0 !3.0
+		lj%cutoff = 3.0_wp*S0 !3.0
 		lj%skin = 0.5_wp*S0	!0.5
 		
 		lj%coeffs = [E0,S0]
