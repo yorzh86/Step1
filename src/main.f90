@@ -9,6 +9,7 @@ program main_prg
 	use system_mod
 	use integrate_mod
 	use output_mod
+	use lmpIntegrator_mod
 	implicit none
 	
 	integer::iou_xyz
@@ -23,8 +24,13 @@ program main_prg
 contains
 
 	subroutine setupSim
+		integer::i, j, k, atom_id
+		real(wp), dimension(3)::posit, velocity, force
 		open(file='mark1.xyz',newunit=iou_xyz)
 		open(file='mark1.thermo',newunit=iou_thermo)
+		open(1, file='../lammps/lammps.all', status= 'old')
+		
+		
 		
 		enableLennardJones = .true.
 		
@@ -32,20 +38,30 @@ contains
 		!! Initialize E0, S0, cutoff, N-steps, etc (settings.f90)
 		call setThermostat(.false.,T0,10.0_wp*dt)
 		call setBarostat(.false.,P0, 5.0E10_wp*dt)
-		call buildSystem(convert(lattice_const,'A','m'),[5,5,5],T0)
-		
+		call buildSystem(convert(lattice_const,'A','m'),[2,2,2],T0)
+		!do k=1, size(atoms)
+		!	read(1, '(1I4)') atoms(k)%atom_id
+		!	atoms(k)%r = posit/1.0E10_wp
+		!	atoms(k)%v = velocity/1.0E-2_wp
+		!	atoms(k)%f = force/6.24150636309E8_wp
+		!	atoms(k)%a = -delV(k)/types(atoms(k)%t)%m
+		!end do
 		call doBox()
 		call writeLammpsData('Ar.data')
 		call writeLammpsVars('Ar.vars')
+		
 	end subroutine setupSim
-
+		
 	subroutine runSim
 		integer::k
+		
 		do k=0,N_steps
+			call integrateLammps(dt)
 			if(mod(k,skip_thermo)==0) call thermoReport(k)
 			if(mod(k,skip_dump  )==0) call writeStepXYZ(iou_xyz)
 			if(mod(k,skip_neighbor)==0) call updateAllNeighbors()
-			call velocityVerlet(dt)
+			
+			!call velocityVerlet(dt)
 			call doBox()
  			if(k==N_steps/2) call setThermostat(.false.)
 
@@ -55,6 +71,7 @@ contains
 	subroutine endSim
 		close(iou_xyz)
 		close(iou_thermo)
+		close(1)
 	end subroutine endSim
 
 	subroutine thermoReport(k)
@@ -76,8 +93,10 @@ contains
 				& 'tEnergy','Jx','Jy','Jz',  "\x1B[0m"
 		end if
 		
-		write(stdout,'(1X,1I3,1F11.3,1F13.5,3ES17.6)') k, temperature(),convert(E(),'J','eV'), &
+		write(stdout,'(1X,1I3,1F11.3,1F13.5,3ES17.6)') k, temperature(), convert(E(),'J','eV'), &
 			& (convert(o(i),'W/m2','eV/ps/A2')/product(box),i=1,3)
+		
+		!write(stdout,'(1X,1I3,1F11.3,3F13.5,3ES17.6)') k, temperature(), E(), KE(), PE(), o(i)/product(box)
 		
 		c = c+1
 	end subroutine thermoReport

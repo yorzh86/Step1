@@ -25,11 +25,13 @@ module system_mod
 			!! Atomic acceleration
 		real(wp),dimension(3)::f
 			!! Atomic force
+		integer::atom_id
 		integer::t
 			!! Atom type
 		integer,dimension(:),allocatable::neighbors
 			!! Nearest neighbors
 	end type
+	
 	
 	!===============!
 	!= Module Data =!
@@ -81,43 +83,41 @@ contains
 		types%atom_name = 'Ar'
 		atoms(:)%t = 1
 		
-		idx = 1
-		do k=1,N(3)
-			do j=1,N(2)
-				do i=1,N(1)
-				
-					do l=1,size(rcell,2)
-						atoms(idx)%r = a*(real([i,j,k]-1,wp)+rcell(1:3,l))
-						idx = idx+1
-					end do
-					
-				end do
-			end do
-		end do
-		
-		do k=1,size(atoms)
-			!! Create random direction of velocities
-			call random_number(atoms(k)%v)
-			atoms(k)%v = 2.0_wp*atoms(k)%v-1.0_wp
-			do while(norm2(atoms(k)%v)>1.0_wp .and. norm2(atoms(k)%v)<0.1_wp)
-				call random_number(atoms(k)%v)
-				atoms(k)%v = 2.0_wp*atoms(k)%v-1.0_wp
-			end do
-			atoms(k)%v = atoms(k)%v/norm2(atoms(k)%v)
-			!! Set velocity magnitude
-			atoms(k)%v = atoms(k)%v*sqrt(2.0_wp*kB*Ti/types(atoms(k)%t)%m)*abs(randomNormal()+1.0_wp)
-		end do
-		forall(k=1:3) atoms(:)%v(k) = atoms(:)%v(k)-sum(atoms(:)%v(k))/real(size(atoms),wp)
-		
-		call updateAllNeighbors()
-		
-		do k=1,size(atoms)
-			atoms(k)%a = -delV(k)/types(atoms(k)%t)%m
-			atoms(k)%f = -delV(k)
-		end do
-		
-		ts = 0
-		t  = 0.0_wp
+! 		idx = 1
+! 		do k=1,N(3)
+! 			do j=1,N(2)
+! 				do i=1,N(1)
+! 					do l=1,size(rcell,2)
+! 						atoms(idx)%r = a*(real([i,j,k]-1,wp)+rcell(1:3,l))
+! 						idx = idx+1
+! 					end do
+ 					
+! 				end do
+! 			end do
+! 		end do
+ 		
+! 		do k=1,size(atoms)
+! 			!! Create random direction of velocities
+! 			call random_number(atoms(k)%v)
+! 			atoms(k)%v = 2.0_wp*atoms(k)%v-1.0_wp
+! 			do while(norm2(atoms(k)%v)>1.0_wp .and. norm2(atoms(k)%v)<0.1_wp)
+! 				call random_number(atoms(k)%v)
+! 				atoms(k)%v = 2.0_wp*atoms(k)%v-1.0_wp
+! 			end do
+! 			atoms(k)%v = atoms(k)%v/norm2(atoms(k)%v)
+! 			!! Set velocity magnitude
+! 			atoms(k)%v = atoms(k)%v*sqrt(2.0_wp*kB*Ti/types(atoms(k)%t)%m)*abs(randomNormal()+1.0_wp)
+! 		end do
+! 		forall(k=1:3) atoms(:)%v(k) = atoms(:)%v(k)-sum(atoms(:)%v(k))/real(size(atoms),wp)
+ 		
+! 		call updateAllNeighbors()
+ 		
+! 		do k=1,size(atoms)
+! 			atoms(k)%a = -delV(k)/types(atoms(k)%t)%m
+! 			!atoms(k)%f = -delV(k)
+! 		end do
+ 		ts = -1
+ 		t  = 0.0_wp
 	end subroutine buildSystem
 
 	subroutine writeLammpsData(fn)
@@ -215,7 +215,8 @@ contains
 			aj = atoms(i)%neighbors(j)
 			r  = deltaR(atoms(i),atoms(aj))
 			if( norm2(r)>lj%cutoff ) cycle
-			o = o+delVij(i,aj,r)
+			!o = o+delVij(i,aj,r)
+			o = o + atoms(j)%f
 		end do
 	end function delV
 

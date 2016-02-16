@@ -34,9 +34,9 @@ thermo           ${skip_thermo}
 #thermo_style     custom step v_t c_T etotal ke pe c_P
 thermo_style     custom step temp etotal v_Jx v_Jy v_Jz
 
-thermo_modify	 format 4 %16.15g
-thermo_modify	 format 5 %16.15g
-thermo_modify	 format 6 %16.15g
+thermo_modify	 format 4 %14.13g
+thermo_modify	 format 5 %14.13g
+thermo_modify	 format 6 %14.13g
 
 variable         T  equal c_T
 variable         TE equal etotal
@@ -51,11 +51,13 @@ fix              PRINT all print ${skip_thermo} "${s} ${t} ${T} ${TE} ${KE} ${PE
 #fix              NVT all nvt temp ${T0} ${T0} ${dt_nh} tchain 1
 fix              NVE all nve
 
-dump		XYZ all custom ${skip_dump} lammps.all id x y z vx vy vz fx fy fz
+dump			XYZ all custom ${skip_dump} lammps.all id x y z vx vy vz fx fy fz
+dump_modify		XYZ format "%04d %4.1f %4.1f %4.1f %12.9f %12.9f %12.9f %12.9f %12.9f %12.9f"
+
 #dump           XYZ all xyz ${skip_dump} lammps.xyz
-#dump 		XYZ all custom 	${skip_dump} ../scripts/lammps.vel vx vy vz
-#dump 		XYZ all custom 	${skip_dump} ../scripts/lammps.fij fx fy fz
-dump_modify     XYZ element Ar
+#dump 			XYZ all custom 	${skip_dump} ../scripts/lammps.vel vx vy vz
+#dump 			XYZ all custom 	${skip_dump} ../scripts/lammps.fij fx fy fz
+#dump_modify    XYZ element Ar
 
 run              ${N_steps}
 #run_style		verlet/split
