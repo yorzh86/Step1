@@ -233,15 +233,17 @@ contains
 		end do
 	end function delV
 	
-	pure function sumdelV() result(o)
+	pure function fnorm() result(o)
 		real(wp)::o
 		integer::k
 		
 		o = 0.0_wp
 		do k=1,size(atoms)
-			o = o+norm2(delV(k))
+			o = o + norm2(atoms(k)%f)
 		end do
-	end function sumdelV
+	end function fnorm
+	
+
 
 	pure function delVij(i,j,d) result (o)
 		integer,intent(in)::i,j

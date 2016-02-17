@@ -73,7 +73,7 @@ contains
 		integer,save::c = 0
 		!character(128)::buf
 		real(wp), dimension(3)::o
-		integer::i	
+		integer::i,j
 		
 		o = heatflux()
 		
@@ -85,16 +85,26 @@ contains
 !			write(*,*)			
 !			write (stdout, '(1X, 1A5, 1A4, 1A8, 1A10, 1A11, 2A18, 1A4)') "\x1B[93m", 'k[#]','temperature', &
 !				& 'tEnergy', 'Jx','Jy','Jz',  "\x1B[0m"
-		write(*, '(1X, 1A5, 1A10, 6A13)') 'Step', 'Temp', 'KE()', 'PE()', 'TotEng', 'Jx', 'Jy', 'Jz'
+		!write(*, '(1X, 1A5, 1A10, 6A13)') 'Step', 'Temp', 'KE()', 'PE()', 'TotEng', 'Jx', 'Jy', 'Jz'
 		end if
 
-		write(stdout,'(1X,1I3,1F11.3,3F13.6,3ES17.6, 1F13.6)') k, temperature(), &
-			& convert(KE(),'J','eV'), &
-			& convert(PE(),'J','eV'), &
-			& convert(E(),'J','eV'),  &
-			& (convert(o(i),'W/m2','eV/ps/A2')/product(box),i=1,3), &
-			& convert(sumdelV(),'N','eV/A')
+!		write(stdout,'(1X,1I3,1F11.3,3F13.6,3ES17.6, 1F13.6)') k, temperature(), &
+!			& convert(KE(),'J','eV'), &
+!			& convert(PE(),'J','eV'), &
+!			& convert(E(),'J','eV'),  &
+!			& (convert(o(i),'W/m2','eV/ps/A2')/product(box),i=1,3), &
+!			& convert(fnorm(),'N','eV/A')
 		
+		write(*,*)
+		write(*, '(1X, 2A5, 3A15, 2A15)') 'Step', 'id', 'Fx', 'Fy', 'Fz', 'NORM2(Fatom)', 'SUM(NORM2(Fatom))'	
+		
+		do i=1, size(atoms)
+			write(*,'(1X, 2I5, 3F15.9, 2F14.9 )')k, atoms(i)%atom_id, &
+				& [(convert(atoms(i)%f(j), 'N', 'eV/A'), j=1,3)], &
+				& convert(norm2(atoms(i)%f),'N', 'eV/A'), &
+				& convert(fnorm(),'N','eV/A')
+		end do
+					
 		!write(stdout,'(1X,1I3,1F11.3,3F13.5,3ES17.6)') k, temperature(), E(), KE(), PE(), o(i)/product(box)
 		
 		c = c+1
