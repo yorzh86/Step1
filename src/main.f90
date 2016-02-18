@@ -30,7 +30,7 @@ contains
 		real(wp), dimension(3)::posit, velocity, force
 		open(file='mark1.xyz',newunit=iou_xyz)
 		open(file='mark1.thermo',newunit=iou_thermo)
-		open(file='../lammps/lammps.all', status= 'old', unit= iou_lammps)
+		!open(file='../lammps/lammps.all', status= 'old', unit= iou_lammps)
 		
 		
 		
@@ -41,7 +41,7 @@ contains
 		call setThermostat(.false.,T0,10.0_wp*dt)
 		call setBarostat(.false.,P0, 5.0E10_wp*dt)
 		call buildSystem(convert(lattice_const,'A','m'),[2,2,2],T0)
-		rewind(iou_lammps)
+		!rewind(iou_lammps)
 		call doBox()
 		call writeLammpsData('Ar.data')
 		call writeLammpsVars('Ar.vars')
@@ -50,7 +50,6 @@ contains
 		
 	subroutine runSim
 		integer::k
-		open(iou_lammps, file='../lammps/lammps.all', status= 'old')
 		do k=0,N_steps
 			!call integrateLammps(dt)
 			if(mod(k,skip_thermo)==0) call thermoReport(k)
@@ -67,7 +66,7 @@ contains
 	subroutine endSim
 		close(iou_xyz)
 		close(iou_thermo)
-		close(iou_lammps)
+		!close(iou_lammps)
 	end subroutine endSim
 
 	subroutine thermoReport(k)
@@ -98,7 +97,7 @@ contains
 			& convert(fnorm(),'N','eV/A')
 		
 !		write(*,*)
-!		write(*, '(1X, 2A5, 3A15, 2A15)') 'Step', 'id', 'Fx', 'Fy', 'Fz', 'NORM2(Fatom)', 'NORM2(Fall)'	
+!		write(*, '(1X, 2A5, 3A15, 2A15)') 'Step', 'id', 'Fx', 'Fy', 'Fz', 'NORM2(Fatom)', 'NORM2(Fall)'
 !				!!======= CHANGE NUMBER OF N_STEPS========!!		
 !		do i=1, size(atoms)
 !			write(*,'(1X, 2I5, 3F15.9, 2F14.9 )')k, atoms(i)%atom_id, &
