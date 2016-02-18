@@ -40,7 +40,7 @@ contains
 		!! Initialize E0, S0, cutoff, N-steps, etc (settings.f90)
 		call setThermostat(.false.,T0,10.0_wp*dt)
 		call setBarostat(.false.,P0, 5.0E10_wp*dt)
-		call buildSystem(convert(lattice_const,'A','m'),[2,2,2],T0)
+		call buildSystem(convert(lattice_const,'A','m'),[5,5,5],T0)
 		!rewind(iou_lammps)
 		call doBox()
 		call writeLammpsData('Ar.data')
