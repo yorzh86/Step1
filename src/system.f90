@@ -59,6 +59,54 @@ module system_mod
 	
 contains
 
+	subroutine SimpleSystem (delta, N, Ti)
+	implicit none
+	integer, intent(in):: N
+		!! N - number of atoms
+	real(wp), intent(in):: a, Ti
+	integer::i, j, k
+	
+	types%m = convert(39.948_wp,'u','kg')
+	types%atom_name = 'Ar'
+	atoms(:)%t = 1
+	
+	box = [30,30,30]
+	
+	allocate(types(1))
+	allocate(atoms(N))
+		
+	atoms(1)%r = [0.0,0.0,0.0]
+	do k=1, N
+		atoms(k)%r = atoms(k)%r + delta
+	end do
+	
+	 do k=1,size(atoms)
+ 		!! Create random direction of velocities
+ 		call random_number(atoms(k)%v)
+ 		atoms(k)%v = 2.0_wp*atoms(k)%v-1.0_wp
+ 		do while(norm2(atoms(k)%v)>1.0_wp .and. norm2(atoms(k)%v)<0.1_wp)
+ 			call random_number(atoms(k)%v)
+ 			atoms(k)%v = 2.0_wp*atoms(k)%v-1.0_wp
+ 		end do
+ 		atoms(k)%v = atoms(k)%v/norm2(atoms(k)%v)
+ 		!! Set velocity magnitude
+ 		atoms(k)%v = atoms(k)%v*sqrt(2.0_wp*kB*Ti/types(atoms(k)%t)%m)*abs(randomNormal()+1.0_wp)
+ 	end do
+ 	
+ 	forall(k=1:3) atoms(:)%v(k) = atoms(:)%v(k)-sum(atoms(:)%v(k))/real(size(atoms),wp)
+ 	call updateAllNeighbors()
+ 	
+ 	do k=1,size(atoms)
+ 		atoms(k)%a = -delV(k)/types(atoms(k)%t)%m
+ 	end do
+ 	
+ 	ts = 0
+ 	t  = 0.0_wp
+	
+	end subroutine SimpleSystem
+	
+	
+
 	subroutine buildSystem(a,N,Ti)
 		implicit none
 		real(wp), dimension(3)::posit, velocity, force
