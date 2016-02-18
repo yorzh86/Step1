@@ -74,6 +74,7 @@ contains
 		         0.0_wp, 0.5_wp, 0.5_wp, &
 		         0.5_wp, 0.0_wp, 0.5_wp  ], [3,4])
 		integer::i,j,k,l,idx
+		integer:: iou_lammps=1
 		
 		box = a*real(N,wp)
 		
@@ -115,11 +116,10 @@ contains
  		
  		do k=1,size(atoms)
  			atoms(k)%a = -delV(k)/types(atoms(k)%t)%m
- 			!atoms(k)%f = -delV(k)
  		end do
  		
  		do k=1, 9
-			read(1,*)
+			read(iou_lammps,*)
 		end do
 			
 		do k=1, size(atoms)
@@ -246,6 +246,7 @@ contains
 
 
 	pure function delVij(i,j,d) result (o)
+	!! Force between two atoms
 		integer,intent(in)::i,j
 		real(wp),dimension(3),intent(in)::d
 		real(wp),dimension(3)::o

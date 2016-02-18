@@ -31,15 +31,15 @@ variable        Jz equal c_flux[3]/vol
 #[/new]
 
 thermo           ${skip_thermo}
-#thermo_style     custom step v_t c_T etotal ke pe c_P
-thermo_style     custom step temp ke pe etotal v_Jx v_Jy v_Jz fmax fnorm
+#thermo_style    custom step v_t c_T etotal ke pe c_P
+thermo_style     custom step temp ke pe etotal v_Jx v_Jy v_Jz fnorm
 
 
 thermo_modify	 format 6 %17.6g
 thermo_modify	 format 7 %17.6g
 thermo_modify	 format 8 %17.6g
 thermo_modify	 format 9 %14.9f
-thermo_modify	 format 10 %14.9f
+
 
 variable         T  equal c_T
 variable         TE equal etotal
@@ -52,10 +52,11 @@ fix              PRINT all print ${skip_thermo} "${s} ${t} ${T} ${TE} ${KE} ${PE
 
 #fix              NPT all npt temp ${T0} ${T0} ${tau_T} tchain 1 iso ${P0} ${P0} ${tau_P} pchain 1
 #fix              NVT all nvt temp ${T0} ${T0} ${dt_nh} tchain 1
-fix              NVE all nve
+fix               NVE all nve
 
 dump			XYZ all custom ${skip_dump} lammps.all id x y z vx vy vz fx fy fz
 dump_modify		XYZ format "%04d %4.1f %4.1f %4.1f %12.9f %12.9f %12.9f %12.9f %12.9f %12.9f"
+
 
 #dump           XYZ all xyz ${skip_dump} lammps.xyz
 #dump 			XYZ all custom 	${skip_dump} ../scripts/lammps.vel vx vy vz
@@ -63,4 +64,4 @@ dump_modify		XYZ format "%04d %4.1f %4.1f %4.1f %12.9f %12.9f %12.9f %12.9f %12.
 #dump_modify    XYZ element Ar
 
 run              ${N_steps}
-#run_style		verlet/split
+

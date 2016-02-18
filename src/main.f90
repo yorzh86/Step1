@@ -16,6 +16,8 @@ program main_prg
 		!! I/O unit for xyz file output
 	integer::iou_thermo
 		!! I/O unit for thermo report output
+	integer::iou_lammps=1
+		!! I/O unit to read lammps dump file
 	
 	call setupSim()
 	call runSim()
@@ -28,7 +30,7 @@ contains
 		real(wp), dimension(3)::posit, velocity, force
 		open(file='mark1.xyz',newunit=iou_xyz)
 		open(file='mark1.thermo',newunit=iou_thermo)
-		open(1, file='../lammps/lammps.all', status= 'old')
+		open(file='../lammps/lammps.all', status= 'old', unit= iou_lammps)
 		
 		
 		
@@ -39,7 +41,7 @@ contains
 		call setThermostat(.false.,T0,10.0_wp*dt)
 		call setBarostat(.false.,P0, 5.0E10_wp*dt)
 		call buildSystem(convert(lattice_const,'A','m'),[2,2,2],T0)
-		rewind(1)
+		rewind(iou_lammps)
 		call doBox()
 		call writeLammpsData('Ar.data')
 		call writeLammpsVars('Ar.vars')
@@ -48,9 +50,9 @@ contains
 		
 	subroutine runSim
 		integer::k
-		open(1, file='../lammps/lammps.all', status= 'old')
+		open(iou_lammps, file='../lammps/lammps.all', status= 'old')
 		do k=0,N_steps
-			call integrateLammps(dt)
+			!call integrateLammps(dt)
 			if(mod(k,skip_thermo)==0) call thermoReport(k)
 			if(mod(k,skip_dump  )==0) call writeStepXYZ(iou_xyz)
 			if(mod(k,skip_neighbor)==0) call updateAllNeighbors()
@@ -65,7 +67,7 @@ contains
 	subroutine endSim
 		close(iou_xyz)
 		close(iou_thermo)
-		close(1)
+		close(iou_lammps)
 	end subroutine endSim
 
 	subroutine thermoReport(k)
@@ -85,28 +87,26 @@ contains
 !			write(*,*)			
 !			write (stdout, '(1X, 1A5, 1A4, 1A8, 1A10, 1A11, 2A18, 1A4)') "\x1B[93m", 'k[#]','temperature', &
 !				& 'tEnergy', 'Jx','Jy','Jz',  "\x1B[0m"
-		!write(*, '(1X, 1A5, 1A10, 6A13)') 'Step', 'Temp', 'KE()', 'PE()', 'TotEng', 'Jx', 'Jy', 'Jz'
+		write(*, '(1X, 1A5, 1A9, 6A13, 1A22)') 'Step', 'Temp', 'KE()', 'PE()', 'TotEng', 'Jx', 'Jy', 'Jz', 'Fnorm'
 		end if
 
-!		write(stdout,'(1X,1I3,1F11.3,3F13.6,3ES17.6, 1F13.6)') k, temperature(), &
-!			& convert(KE(),'J','eV'), &
-!			& convert(PE(),'J','eV'), &
-!			& convert(E(),'J','eV'),  &
-!			& (convert(o(i),'W/m2','eV/ps/A2')/product(box),i=1,3), &
-!			& convert(fnorm(),'N','eV/A')
+		write(stdout,'(1X,1I3,1F11.3,3F13.6,3ES17.6, 1F13.6)') k, temperature(), &
+			& convert(KE(),'J','eV'), &
+			& convert(PE(),'J','eV'), &
+			& convert(E(),'J','eV'),  &
+			& (convert(o(i),'W/m2','eV/ps/A2')/product(box),i=1,3), &
+			& convert(fnorm(),'N','eV/A')
 		
-		write(*,*)
-		write(*, '(1X, 2A5, 3A15, 2A15)') 'Step', 'id', 'Fx', 'Fy', 'Fz', 'NORM2(Fatom)', 'SUM(NORM2(Fatom))'	
-		
-		do i=1, size(atoms)
-			write(*,'(1X, 2I5, 3F15.9, 2F14.9 )')k, atoms(i)%atom_id, &
-				& [(convert(atoms(i)%f(j), 'N', 'eV/A'), j=1,3)], &
-				& convert(norm2(atoms(i)%f),'N', 'eV/A'), &
-				& convert(fnorm(),'N','eV/A')
-		end do
+!		write(*,*)
+!		write(*, '(1X, 2A5, 3A15, 2A15)') 'Step', 'id', 'Fx', 'Fy', 'Fz', 'NORM2(Fatom)', 'NORM2(Fall)'	
+!				!!======= CHANGE NUMBER OF N_STEPS========!!		
+!		do i=1, size(atoms)
+!			write(*,'(1X, 2I5, 3F15.9, 2F14.9 )')k, atoms(i)%atom_id, &
+!				& [(convert(atoms(i)%f(j), 'N', 'eV/A'), j=1,3)], &
+!				& convert(norm2(atoms(i)%f),'N', 'eV/A'), &
+!				& convert(fnorm(),'N','eV/A')
+!		end do
 					
-		!write(stdout,'(1X,1I3,1F11.3,3F13.5,3ES17.6)') k, temperature(), E(), KE(), PE(), o(i)/product(box)
-		
 		c = c+1
 	end subroutine thermoReport
 
