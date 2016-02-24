@@ -66,7 +66,7 @@ contains
 	real(wp), intent(in):: delta, Ti
 	integer::i, j, k
 
-	box = delta*(N+1)
+	box = delta*N
 	
 	allocate(types(1))
 	allocate(atoms(N))
@@ -75,14 +75,14 @@ contains
 	types%atom_name = 'Ar'
 	atoms(:)%t = 1
 	
-	!atoms(k)%r = [0.0,0.0,0.0]
 	do k=1, N
-		atoms(k)%r = atoms(k)%r + k*[1.0,0.0,0.0]*delta
+		atoms(k)%atom_id = k
+		atoms(k)%r = atoms(k)%r + k*[1.0,0.0,0.0]*delta/2.0_wp
 	end do
 	
 	
 	do k=1,N
- 		!! Create random direction of velocities
+ 		!! Same treatment of velocities as in buildSystem
  		call random_number(atoms(k)%v)
  		atoms(k)%v = 2.0_wp*atoms(k)%v-1.0_wp
  		do while(norm2(atoms(k)%v)>1.0_wp .and. norm2(atoms(k)%v)<0.1_wp)
@@ -90,22 +90,16 @@ contains
  			atoms(k)%v = 2.0_wp*atoms(k)%v-1.0_wp
  		end do
  		atoms(k)%v = atoms(k)%v/norm2(atoms(k)%v)
- 		!! Set velocity magnitude
  		atoms(k)%v = atoms(k)%v*sqrt(2.0_wp*kB*Ti/types(atoms(k)%t)%m)*abs(randomNormal()+1.0_wp)
  	end do
- 	
  	forall(k=1:3) atoms(:)%v(k) = atoms(:)%v(k)-sum(atoms(:)%v(k))/real(size(atoms),wp)
- 	
  	call updateAllNeighbors()
- 	
  	do k=1,N
  		atoms(k)%a = -delV(k)/types(atoms(k)%t)%m
  		atoms(k)%f = -delV(k)
  	end do
- 	
  	ts = 0
  	t  = 0.0_wp
-	
 	end subroutine SimpleSystem
 	
 	

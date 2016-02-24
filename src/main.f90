@@ -91,7 +91,7 @@ contains
 		!write(*, '(1X, 1A5, 1A9, 6A13, 1A22)') 'Step', 'Temp', 'KE()', 'PE()', 'TotEng', 'Jx', 'Jy', 'Jz', 'Fnorm'
 		write(*,*)'Box size[A]:',box*1E10_wp
 		write(*,*)
-		write(*,'(1X, 1A5, 6A25, 1A13 )') 'id', 'rx', 'ry', 'rz', 'fx', 'fy', 'fz', 'fnorm'
+		write(*,'(1X, 1A5, 6A25, 1A13 )')  'id', 'rx', 'ry', 'rz', 'fx', 'fy', 'fz', 'fnorm'
 		end if
 		do i=1, size(atoms)
 			write(stdout, '(1X, 1I5, 6E25.15, 1F13.6)') atoms(i)%atom_id, &
