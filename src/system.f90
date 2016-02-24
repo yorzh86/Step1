@@ -63,24 +63,25 @@ contains
 	implicit none
 	integer, intent(in):: N
 		!! N - number of atoms
-	real(wp), intent(in):: a, Ti
+	real(wp), intent(in):: delta, Ti
 	integer::i, j, k
+
+	box = delta*(N+1)
+	
+	allocate(types(1))
+	allocate(atoms(N))
 	
 	types%m = convert(39.948_wp,'u','kg')
 	types%atom_name = 'Ar'
 	atoms(:)%t = 1
 	
-	box = [30,30,30]
-	
-	allocate(types(1))
-	allocate(atoms(N))
-		
-	atoms(1)%r = [0.0,0.0,0.0]
+	!atoms(k)%r = [0.0,0.0,0.0]
 	do k=1, N
-		atoms(k)%r = atoms(k)%r + delta
+		atoms(k)%r = atoms(k)%r + k*[1.0,0.0,0.0]*delta
 	end do
 	
-	 do k=1,size(atoms)
+	
+	do k=1,N
  		!! Create random direction of velocities
  		call random_number(atoms(k)%v)
  		atoms(k)%v = 2.0_wp*atoms(k)%v-1.0_wp
@@ -94,10 +95,12 @@ contains
  	end do
  	
  	forall(k=1:3) atoms(:)%v(k) = atoms(:)%v(k)-sum(atoms(:)%v(k))/real(size(atoms),wp)
+ 	
  	call updateAllNeighbors()
  	
- 	do k=1,size(atoms)
+ 	do k=1,N
  		atoms(k)%a = -delV(k)/types(atoms(k)%t)%m
+ 		atoms(k)%f = -delV(k)
  	end do
  	
  	ts = 0
@@ -164,6 +167,7 @@ contains
  		
  		do k=1,size(atoms)
  			atoms(k)%a = -delV(k)/types(atoms(k)%t)%m
+ 			atoms(k)%f = -delV(k)
  		end do
  		
 ! 		do k=1, 9
@@ -177,7 +181,7 @@ contains
 !			atoms(k)%f = force/6.24150636309E8_wp
 !			atoms(k)%a = -delV(k)/types(atoms(k)%t)%m
 !		end do
- 		ts = -1 !! CHANGE BACK TO ZERO!!
+ 		ts = -0 !! CHANGE BACK TO ZERO!!
  		t  = 0.0_wp
 	end subroutine buildSystem
 
@@ -219,6 +223,13 @@ contains
 		write(iou,'(1A)') ''
 		do k=1,size(atoms)
 			write(iou,'(1I9,1X,1X,3E25.15)') k,[( convert(atoms(k)%v(i),'m/s','A/ps') , i=1,3 )]
+		end do
+		
+		write(iou,'(1A)') ''
+		write(iou,'(1A)') 'Forces'
+		write(iou,'(1A)') ''
+		do k=1,size(atoms)
+			write(iou,'(1I9,1X,1X,3E25.15)') k,[( convert(atoms(k)%f(i),'N','eV/A') , i=1,3 )]
 		end do
 		
 		close(iou)
@@ -287,8 +298,9 @@ contains
 		
 		o = 0.0_wp
 		do k=1,size(atoms)
-			o = o + norm2(atoms(k)%f)
+			o = o + sum(atoms(k)%f**2)
 		end do
+		o = sqrt(o)
 	end function fnorm
 	
 
@@ -314,8 +326,8 @@ contains
 			S0 = lj%coeffs(2)
 			
 			l = S0/norm2(d)
-			!o = o+24.0_wp*E0/sum(d*d)*(l**6)*(1.0_wp-2.0_wp*l**6)*d
-			o = atoms(i)%f
+			o = o+24.0_wp*E0/sum(d*d)*(l**6)*(1.0_wp-2.0_wp*l**6)*d
+			!o = atoms(i)%f
 		end subroutine doLennardJones
 		
 	end function delVij

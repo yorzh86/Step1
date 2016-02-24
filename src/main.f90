@@ -27,21 +27,22 @@ contains
 
 	subroutine setupSim
 		integer::i, j, k, atom_id
+		real(wp)::simple
 		real(wp), dimension(3)::posit, velocity, force
 		open(file='mark1.xyz',newunit=iou_xyz)
 		open(file='mark1.thermo',newunit=iou_thermo)
 		!open(file='../lammps/lammps.all', status= 'old', unit= iou_lammps)
 		
 		
-		
+		simple = 5.0
 		enableLennardJones = .true.
 		
 		call initialize_parameters()
 		!! Initialize E0, S0, cutoff, N-steps, etc (settings.f90)
 		call setThermostat(.false.,T0,10.0_wp*dt)
 		call setBarostat(.false.,P0, 5.0E10_wp*dt)
-		call SimpleSystem (delta, N, Ti)
-		!call buildSystem(convert(lattice_const,'A','m'),[5,5,5],T0)
+		call SimpleSystem (convert(simple,'A','m'), 2, T0)
+		!call buildSystem(convert(lattice_const,'A','m'),[2,2,2],T0)
 		!rewind(iou_lammps)
 		call doBox()
 		call writeLammpsData('Ar.data')
@@ -87,15 +88,24 @@ contains
 !			write(*,*)			
 !			write (stdout, '(1X, 1A5, 1A4, 1A8, 1A10, 1A11, 2A18, 1A4)') "\x1B[93m", 'k[#]','temperature', &
 !				& 'tEnergy', 'Jx','Jy','Jz',  "\x1B[0m"
-		write(*, '(1X, 1A5, 1A9, 6A13, 1A22)') 'Step', 'Temp', 'KE()', 'PE()', 'TotEng', 'Jx', 'Jy', 'Jz', 'Fnorm'
+		!write(*, '(1X, 1A5, 1A9, 6A13, 1A22)') 'Step', 'Temp', 'KE()', 'PE()', 'TotEng', 'Jx', 'Jy', 'Jz', 'Fnorm'
+		write(*,*)'Box size[A]:',box*1E10_wp
+		write(*,*)
+		write(*,'(1X, 1A5, 6A25, 1A13 )') 'id', 'rx', 'ry', 'rz', 'fx', 'fy', 'fz', 'fnorm'
 		end if
+		do i=1, size(atoms)
+			write(stdout, '(1X, 1I5, 6E25.15, 1F13.6)') atoms(i)%atom_id, &
+				& [(convert(atoms(i)%r(j),'m','A'),j=1,3)], &
+				& [(convert(atoms(i)%f(j), 'N', 'eV/A'), j=1,3)], &
+				& convert(fnorm(),'N','eV/A')
+		end do
 
-		write(stdout,'(1X,1I3,1F11.3,3F13.6,3ES17.6, 1F13.6)') k, temperature(), &
-			& convert(KE(),'J','eV'), &
-			& convert(PE(),'J','eV'), &
-			& convert(E(),'J','eV'),  &
-			& (convert(o(i),'W/m2','eV/ps/A2')/product(box),i=1,3), &
-			& convert(fnorm(),'N','eV/A')
+!		write(stdout,'(1X,1I3,1F11.3,3F13.6,3ES17.6, 1F13.6)') k, temperature(), &
+!			& convert(KE(),'J','eV'), &
+!			& convert(PE(),'J','eV'), &
+!			& convert(E(),'J','eV'),  &
+!			& (convert(o(i),'W/m2','eV/ps/A2')/product(box),i=1,3), &
+!			& convert(fnorm(),'N','eV/A')
 		
 !		write(*,*)
 !		write(*, '(1X, 2A5, 3A15, 2A15)') 'Step', 'id', 'Fx', 'Fy', 'Fz', 'NORM2(Fatom)', 'NORM2(Fall)'
@@ -106,6 +116,9 @@ contains
 !				& convert(norm2(atoms(i)%f),'N', 'eV/A'), &
 !				& convert(fnorm(),'N','eV/A')
 !		end do
+
+
+		
 					
 		c = c+1
 	end subroutine thermoReport

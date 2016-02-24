@@ -73,7 +73,7 @@ contains
 		lj%coeffs = [E0,S0]
 		
 		!= Simulation =!
-		N_steps       = 20
+		N_steps       = 0
 		skip_thermo   = 1
 		skip_dump     = 1
 		skip_neighbor = 10 !20
