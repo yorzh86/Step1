@@ -56,6 +56,8 @@ module system_mod
 		!! Time step counter
 	real(wp)::t
 		!! System time
+		
+		
 	
 contains
 
@@ -64,6 +66,7 @@ contains
 	integer, intent(in):: N
 		!! N - number of atoms
 	real(wp), intent(in):: delta, Ti
+	
 	integer::i, j, k
 
 	box = delta*N
@@ -100,6 +103,7 @@ contains
  	end do
  	ts = 0
  	t  = 0.0_wp
+ 	
 	end subroutine SimpleSystem
 	
 	

@@ -20,7 +20,7 @@ program main_prg
 		!! I/O unit to read lammps dump file
 	
 	call setupSim()
-	call runSim()
+	!call runSim()
 	call endSim()
 	
 contains
@@ -32,8 +32,7 @@ contains
 		open(file='mark1.xyz',newunit=iou_xyz)
 		open(file='mark1.thermo',newunit=iou_thermo)
 		!open(file='../lammps/lammps.all', status= 'old', unit= iou_lammps)
-		
-		
+				
 		simple = 5.0
 		enableLennardJones = .true.
 		
@@ -41,24 +40,32 @@ contains
 		!! Initialize E0, S0, cutoff, N-steps, etc (settings.f90)
 		call setThermostat(.false.,T0,10.0_wp*dt)
 		call setBarostat(.false.,P0, 5.0E10_wp*dt)
-		call SimpleSystem (convert(simple,'A','m'), 3, T0)
-		call printSimpleSystem()
-		!call buildSystem(convert(lattice_const,'A','m'),[2,2,2],T0)
-		!rewind(iou_lammps)
+		do k=2,3
+			call SimpleSystem (convert(simple,'A','m'), k, T0)
+			call printSimpleSystem()
+			if (k .ne. 3) then
+			deallocate(types)
+			deallocate(atoms)	
+			end if
+		end do
+		
 		call doBox()
 		call writeLammpsData('Ar.data')
 		call writeLammpsVars('Ar.vars')
 		
+		!call buildSystem(convert(lattice_const,'A','m'),[2,2,2],T0)
+		!rewind(iou_lammps)
+
 	end subroutine setupSim
 		
 	subroutine runSim
 		integer::k
 		do k=0,N_steps
 			!call integrateLammps(dt)
-			!if(mod(k,skip_thermo)==0) call thermoReport(k)
-			!if(mod(k,skip_dump  )==0) call writeStepXYZ(iou_xyz)
-			!if(mod(k,skip_neighbor)==0) call updateAllNeighbors()
-			!call velocityVerlet(dt)
+			if(mod(k,skip_thermo)==0) call thermoReport(k)
+			if(mod(k,skip_dump  )==0) call writeStepXYZ(iou_xyz)
+			if(mod(k,skip_neighbor)==0) call updateAllNeighbors()
+			call velocityVerlet(dt)
 			
 			call doBox()
  			if(k==N_steps/2) call setThermostat(.false.)
@@ -74,7 +81,8 @@ contains
 	
 	subroutine printSimpleSystem()
 		integer::i,j
-		
+		write(*,*)
+		write(*,*) 'Number of atoms:', size(atoms)
 		write(*,*)'Box size[A]:',box*1E10_wp
 		write(*,*)
 		
@@ -86,7 +94,6 @@ contains
 				& [(convert(atoms(i)%f(j), 'N', 'eV/A'), j=1,3)], &
 				& convert(fnorm(),'N','eV/A')
 		end do
-	
 	end subroutine printSimpleSystem
 
 	subroutine thermoReport(k)
