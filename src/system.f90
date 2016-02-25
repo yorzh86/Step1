@@ -69,8 +69,9 @@ contains
 	
 	integer::i, j, k
 
-	box = delta*N
-	
+	box = delta*N - (delta/2.0_wp)*(N-1)
+		!! 5 * 2 - 2.5 = 7.5; for 2.5 and 5.0
+		!! 5 * 3 - 5.0 = 10.0; for 2.5 and 5.0 and 7.5 atoms, etc
 	allocate(types(1))
 	allocate(atoms(N))
 	
