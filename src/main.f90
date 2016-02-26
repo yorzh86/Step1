@@ -33,7 +33,7 @@ contains
 		open(file='mark1.thermo',newunit=iou_thermo)
 		!open(file='../lammps/lammps.all', status= 'old', unit= iou_lammps)
 				
-		simple = 5.0
+		simple = 2.0
 		enableLennardJones = .true.
 		
 		call initialize_parameters()
@@ -41,12 +41,10 @@ contains
 		call setThermostat(.false.,T0,10.0_wp*dt)
 		call setBarostat(.false.,P0, 5.0E10_wp*dt)
 		do k=2,3
+			if (allocated(types)) deallocate(types)
+			if (allocated(atoms)) deallocate(atoms)
 			call SimpleSystem (convert(simple,'A','m'), k, T0)
 			call printSimpleSystem()
-			if (k .ne. 3) then
-			deallocate(types)
-			deallocate(atoms)	
-			end if
 		end do
 		
 		call doBox()

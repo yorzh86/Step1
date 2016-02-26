@@ -69,9 +69,8 @@ contains
 	
 	integer::i, j, k
 
-	box = delta*N - (delta/2.0_wp)*(N-1)
-		!! 5 * 2 - 2.5 = 7.5; for 2.5 and 5.0
-		!! 5 * 3 - 5.0 = 10.0; for 2.5 and 5.0 and 7.5 atoms, etc
+	box = delta*N
+		
 	allocate(types(1))
 	allocate(atoms(N))
 	
@@ -81,7 +80,7 @@ contains
 	
 	do k=1, N
 		atoms(k)%atom_id = k
-		atoms(k)%r = atoms(k)%r + k*[1.0,0.0,0.0]*delta/2.0_wp
+		atoms(k)%r = atoms(k)%r + k*[1.0,0.0,0.0]*delta - [1.0,0.0,0.0]*delta/2.0_wp
 	end do
 	
 	
