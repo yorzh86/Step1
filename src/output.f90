@@ -31,9 +31,18 @@ contains
         integer,dimension(:), allocatable::l
         integer:: h, c, j
         real(wp):: abc, t
-        
+               
         abc = real(latM(3)*lattice_const/N_slabs, wp)
-
+        if (k==0) then
+            write(iou_temps, '(1X, 1A8, 2X, 1A8, 2X, 1A20, 1I3, 1A9 )')'Time[ps],', & 
+                & 'TimeStep[ms],', 'Temperatures[K] for:', N_slabs, ' regions.'
+            write(iou_temps,*)
+            
+            write(iou_energies,'(1X, 1A8, 2X, 1A8, 2X, 1A35)') 'Time[ps],', & 
+                & 'TimeStep[ms],', 'Total energy[eV] of swapped atoms.'
+            write(iou_energies,*)
+        end if
+        
         do j=1, N_slabs
             l = regionList(j*abc - abc, j*abc)
             regions(k+1)%temps(j) = listTemp(l)
@@ -41,6 +50,7 @@ contains
             if (j==5) c = selectCold(l)
         end do
         t = k*1E-2_wp
+
         write(iou_temps,'(1X, 1F7.2, 1I7, 10F15.8)') t, k, regions(k+1)%temps
         
         if (mod(k,10)==0) then

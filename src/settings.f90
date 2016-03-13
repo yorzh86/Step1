@@ -88,7 +88,7 @@ contains
         skip_dump     = 1
         skip_neighbor = 20
         lattice_const = convert(5.40_wp, 'A', 'm')
-        latM = [3,3,5]
+        latM = [5,5,20]
         
         T0 = convert(45.0_wp,'K','K')
         P0 = convert(1.0_wp,'bar','Pa')

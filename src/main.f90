@@ -2,14 +2,6 @@
 !
 ! http://www.pymolwiki.org/index.php/DrawBoundingBox
 
-
-! write: step temp1 temp2 temp2
-! write: step rx1 ry1 rz1 KE1 rx2 ry2 rz2 KE2
-! call swap atoms(k)
-! call calculate conduction
-! write: step conduction
-
-
 program main_prg
     use kinds_mod
     use units_mod
@@ -38,9 +30,7 @@ program main_prg
 contains
 
     subroutine setupSim
-        open(file='mark1.xyz',newunit=iou_xyz)
-        open(file='mark1.thermo',newunit=iou_thermo)
-        
+        open(file='mark1.xyz',newunit=iou_xyz)        
         open(file='mark1.temps',newunit=iou_temps)
         open(file='mark1.energies',newunit=iou_energies)
                         
@@ -59,17 +49,26 @@ contains
     subroutine runSim
         integer::k
         integer,dimension(:), allocatable::l
-        do k=0, N_steps
-            
-            call writeStepThermo(k, iou_temps, iou_energies)
-
-            if(mod(k,skip_dump)==0)     call writeStepXYZ(iou_xyz)
-            if(mod(k,skip_neighbor)==0) call updateAllNeighbors()
-            if(mod(k,skip_thermo)==0)   call thermoReport()
         
+        write(*,'(1X, 1A12, 3F10.2)') 'Box size[A]:', box*1E10
+        write(*,'(1X, 1A16, 1I6)') 'Number of steps:', N_steps
+		write(*,'(1X, 1A16, 1I6)') 'Number of atoms:', size(atoms)
+		write(*,'(1X, 1A31, 1I6)') 'Average number of atoms/region:', &
+			& size(regionList(0.0_wp, real(latM(3)*lattice_const/N_slabs, wp)))
+		
+		write(*,'(1X, 1A37, 1F7.1, 1A4)') 'Estimated time to execute simulation:', & 
+			& N_steps/10/60.0, 'min' 
+                
+        do k=0, N_steps
+            call writeStepThermo(k, iou_temps, iou_energies)
+            if(mod(k,skip_dump)==0)     call writeStepXYZ(iou_xyz)
+            if(mod(k,skip_neighbor)==0) call updateAllNeighbors()              
             call velocityVerlet(dt)
             call doBox()
         end do
+        write(*,*)
+        write(*,*)"FINISHED!!!"
+        
     end subroutine runSim
 
     subroutine endSim
@@ -79,8 +78,4 @@ contains
         close(iou_energies)
     end subroutine endSim
     
-    subroutine thermoReport()
-    end subroutine thermoReport
-
-
 end program main_prg 
