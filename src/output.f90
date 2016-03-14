@@ -54,6 +54,7 @@ contains
         write(iou_temps,'(1X, 1F7.2, 1I7, 10F15.8)') t, k, regions(k+1)%temps
         
         if (mod(k,10)==0) then
+        !! Shall we add positions?
             write(iou_energies,'(1X, 1F7.2, 1I7, 2F15.8)') t,  k, & 
                 & convert(Ei(h), 'J','eV'), &
                 & convert(Ei(c), 'J', 'eV')

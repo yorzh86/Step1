@@ -141,7 +141,7 @@ contains
         real(wp):: newmass
         
         swapv = atoms(h)%v
-        atoms(h)%v = atoms(c)%v
+        atoms(h)%v = atoms(c)%v ! is this safe to do?
         atoms(c)%v = swapv
         
         newmass = types(atoms(h)%t)%m
