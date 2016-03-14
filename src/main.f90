@@ -82,9 +82,9 @@ contains
         write(*,'(1X, 1A31, 1I6)') 'Average number of atoms/region:', &
             & size(regionList(0.0_wp, real(latM(3)*lattice_const/N_slabs, wp)))
         
-        write(*,'(1X, 1A34, 1F7.2, 1A5)') 'Estimated time to turn simulation:', & 
+        write(*,'(1X, 1A33, 1F7.2, 1A5)') 'Estimated time to run simulation:', & 
             & ((size(atoms)/1000.0_wp*(0.08_wp + 0.003_wp + &
-            & 0.005*(size(atoms)/1000-1)))*(N_steps/100.0_wp-0.1_wp)), 'min.'
+            & 0.009*(size(atoms)/1000-1)))*(N_steps/100.0_wp-0.1_wp)), 'min.'
         write(*,*)
                     
     end subroutine basicINFO
