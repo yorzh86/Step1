@@ -84,7 +84,7 @@ contains
         
         write(*,'(1X, 1A33, 1F7.2, 1A5)') 'Estimated time to run simulation:', & 
             & ((size(atoms)/1000.0_wp*(0.08_wp + 0.003_wp + &
-            & 0.009*(size(atoms)/1000-1)))*(N_steps/100.0_wp-0.1_wp)), 'min.'
+            & 0.01*(size(atoms)/1000-1)))*(N_steps/100.0_wp-0.25_wp)), 'min.'
         write(*,*)
                     
     end subroutine basicINFO

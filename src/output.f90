@@ -47,7 +47,7 @@ contains
             l = regionList(j*abc - abc, j*abc)
             regions(k+1)%temps(j) = listTemp(l)
             if (j==1) h = selectHot(l)
-            if (j==5) c = selectCold(l)
+            if (j==6) c = selectCold(l)
         end do
         t = k*1E-2_wp
 
