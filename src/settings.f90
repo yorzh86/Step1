@@ -51,8 +51,8 @@ module settings_mod
         !! Number of steps between xyz file dumps
     integer::skip_neighbor
         !! Number of steps between neighbor list rebuilds
-    integer::skip_rnemd
-        !! Number of steps between rnemd report
+    integer::skip_swap
+        !! Number of steps between swapping atoms velocities
         
     real(wp)::lattice_const
         !! Lattice constant [A]
@@ -81,14 +81,15 @@ contains
         lj%coeffs = [E0,S0]
         
         != Simulation =!
-        N_steps       = 100
+        N_steps       = 600
         N_slabs       = 10
-        skip_rnemd    = 1
+        skip_swap     = 10
         skip_thermo   = 1
         skip_dump     = 1
         skip_neighbor = 20
+        
         lattice_const = convert(5.40_wp, 'A', 'm')
-        latM = [5,5,50]
+        latM = [5,5,10]
         
         T0 = convert(45.0_wp,'K','K')
         P0 = convert(1.0_wp,'bar','Pa')

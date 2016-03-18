@@ -6,13 +6,18 @@ module integrate_mod
     
     logical::doThermostat = .false.
     logical::doBarostat = .false.
+    integer::hot, cold
     
     public::setThermostat
     public::setBarostat
+    public::hot
+    public::cold
+    
     public::velocityVerlet
     public::leapFrog
     public::doBox
     public::swapAtoms
+    public::rnem
     
 contains
 
@@ -34,7 +39,7 @@ contains
         
         doThermostat = state
     end subroutine setThermostat
-
+    
     subroutine setBarostat(state,P,tau)
         !! Turns on/off damping parameter "eta" in the Integrator
         logical,intent(in)::state
@@ -134,22 +139,36 @@ contains
         o = (1.0_wp/barostat%tau**2)*(pressure()/barostat%set-1.0_wp)
     end function DepsilonDt
     
+    subroutine rnem(k)
+	    integer, intent(in)::k
+        integer,dimension(:), allocatable::l
+        integer::j
+        real(wp):: abc, t
+        
+        abc = real(latM(3)*lattice_const/N_slabs, wp)
+              
+        do j=1, N_slabs
+            l = regionList(j*abc - abc, j*abc)
+            regions(k+1)%temps(j) = listTemp(l)
+            if (j==1) hot = selectHot(l)
+            if (j==6) cold = selectCold(l)
+        end do
+         
+    end subroutine rnem
+    
     subroutine swapAtoms(h,c)
+      !! Swapping atoms' velocities
+      !! to swap masses (add when needed):
+	  !! - either change their types, or swap atoms of same type
         
         integer,  intent(in)::h,c
         real(wp), dimension(3)::swapv
         real(wp):: newmass
         
         swapv = atoms(h)%v
-        atoms(h)%v = atoms(c)%v ! is this safe to do?
+        atoms(h)%v = atoms(c)%v
         atoms(c)%v = swapv
-        
-        newmass = types(atoms(h)%t)%m
-        types(atoms(h)%t)%m = types(atoms(c)%t)%m
-        types(atoms(c)%t)%m = newmass
-            
-        !! Have I just swapped masses for ALL atoms of types???????
-        
+       
     end subroutine swapAtoms
     
 end module integrate_mod
