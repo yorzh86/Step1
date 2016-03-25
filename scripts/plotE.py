@@ -38,23 +38,22 @@ def plotHC(ax,t,H,C):
 	ax.legend(loc='best',fancybox=True)
 
 def plotG(ax,T):
+	a = 5.4
+	z = pl.linspace(0,150*a,T.shape[1])
+	
 	#v = bu[N:,:].sum(0)/bu[N:,:].shape[0]
 	#e = bu[N:,:].std(0)
-	#X,L,R = mirror(x,v)
-	#X,Le,Re = mirror(x,e)
+	#X,L,R = mirror(z/10,T.mean(0)[:5])
+	#X,Le,Re = mirror(z/10, T.mean(0)[5:])
 	#ax.errorbar(X,L,Le)
 	#ax.errorbar(X,R,Re)
 	
+	#ax.errorbar(x, y, yerr=[yerr_lower, 2*yerr], xerr=xerr,
+    #        fmt='o', ecolor='g', capthick=2)
 	
+	ax.errorbar(z/10,T.mean(0),T.std(0)/pl.sqrt(T.shape[0]),color='k')
 	
-	
-	
-	a = 5.4
-	z = pl.linspace(0,150*a,T.shape[1])
-	#ax.errorbar(z/10,T.mean(0),T.std(0)/pl.sqrt(T.shape[0]),color='k')
-	ax.plot(z/10, T.mean(0), 'darkblue')
-	#ax.plot(z/10, T.mean(0) 'k')
-	
+		
 	ax.set_xlim(z.min()/10,z.max()/10)
 	ax.set_xlabel('Position $z$ [nm]')
 	ax.set_ylabel('Temperature $T$ [K]')	
@@ -96,7 +95,7 @@ def doFigure(fnE,fnT):
 	fig.tight_layout()
 	pl.subplots_adjust(top=0.91, hspace=0.46)
 	fig.suptitle('Reverse non equilibrium method', fontsize=14, fontweight='bold')
-	fig.savefig('plot.pdf')
+	#fig.savefig('plot.pdf')
 	return q, T 
 
 def mirror(x,u):
@@ -104,7 +103,7 @@ def mirror(x,u):
 	l = u[0:N]
 	r = list(u[-1:-N:-1])
 	r.insert(0,u[0])
-	r = array(r)
+	r = pl.array(r)
 	return x[0:N],l,r	
 
 
@@ -119,10 +118,11 @@ flux = pl.mean(f[30000:]/0.01)
 # mean of two gradients:
 grad = ((T.mean(0)[5]-T.mean(0)[0]) + (T.mean(0)[5] - T.mean(0)[9]))/2.0
 # Area [A^2]:
-A = (5*5.4)*(5*5.4)
-k = flux/A/grad
+dz = 5*5.4
+
+k = flux/grad/dz
 kSI = k*J2eV/(s2ps*m2A)
 
-pl.title( 'kSI=%f W/m2K'%kSI)
+pl.title( 'kSI=%f W/mK'%kSI)
 
 pl.show()
