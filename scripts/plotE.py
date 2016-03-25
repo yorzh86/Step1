@@ -113,14 +113,16 @@ m2A  = 1.0E-10
 
 # getting KE difference and temperatures:
 f, T = doFigure('mark2.energies','mark2.temps')
-# average flux after 3ns in [eV/ps ]:
-flux = pl.mean(f[30000:]/0.01)
-# mean of two gradients:
-grad = ((T.mean(0)[5]-T.mean(0)[0]) + (T.mean(0)[5] - T.mean(0)[9]))/2.0
 # Area [A^2]:
-dz = 5*5.4
+A = 5.4*5*5.4*5
+# average flux after 3ns in [eV/ps/A2]:
+flux = pl.mean(f[30000:]/0.01/A)
+# Temperature change over z/2 domain
+dz = 150*5.4/2
+# mean of two gradients:
+grad = ((T.mean(0)[5]-T.mean(0)[0]) + (T.mean(0)[5] - T.mean(0)[9]))/2.0/dz
 
-k = flux/grad/dz
+k = flux/grad
 kSI = k*J2eV/(s2ps*m2A)
 
 pl.title( 'kSI=%f W/mK'%kSI)
