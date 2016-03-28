@@ -102,7 +102,7 @@ def plotC(ax,t,Ts,S):
 
 def doFigure(fnE,fnT,box):
 	print 'Reading...'
-	tE,tsE,q = readE(fnE)  #q is not flux, it's ke1-ke2
+	tE,tsE,q = readE(fnE)
 	tT,tsT,TC,TH,T = readT(fnT)
 	print 'Done!'
 	
@@ -120,7 +120,7 @@ def doFigure(fnE,fnT,box):
 	plotHC(axHC,tT,TH,TC,S)
 	
 	axQ = fig.add_subplot(224)
-	heatRate = plotFlux(axQ,tE,q,S) #10 fs = 0.01 ps
+	heatRate = plotFlux(axQ,tE,q,S)
 	
 	A = box[0]*box[1]
 	k = heatRate/(A*grad)
@@ -135,22 +135,19 @@ J2eV = 1.60217646E-19
 s2ps = 1.0E-12
 m2A  = 1.0E-10
 
-# getting KE difference and temperatures:
+
 a = 5.4
 f, T, k2 = doFigure('mark2.energies','mark2.temps',a*pl.array([5,5,150]))
-# Area [A^2]:
 A = 5.4*5*5.4*5
-# average flux after 3ns in [eV/ps/A2]:
-flux = pl.mean(f[30000:]/0.01/A)
-# Temperature change over z/2 domain
+flux = pl.mean(f[30000:]/0.1/A)
 dz = 150*5.4/2
-# mean of two gradients:
 grad = ((T.mean(0)[5]-T.mean(0)[0]) + (T.mean(0)[5] - T.mean(0)[9]))/2.0/dz
-
 k = flux/grad
+
 kSI = k*J2eV/(s2ps*m2A)
 k2SI = k2*J2eV/(s2ps*m2A)
 
 pl.title( 'k=%f [W/m.K]; k=%f [W/m.K]'%(kSI,k2SI))
+print 'k=', k2SI, '[W/m.K]'
 
 pl.show()
