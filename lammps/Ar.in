@@ -31,7 +31,6 @@ variable        Jz equal c_flux[3]/vol
 #[/new]
 
 thermo           ${skip_thermo}
-#thermo_style    custom step v_t c_T etotal ke pe c_P
 thermo_style     custom step temp ke pe etotal v_Jx v_Jy v_Jz fnorm
 
 
@@ -47,28 +46,16 @@ variable         KE equal ke
 variable         PE equal pe
 variable         P  equal c_P
 
-variable			   dL equal ${ FIXME box[z] }/${N_regions}
+variable		 dL equal ${box_length}/${N_slabs}
 
-# fix below print data to lammps.thermo file
 fix              PRINT all print ${skip_thermo} "${s} ${t} ${T} ${TE} ${KE} ${PE} ${P}" file lammps.thermo screen no title "# k [#] t [ps] T [K] TE [eV] KE [eV] PE [eV] P [bar]"
 
-#fix              NPT all npt temp ${T0} ${T0} ${tau_T} tchain 1 iso ${P0} ${P0} ${tau_P} pchain 1
-#fix              NVT all nvt temp ${T0} ${T0} ${dt_nh} tchain 1
 fix               NVE all nve
-fix 					    KEA all ave/spatial 1 ${skip_swap} ${skip_swap} z 0 ${dL} c_T units lattice file Tregions.dat
-fix               MPE all thermal/conductivity ${skip_swap} z ${N_regions}
+fix 			  KEA all ave/spatial 1 ${skip_swap} ${skip_swap} z 0 ${dL} c_T units lattice file Tregions.dat
+fix               MPE all thermal/conductivity ${skip_swap} z ${N_slabs}
 
 variable          MP  equal f_MPE
 fix               PNT all print ${skip_swap} "${t} ${MP}" append MP.dat
-
-#dump			XYZ all custom ${skip_dump} lammps.all id x y z vx vy vz fx fy fz
-#dump_modify		XYZ format "%04d %4.1f %4.1f %4.1f %12.9f %12.9f %12.9f %12.9f %12.9f %12.9f"
-
-
-#dump           XYZ all xyz ${skip_dump} lammps.xyz
-#dump 			XYZ all custom 	${skip_dump} ../scripts/lammps.vel vx vy vz
-#dump 			XYZ all custom 	${skip_dump} ../scripts/lammps.fij fx fy fz
-#dump_modify    XYZ element Ar
 
 run              ${N_steps}
 

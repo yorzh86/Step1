@@ -112,6 +112,8 @@ contains
         write(iou,'(1A,1I10)')   'variable skip_thermo   equal ',skip_thermo
         write(iou,'(1A,1I10)')   'variable skip_dump     equal ',skip_dump
         write(iou,'(1A,1I10)')   'variable skip_neighbor equal ',skip_neighbor
+        write(iou,'(1A,1I10)')   'variable N_slabs       equal ',N_slabs
+        write(iou,'(1A,1I10)')   'variable skip_swap     equal ',skip_swap
         
         write(iou,'(1A,1EN25.5)') 'variable dt            equal ',convert(dt,'s','ps')
         write(iou,'(1A,1EN25.5)') 'variable tau_T         equal ',convert(thermostat%tau,'s','ps')
@@ -121,6 +123,8 @@ contains
         
         write(iou,'(1A,1EN25.5)') 'variable cutoff        equal ',convert(lj%cutoff,'m','A')
         write(iou,'(1A,1EN25.5)') 'variable skin          equal ',convert(lj%skin,'m','A')
+        
+        write(iou,'(1A,1EN25.5)') 'variable box_length    equal ',box(3)*1E10_wp 
         
         close(iou)
     end subroutine writeLammpsVars
