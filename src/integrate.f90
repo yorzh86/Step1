@@ -143,7 +143,7 @@ contains
         real(wp):: abc, t
         
         abc = real(latM(3)*lattice_const/N_slabs, wp)
-              
+        
         do j=1, N_slabs
             l = regionList(j*abc - abc, j*abc)
             regions(k+1)%temps(j) = listTemp(l)

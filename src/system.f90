@@ -55,14 +55,14 @@ module system_mod
         !! All atoms in system
     type(region_t),dimension(:),allocatable::regions
     
-    
     real(wp)::Teta = 0.0_wp
         !! Thermostat DOF
     real(wp)::Pepsilon = 0.0_wp !was used as 0.01
         !! Barostat DOF
     real(wp),dimension(3)::box
         !! Bounds of the simulation box
-        
+    real(wp), dimension(:),   allocatable::times
+    real(wp), dimension(:,:), allocatable::energies
     integer::ts
         !! Time step counter
     real(wp)::t
@@ -85,15 +85,20 @@ contains
                  0.5_wp, 0.5_wp, 0.0_wp, &
                  0.0_wp, 0.5_wp, 0.5_wp, &
                  0.5_wp, 0.0_wp, 0.5_wp  ], [3,4])
-        integer::i,j,k,l,idx
+        integer::i,j,k,l,idx, ns
         integer:: iou_lammps=1
         
         box = a*real(N,wp)
-        
+        ns = nint(real(N_steps/skip_swap,wp))
+                
         allocate(types(1))
         allocate(atoms(size(rcell,2)*product(N)))
-
+        
+        allocate(times(N_steps))
+        allocate(energies(ns,2))
+                
         allocate(regions(N_steps+1))
+
         do i=1, N_steps+1
             allocate(regions(i)%temps(N_slabs))
         end do
@@ -472,8 +477,7 @@ contains
         end do
     
     end subroutine sub1
-    
-    
+
     function regionList(zl,zh) result(o)
         !! Stores an array of atoms(i)%atoms_id that belong to a region
         real(wp),intent(in)::zl,zh
