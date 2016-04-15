@@ -47,19 +47,19 @@ contains
     end subroutine setupSim
         
     subroutine runSim
-        integer::k
+        integer::k, h, c
         integer,dimension(:), allocatable::l
         real(wp)::start, finish
         character(128)::buf
         
 		call cpu_time(start)
         do k=0, N_steps
-			call rnem(k)
-			call writeStepThermo(k, iou_temps)
+			call rnem(k, h, c)
 			
-			if(mod(k,skip_swap)==0)     call swapAtoms(hot, cold)
-			if(mod(k,skip_swap)==0)     call writeStepEnergies(k, iou_energies)
-			if(mod(k,skip_dump)==0)     call writeStepXYZ(iou_xyz)
+			if(mod(k,skip_swap)==0)   call swapAtoms(h, c)
+			if(mod(k,skip_thermo)==0) call writeStepThermo(k, iou_temps)
+			if(mod(k,skip_swap)==0)   call writeStepEnergies(k,iou_energies,h,c)
+			if(mod(k,skip_dump)==0)   call writeStepXYZ(iou_xyz)
             if(mod(k,skip_neighbor)==0) call updateAllNeighbors()              
             
             call velocityVerlet(dt)

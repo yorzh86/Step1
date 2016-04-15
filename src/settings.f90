@@ -81,7 +81,7 @@ contains
         lj%coeffs = [E0,S0]
         
         != Simulation =!
-        N_steps       = 160
+        N_steps       = 700
         N_slabs       = 10
         skip_swap     = 10
         skip_thermo   = 1
@@ -89,7 +89,7 @@ contains
         skip_neighbor = 20
         
         lattice_const = convert(5.40_wp, 'A', 'm')
-        latM = [5,5,10]
+        latM = [5,5,150]
         
         T0 = convert(45.0_wp,'K','K')
         P0 = convert(1.0_wp,'bar','Pa')
@@ -124,7 +124,7 @@ contains
         write(iou,'(1A,1EN25.5)') 'variable cutoff        equal ',convert(lj%cutoff,'m','A')
         write(iou,'(1A,1EN25.5)') 'variable skin          equal ',convert(lj%skin,'m','A')
         
-        write(iou,'(1A,1EN25.5)') 'variable box_length    equal ',box(3)*1E10_wp 
+        write(iou,'(1A,1EN25.5)') 'variable box_length    equal ',latM(3)*lattice_const*1E10_wp 
         
         close(iou)
     end subroutine writeLammpsVars

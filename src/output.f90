@@ -41,8 +41,8 @@ contains
 
     end subroutine writeStepThermo
     
-    subroutine writeStepEnergies(k, iou_energies)
-        integer, intent(in)::k, iou_energies
+    subroutine writeStepEnergies(k, iou_energies, h, c)
+        integer, intent(in)::k, iou_energies, h, c
         real(wp)::t
         integer::j
         
@@ -55,8 +55,8 @@ contains
         end if
         
         write(iou_energies,'(1X, 1F7.2, 1I7, 2F15.8)') t,  k, & 
-            & convert(KEi(hot), 'J','eV'), &
-            & convert(KEi(cold), 'J', 'eV')
+            & convert(KEi(h), 'J','eV'), &
+            & convert(KEi(c), 'J', 'eV')
         
     end subroutine writeStepEnergies
     
@@ -70,9 +70,10 @@ contains
     	call cpu_time(finish)
         write(*,'(/, 1X,1A12, T40, 1A1, 2(1F4.1,", "), 1F5.1, 1A1)')'Box size[A]:', &
             &  '[',[(convert(box(i), 'm','A'),i=1,3)],']'
-        write(*,'(1X, 1A16, T40, 1I3)') 'Number of steps:', N_steps
-        write(*,'(1X, 1A16, T40, 1I4)') 'Number of atoms:', size(atoms)
-        write(*,'(1X, 1A31, T40, 1I3)') 'Average number of atoms/region:', &
+        write(*,'(1X, 1A16, T40, 1I5)') 'Number of steps:', N_steps
+        write(*,'(1X, 1A17, T40, 1I5)') 'Skip_swap factor:', skip_swap
+        write(*,'(1X, 1A16, T40, 1I5)') 'Number of atoms:', size(atoms)
+        write(*,'(1X, 1A31, T40, 1I5)') 'Average number of atoms/region:', &
             & size(regionList(0.0_wp, real(latM(3)*lattice_const/N_slabs, wp)))
         write(*,'(1X, 1A25, T40, 1F4.1, 1A5)')'Time to build the system:', &
             & (finish-start), ' sec.'
@@ -88,13 +89,13 @@ contains
         function estimateTime(N) result (o)
             integer, intent(in)::N
             real(wp):: o
-            integer::k, iou_test
+            integer::k, iou_test, h, c
             
             open(file='mark1.test',newunit=iou_test) 
             
             call cpu_time(start)
-            do k= 1, 10
-                call rnem(k)
+            do k= 0, 10
+                call rnem(k, h, c)
                 if(mod(k,skip_dump)==0)     call writeStepXYZ(iou_test)
                 if(mod(k,skip_neighbor)==0) call updateAllNeighbors()
                 call velocityVerlet(dt)
@@ -102,7 +103,7 @@ contains
             end do
             call cpu_time(finish)
             
-            o = (finish-start)*(N/10)
+            o = (finish-start)*(N/11)
             
             close(iou_test)
             

@@ -6,39 +6,22 @@ include          ../build/Ar.vars
 pair_style       lj/cut ${cutoff}
 neighbor         ${skin} bin
 neigh_modify     every ${skip_neighbor} delay 0
-read_data	 	../build/Ar.data
+read_data	     ../build/Ar.data
 
 timestep         ${dt}
 
 variable         t  equal step*${dt}
 variable         s  equal step
+variable	     dL equal ${box_length}/${N_slabs}
 
 compute          T all temp
 compute          P all pressure T
 
-#[new]
-compute         myKE all ke/atom
-compute         myPE all pe/atom
-compute         myStress all stress/atom NULL virial
-compute         flux all heat/flux myKE myPE myStress
-variable        Jx equal c_flux[1]/vol
-variable        Jy equal c_flux[2]/vol
-variable        Jz equal c_flux[3]/vol
-
-#variable        Jx equal (c_flux[1]-c_flux[4])/vol
-#variable        Jy equal (c_flux[2]-c_flux[5])/vol
-#variable        Jz equal (c_flux[3]-c_flux[6])/vol
-#[/new]
-
-thermo           ${skip_thermo}
-thermo_style     custom step temp ke pe etotal v_Jx v_Jy v_Jz fnorm
-
-
-thermo_modify	 format 6 %17.6g
-thermo_modify	 format 7 %17.6g
-thermo_modify	 format 8 %17.6g
-thermo_modify	 format 9 %14.9f
-
+compute         ke all ke/atom
+compute         pe all pe/atom
+compute         stress all stress/atom NULL virial
+compute         flux all heat/flux ke pe stress
+compute 		chunk1 all chunk/atom bin/1d z 0.0 ${dL} units lattice
 
 variable         T  equal c_T
 variable         TE equal etotal
@@ -46,16 +29,15 @@ variable         KE equal ke
 variable         PE equal pe
 variable         P  equal c_P
 
-variable		 dL equal ${box_length}/${N_slabs}
-
-fix              PRINT all print ${skip_thermo} "${s} ${t} ${T} ${TE} ${KE} ${PE} ${P}" file lammps.thermo screen no title "# k [#] t [ps] T [K] TE [eV] KE [eV] PE [eV] P [bar]"
+thermo           ${skip_thermo}
+thermo_style     custom v_t temp v_KE
 
 fix               NVE all nve
-fix 			  KEA all ave/spatial 1 ${skip_swap} ${skip_swap} z 0 ${dL} c_T units lattice file Tregions.dat
 fix               MPE all thermal/conductivity ${skip_swap} z ${N_slabs}
-
 variable          MP  equal f_MPE
 fix               PNT all print ${skip_swap} "${t} ${MP}" append MP.dat
+fix 		      KEA all ave/chunk 1 ${skip_swap} ${skip_swap} chunk1 temp file Tregions.dat
+
+#fix 		      KEA all ave/spatial 1 ${skip_swap} ${skip_swap} z 0 ${dL} temp units lattice file Tregions.dat
 
 run              ${N_steps}
-

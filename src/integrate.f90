@@ -6,13 +6,10 @@ module integrate_mod
     
     logical::doThermostat = .false.
     logical::doBarostat = .false.
-    integer::hot, cold
     
     public::setThermostat
     public::setBarostat
-    public::hot
-    public::cold
-    
+   
     public::velocityVerlet
     public::leapFrog
     public::doBox
@@ -139,10 +136,10 @@ contains
         o = (1.0_wp/barostat%tau**2)*(pressure()/barostat%set-1.0_wp)
     end function DepsilonDt
     
-    subroutine rnem(k)
+    subroutine rnem(k, h, c)
 	    integer, intent(in)::k
         integer,dimension(:), allocatable::l
-        integer::j
+        integer::j, h, c
         real(wp):: abc, t
         
         abc = real(latM(3)*lattice_const/N_slabs, wp)
@@ -150,8 +147,8 @@ contains
         do j=1, N_slabs
             l = regionList(j*abc - abc, j*abc)
             regions(k+1)%temps(j) = listTemp(l)
-            if (j==1) hot = selectHot(l)
-            if (j==6) cold = selectCold(l)
+            if (j==1) h = selectHot(l)
+            if (j==6) c = selectCold(l)
         end do
          
     end subroutine rnem
