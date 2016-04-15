@@ -150,7 +150,7 @@ contains
             if (j==1) h = selectHot(l)
             if (j==6) c = selectCold(l)
         end do
-         
+				write(*,*) h,c,N_slabs
     end subroutine rnem
     
     subroutine swapAtoms(h,c)

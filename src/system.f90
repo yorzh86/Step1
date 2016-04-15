@@ -94,8 +94,8 @@ contains
         allocate(types(1))
         allocate(atoms(size(rcell,2)*product(N)))
         
-        allocate(times(N_steps))
-        allocate(energies(ns,2))
+!         allocate(times(N_steps))
+!         allocate(energies(ns,2))
                 
         allocate(regions(N_steps+1))
 

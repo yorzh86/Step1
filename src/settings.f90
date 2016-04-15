@@ -82,7 +82,7 @@ contains
         
         != Simulation =!
         N_steps       = 20
-        N_slabs       = 2
+        N_slabs       = 10
         skip_swap     = 10
         skip_thermo   = 1
         skip_dump     = 1

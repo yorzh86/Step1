@@ -36,8 +36,8 @@ contains
         call initialize_parameters()
                     
         enableLennardJones = .true.
-        call setThermostat(.false.,T0,10.0_wp*dt)
-        call setBarostat(.false.,P0, 5.0E10_wp*dt)
+        call setThermostat(.true.,T0,10.0_wp*dt)
+        call setBarostat(.true.,P0, 5.0E10_wp*dt)
         !call writeBasicInfo()
         call buildSystem(lattice_const,latM,T0)
         call doBox()
@@ -52,17 +52,22 @@ contains
         real(wp)::start, finish
         character(128)::buf
         
-		call cpu_time(start)
+				call cpu_time(start)
         do k=0, N_steps
-            call rnem(k, h, c)
-			if(mod(k,skip_swap)==0)    call swapAtoms(h, c)
+						if(k==N_steps/3) then
+							call setThermostat(.false.)
+							call setBarostat(.false.)
+						end if
+						if(mod(k,skip_swap)==0) then
+							call rnem(k, h, c)
+							call swapAtoms(h, c)
+						end if
             if(mod(k,skip_thermo)==0)  call writeStepThermo(k, iou_temps)
-			if(mod(k,skip_swap)==0)    call writeStepEnergies(k,iou_energies,h,c)
-			if(mod(k,skip_dump)==0)    call writeStepXYZ(iou_xyz)
-            if(mod(k,skip_neighbor)==0)call updateAllNeighbors()              
-            
-            times(k) = k*dt
-            if(mod(k,skip_swap)==0) energies(:,:) = times(k),(KEi(h), KEi(c))
+						if(mod(k,skip_swap)==0)    call writeStepEnergies(k,iou_energies,h,c)
+						if(mod(k,skip_dump)==0)    call writeStepXYZ(iou_xyz)
+            if(mod(k,skip_neighbor)==0)call updateAllNeighbors()
+!             times(k) = k*dt
+!             if(mod(k,skip_swap)==0) energies(:,:) = times(k),(KEi(h), KEi(c))
             call velocityVerlet(dt)
             call doBox()
         end do

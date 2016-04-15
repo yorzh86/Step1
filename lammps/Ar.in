@@ -32,6 +32,9 @@ variable         P  equal c_P
 thermo           ${skip_thermo}
 thermo_style     custom v_t temp v_KE
 
+fix               NPT all npt [args...]
+run              ${N_steps}
+
 fix               NVE all nve
 fix               MPE all thermal/conductivity ${skip_swap} z ${N_slabs}
 variable          MP  equal f_MPE
