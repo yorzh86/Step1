@@ -86,7 +86,7 @@ contains
         skip_swap     = 100
         skip_thermo   = 1
         skip_dump     = 1
-        skip_neighbor = 20
+        skip_neighbor = 200
         
         lattice_const = convert(5.40_wp, 'A', 'm')
         latM = [5,5,15]

@@ -86,7 +86,6 @@ contains
                  0.0_wp, 0.5_wp, 0.5_wp, &
                  0.5_wp, 0.0_wp, 0.5_wp  ], [3,4])
         integer::i,j,k,l,idx, ns
-        integer:: iou_lammps=1
         
         box = a*real(N,wp)
         ns = nint(real(N_steps/skip_swap,wp))
@@ -95,11 +94,6 @@ contains
         allocate(atoms(size(rcell,2)*product(N)))
         allocate(mullerplathe(0:N_steps))
                        
-!         do i=0,N_steps
-! 					allocate(mullerplathe(i)%temps(N_slabs+2))
-! 					allocate(mullerplathe(i)%energies(4))
-!         end do
-    
         types%m = convert(39.948_wp,'u','kg')
         types%atom_name = 'Ar'
         atoms(:)%t = 1

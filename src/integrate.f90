@@ -13,7 +13,6 @@ module integrate_mod
 	public::hot, cold
    
 	public::velocityVerlet
-	public::leapFrog
 	public::doBox
 	public::swapAtoms
 	public::rnem
@@ -118,8 +117,8 @@ contains
 		integer, intent(in)::k
 		integer,dimension(:), allocatable::l
 		real(wp),dimension(N_slabs)::temperatures
-		integer::j, h, c
-		real(wp):: abc, t
+		integer::j
+		real(wp):: abc
 		
 		abc = real(latM(3)*lattice_const/N_slabs, wp)
 		
@@ -138,7 +137,6 @@ contains
 	  !! to swap masses (add when needed):
 	  !! - either change their types, or swap atoms of same type
 		real(wp)::t
-		integer::i
 		integer,  intent(in)::k
 		real(wp), dimension(3)::swapv
 		t = convert((k*dt),'s','ps')
