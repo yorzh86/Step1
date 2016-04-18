@@ -7,7 +7,6 @@ set(source
 	"src/kinds.f90"
 	"src/main.f90"
 	"src/output.f90"
-	#"src/plplotlib.f90"
 	"src/system.f90"
 	"src/settings.f90"
 	"src/units.f90"

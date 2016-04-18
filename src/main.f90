@@ -32,7 +32,7 @@ contains
 		open(file='step1.energies',newunit=iou_energies)
 		
 		call initialize_parameters()
-					
+
 		enableLennardJones = .true.
 		call setThermostat(.true.,T0,10.0_wp*dt)
 		call setBarostat(.true.,P0, 5.0E10_wp*dt)
@@ -55,7 +55,7 @@ contains
 			end if
 			
 			call rnem(k)
-			if(mod(k,skip_swap)==0) 	call swapAtoms(k)
+			if(mod(k,skip_swap)==0)     call swapAtoms(k)
 			if(mod(k,skip_thermo)==0)   call writeStepThermo(k, iou_temps)
 			if(mod(k,skip_swap)==0)     call writeStepEnergies(k,iou_energies)
 			!if(mod(k,skip_dump)==0)    call writeStepXYZ(iou_xyz)

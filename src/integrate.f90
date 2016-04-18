@@ -99,7 +99,7 @@ contains
 		end forall
 	end subroutine doBox
 
-	pure function DetaDt() result(o)
+	function DetaDt() result(o)
 		!! Calculates damping parameter("eta") change over time
 		real(wp)::o
 		
@@ -129,7 +129,7 @@ contains
 			if (j==N_slabs/2+1) cold = selectCold(l)
 		end do
 		
-		mullerplathe(k)%temps = [ real(convert((k*dt),'s','ps'),wp),real(k,wp),temperatures ]
+		regions(k)%temps = [ real(convert((k*dt),'s','ps'),wp),real(k,wp),temperatures ]
 	end subroutine rnem
 	
 	subroutine swapAtoms(k)
@@ -140,9 +140,9 @@ contains
 		integer,  intent(in)::k
 		real(wp), dimension(3)::swapv
 		t = convert((k*dt),'s','ps')
-                          
-		mullerplathe(k)%energies = [ t,real(k,wp),convert(KEi(hot),'J','eV'),convert(KEi(cold),'J','eV') ]
-        		
+
+		regions(k)%energies = [ t,real(k,wp),convert(KEi(hot),'J','eV'),convert(KEi(cold),'J','eV') ]
+
 		swapv = atoms(hot)%v
 		atoms(hot)%v = atoms(cold)%v
 		atoms(cold)%v = swapv
