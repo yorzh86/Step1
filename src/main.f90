@@ -10,6 +10,7 @@ program main_prg
 	use integrate_mod
 	use output_mod
 	use lmpIntegrator_mod
+    use progress_mod
 	implicit none
 	
 	integer::iou_xyz
@@ -20,11 +21,12 @@ program main_prg
 		!! I/O unit to write energies before swap
 	integer::iou_temps
 		!! I/O unit to write temperatures
+    real(wp)::p
 		
 	call setupSim()
 	call runSim()
 	call endSim()
-    call showResults()
+    !call showResults()
 	
 contains
 
@@ -52,8 +54,11 @@ contains
 		real(wp)::start, finish
 		character(128)::buf
 		
+        
         call cpu_time(start)
 		do k=0, N_steps
+            p = real(k,wp)/real(N_steps, wp)
+            call showProgress1(' Simulation ongoing', p)
             if(k==N_steps/3) then
 				call setThermostat(.false.)
 				call setBarostat(.false.)
@@ -69,11 +74,12 @@ contains
 			call velocityVerlet(dt)
 			call doBox()
 		end do
-        
                         
 		call cpu_time(finish)
 		write(*,'(/,1X,1A23, T40, 1A50  )')'FINISHED! Elapsed time:', &
 			& writeUsedTime(finish-start)
+              !real2time(finish-start)
+             
 		
 	end subroutine runSim
 	
@@ -82,24 +88,5 @@ contains
 		close(iou_temps)
 		close(iou_energies)
 	end subroutine endSim
-    
-    subroutine showResults
-        integer::i
-        print *,
-        write(*,*) 'Writing time[ps], timestep and temperatures for regions:'
-        do i=1, N_steps+1
-            write(*,'(1X, 1F8.2, 1F10.0, 10F15.8 )') regions(i)%temps
-        end do
-        
-        print *,
-        write(*,*) 'Writing time[ps], timestep and kinetic energies before swap:'
-        do i= 0, N_steps/skip_swap
-            write(*, '(1X, 1F8.2, 1F10.0, 2F17.10)') times(i*5+1)%energies
-            
-            ! In fact we store ZEROS between swap steps. Try i=0, N_steps:
-            ! write(*, '(1X, 1F8.2, 1F10.0, 2F17.10)') times(i)%energies
-        end do
-        
-    end subroutine showResults
 	
 end program main_prg 

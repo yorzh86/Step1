@@ -7,6 +7,30 @@ module output_mod
     
 contains
 
+    subroutine showResults
+        integer::i
+        print *,
+        write(*,*) 'Writing time[ps], timestep and temperatures for regions:'
+        do i=1, N_steps+1
+            write(*,'(1X, 1F8.2, 1F10.0, 10F15.8 )') mullerplathe(i)%temps
+        end do
+        
+        print *,
+        write(*,*) 'Writing time[ps], timestep and kinetic energies before swap:'
+        
+        !how we store energies:
+        do i=1, N_steps+1
+            write(*, '(1X, 1F8.2, 1F10.0, 2F17.10)') mullerplathe(i)%energies
+        end do
+        
+        !how we can print energies:
+        print *,
+        do i= 0, N_steps/skip_swap
+            write(*, '(1X, 1F8.2, 1F10.0, 2F17.10)') mullerplathe(i*5+1)%energies
+        end do
+        
+    end subroutine showResults
+
     subroutine writeStepXYZ(iou)
         integer,intent(in)::iou
         
@@ -37,7 +61,7 @@ contains
         
         t = k*1E-2_wp
 
-        write(iou_temps,'(1X, 1F8.2, 1F10.0, 10F15.8)') regions(k+1)%temps
+        write(iou_temps,'(1X, 1F8.2, 1F10.0, 10F15.8)') mullerplathe(k+1)%temps
 
     end subroutine writeStepThermo
     
@@ -57,7 +81,7 @@ contains
         write(iou_energies,'(1X, 1F7.2, 1I7, 2F15.8)') t,  k, & 
             & convert(KEi(hot), 'J','eV'), &
             & convert(KEi(cold), 'J', 'eV')
-        
+            
     end subroutine writeStepEnergies
     
     subroutine writeBasicInfo ()
@@ -77,12 +101,14 @@ contains
             & size(regionList(0.0_wp, real(latM(3)*lattice_const/N_slabs, wp)))
         write(*,'(1X, 1A25, T40, 1F4.1, 1A5)')'Time to build the system:', &
             & (finish-start), ' sec.'
-        write(*,'(1X, 1A33, T40, 1A50)') 'Estimated time to run simulation:', & 
+        write(*,'(1X, 1A33, T40, 1A50, /)') 'Estimated time to run simulation:', & 
             writeUsedTime(estimateTime(N_steps))
+        !write(*,'(1X, 1A33, T40, 1A20, /)') 'Estimated time to run simulation:', & 
+        !   real2time(estimateTime(N_steps))
+        !Error: Function 'real2time' at (1) has no IMPLICIT type
 
         if (allocated(atoms)) deallocate(atoms)
-        if (allocated(regions)) deallocate(regions)
-        if (allocated(times)) deallocate(times)
+        if (allocated(mullerplathe)) deallocate(mullerplathe)
         if (allocated(types)) deallocate(types)
 
             
@@ -96,7 +122,7 @@ contains
             open(file='mark1.test',newunit=iou_test) 
             
             call cpu_time(start)
-            do k= 0, 10
+            do k= 0, 50
                 call rnem(k)
                 !if(mod(k,skip_dump)==0)     call writeStepXYZ(iou_test)
                 if(mod(k,skip_neighbor)==0) call updateAllNeighbors()
@@ -105,7 +131,7 @@ contains
             end do
             call cpu_time(finish)
             
-            o = (finish-start)*(N/10)
+            o = (finish-start)*(N/51)
             
             close(iou_test)
             

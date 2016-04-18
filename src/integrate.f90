@@ -154,7 +154,7 @@ contains
 			if (j==6) cold = selectCold(l)
 		end do
 		
-        regions(k+1)%temps(:) = (/real(convert((k*dt),'s','ps'),wp),real(k,wp),&
+        mullerplathe(k+1)%temps(:) = (/real(convert((k*dt),'s','ps'),wp),real(k,wp),&
                 temperatures/)
         
 	end subroutine rnem
@@ -163,14 +163,16 @@ contains
 	  !! Swapping atoms' velocities
 	  !! to swap masses (add when needed):
 	  !! - either change their types, or swap atoms of same type
-		integer::i
+		real(wp)::t
+        integer::i
 		integer,  intent(in)::k
 		real(wp), dimension(3)::swapv
-		
-		times(k+1)%energies(:)= (/real(convert((k*dt),'s','ps'),wp),real(k,wp),&
+		t = convert((k*dt),'s','ps')
+                          
+        mullerplathe(k+1)%energies(:)= (/ t, real(k,wp),&
             convert(KEi(hot), 'J','eV'), &
             convert(KEi(cold), 'J','eV')/)
-		
+        		
 		swapv = atoms(hot)%v
 		atoms(hot)%v = atoms(cold)%v
 		atoms(cold)%v = swapv

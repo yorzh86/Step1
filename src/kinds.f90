@@ -19,22 +19,35 @@ module kinds_mod
         !! Set working precision to double
     
     !==================!
-    != Math Constants =!
-    !==================!
+	!= Math Constants =!
+	!==================!
+	
+	real(wp),parameter::PI = 4.0_wp*atan(1.0_wp)
+		!! Archimedes' constant
+	real(wp),parameter::E  = exp(1.0_wp)
+		!! Euler's constant
+	
     
-    real(wp),parameter::PI = 4.0_wp*atan(1.0_wp)
-        !! Archimedes' constant
-    real(wp),parameter::E  = exp(1.0_wp)
-        !! Euler's constant
-    
-    !===========!
-    != Exports =!
-    !===========!
-
-    public::wp
-    public::PI
-    
-    public::printTypes
+	!==================!
+	!= Buffer Lengths =!
+	!==================!
+	
+	integer,parameter::str_long = 128
+	character(:),parameter::fmt_long = '(1A128)'
+	integer,parameter::str_short = 32
+	character(:),parameter::fmt_short = '(1A32)'
+	
+	!===========!
+	!= Exports =!
+	!===========!
+	
+	public::sp,dp,ep,qp,wp
+	public::PI
+	
+	public::str_long,str_short
+	public::fmt_long,fmt_short
+	
+	public::printTypes
     
 contains
 

@@ -13,6 +13,7 @@ set(source
 	"src/units.f90"
 	"src/utilities.f90"
 	"src/lmpIntegrator.f90"
+	"src/progress.f90"
 	)
 
 set(CMAKE_Fortran_FLAGS "")

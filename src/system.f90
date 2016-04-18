@@ -54,8 +54,8 @@ module system_mod
         !! Types for all atoms in system
     type(atom_t),dimension(:),allocatable::atoms
         !! All atoms in system
-    type(region_t),dimension(:),allocatable::regions
-    type(region_t),dimension(:),allocatable::times
+    type(region_t),dimension(:),allocatable::mullerplathe
+    
     
     real(wp)::Teta = 0.0_wp
         !! Thermostat DOF
@@ -93,12 +93,11 @@ contains
                 
         allocate(types(1))
         allocate(atoms(size(rcell,2)*product(N)))
-        allocate(regions(N_steps+1))
-        allocate(times(N_steps+1))
+        allocate(mullerplathe(N_steps+1))
                        
         do i=1, N_steps+1
-            allocate(regions(i)%temps(N_slabs+2))
-            allocate(times(i)%energies(4))
+            allocate(mullerplathe(i)%temps(N_slabs+2))
+            allocate(mullerplathe(i)%energies(4))
         end do
     
         types%m = convert(39.948_wp,'u','kg')
