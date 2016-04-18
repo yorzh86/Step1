@@ -93,12 +93,12 @@ contains
                 
         allocate(types(1))
         allocate(atoms(size(rcell,2)*product(N)))
-        allocate(mullerplathe(N_steps+1))
+        allocate(mullerplathe(0:N_steps))
                        
-        do i=1, N_steps+1
-            allocate(mullerplathe(i)%temps(N_slabs+2))
-            allocate(mullerplathe(i)%energies(4))
-        end do
+!         do i=0,N_steps
+! 					allocate(mullerplathe(i)%temps(N_slabs+2))
+! 					allocate(mullerplathe(i)%energies(4))
+!         end do
     
         types%m = convert(39.948_wp,'u','kg')
         types%atom_name = 'Ar'
@@ -230,17 +230,6 @@ contains
             o = o+delVij(i,aj,r)
         end do
     end function delV
-    
-    pure function fnorm() result(o)
-        real(wp)::o
-        integer::k
-        
-        o = 0.0_wp
-        do k=1,size(atoms)
-            o = o + sum(atoms(k)%f**2)
-        end do
-        o = sqrt(o)
-    end function fnorm
     
     pure function delVij(i,j,d) result (o)
         !! Force between two atoms
@@ -386,27 +375,6 @@ contains
         
     end function Si
 
-    pure function heatflux() result(o)
-        real(wp),dimension(3)::o
-        
-        integer::i,j,aj
-        real(wp),dimension(3)::Fij,rij
-        
-        o = 0.0_wp
-
-        do i=1,size(atoms)
-            o = o+Ei(i)*atoms(i)%v
-            do j=1,size(atoms(i)%neighbors)
-                aj = atoms(i)%neighbors(j)
-                rij  = deltaR(atoms(i),atoms(aj))
-                if( norm2(rij)>lj%cutoff ) cycle
-                Fij = delVij(i,aj,rij)
-                !Fij = atoms(i)%f
-                o = o+dot_product(Fij,atoms(i)%v)*rij
-            end do
-        end do
-    end function heatflux
-
     subroutine updateAllNeighbors()
         integer::k
         
@@ -460,20 +428,6 @@ contains
         
         o = (real(size(atoms),wp)*kB*temperature()-virial()/3.0_wp)/product(box)
     end function pressure
-    
-    subroutine sub1()
-        
-        !! Subroutine calculates temperature of every atom
-        integer::i
-        real(wp)::mm
-        
-        do i=1, size(atoms)
-            !! calculate temperature
-            mm = types(atoms(i)%t)%m*norm2(atoms(i)%v)**2
-            atoms(i)%tt = mm/(3.0_wp*kB)
-        end do
-    
-    end subroutine sub1
 
     function regionList(zl,zh) result(o)
         !! Stores an array of atoms(i)%atoms_id that belong to a region

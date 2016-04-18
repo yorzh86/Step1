@@ -26,7 +26,7 @@ program main_prg
 	call setupSim()
 	call runSim()
 	call endSim()
-    !call showResults()
+  call showResults()
 	
 contains
 
@@ -41,7 +41,7 @@ contains
 		enableLennardJones = .true.
 		call setThermostat(.true.,T0,10.0_wp*dt)
 		call setBarostat(.true.,P0, 5.0E10_wp*dt)
-		call writeBasicInfo()
+! 		call writeBasicInfo()
 		call buildSystem(lattice_const,latM,T0)
 		call doBox()
 				  
@@ -54,32 +54,32 @@ contains
 		real(wp)::start, finish
 		character(128)::buf
 		
-        
-        call cpu_time(start)
+		
+		call cpu_time(start)
 		do k=0, N_steps
-            p = real(k,wp)/real(N_steps, wp)
-            call showProgress1(' Simulation ongoing', p)
-            if(k==N_steps/3) then
+			p = real(k,wp)/real(N_steps, wp)
+			call showProgress1(' Simulation ongoing', p)
+			if(k==N_steps/3) then
 				call setThermostat(.false.)
 				call setBarostat(.false.)
 			end if
-            
-            call rnem(k)
-            if(mod(k,skip_swap)==0) 	call swapAtoms(k)
+			
+			call rnem(k)
+			if(mod(k,skip_swap)==0) 	call swapAtoms(k)
 			if(mod(k,skip_thermo)==0)   call writeStepThermo(k, iou_temps)
 			if(mod(k,skip_swap)==0)     call writeStepEnergies(k,iou_energies)
 			!if(mod(k,skip_dump)==0)    call writeStepXYZ(iou_xyz)
 			if(mod(k,skip_neighbor)==0) call updateAllNeighbors()
-            
+			
 			call velocityVerlet(dt)
 			call doBox()
 		end do
-                        
+		
 		call cpu_time(finish)
 		write(*,'(/,1X,1A23, T40, 1A50  )')'FINISHED! Elapsed time:', &
 			& writeUsedTime(finish-start)
-              !real2time(finish-start)
-             
+		!real2time(finish-start)
+		
 		
 	end subroutine runSim
 	

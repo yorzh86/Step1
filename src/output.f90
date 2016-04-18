@@ -11,7 +11,7 @@ contains
         integer::i
         print *,
         write(*,*) 'Writing time[ps], timestep and temperatures for regions:'
-        do i=1, N_steps+1
+        do i=0, N_steps
             write(*,'(1X, 1F8.2, 1F10.0, 10F15.8 )') mullerplathe(i)%temps
         end do
         
@@ -19,14 +19,9 @@ contains
         write(*,*) 'Writing time[ps], timestep and kinetic energies before swap:'
         
         !how we store energies:
-        do i=1, N_steps+1
-            write(*, '(1X, 1F8.2, 1F10.0, 2F17.10)') mullerplathe(i)%energies
-        end do
-        
-        !how we can print energies:
-        print *,
-        do i= 0, N_steps/skip_swap
-            write(*, '(1X, 1F8.2, 1F10.0, 2F17.10)') mullerplathe(i*5+1)%energies
+        do i=0, N_steps
+					if(.not. allocated(mullerplathe(i)%energies)) cycle
+					write(*, '(1X, 1F8.2, 1F10.0, 2F17.10)') mullerplathe(i)%energies
         end do
         
     end subroutine showResults
@@ -61,7 +56,7 @@ contains
         
         t = k*1E-2_wp
 
-        write(iou_temps,'(1X, 1F8.2, 1F10.0, 10F15.8)') mullerplathe(k+1)%temps
+        write(iou_temps,'(1X, 1F8.2, 1F10.0, 10F15.8)') mullerplathe(k)%temps
 
     end subroutine writeStepThermo
     

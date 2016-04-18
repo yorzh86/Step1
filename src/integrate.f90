@@ -90,30 +90,6 @@ contains
 		ts = ts+1
 	end subroutine velocityVerlet
 
-	subroutine leapFrog(dt)
-		!! Leap frog integration
-		real(wp),intent(in)::dt
-		
-		real(wp),dimension(3)::d,ao
-		integer::k
-		
-		do k=1,size(atoms)
-			d = atoms(k)%v*dt+0.5_wp*atoms(k)%a*dt**2
-			atoms(k)%r = atoms(k)%r+d+Pepsilon*atoms(k)%r
-		end do
-		do k=1,size(atoms)
-			ao = atoms(k)%a
-			atoms(k)%a = -delV(k)/types(atoms(k)%t)%m-(Teta+Pepsilon)*atoms(k)%v
-			atoms(k)%v = atoms(k)%v+0.5_wp*(ao+atoms(k)%a)*dt
-		end do
-		
-		if(doThermostat) Teta = Teta+DetaDt()*dt
-		if(doBarostat) Pepsilon = Pepsilon+DepsilonDt()*dt
-		box = box+Pepsilon*box
-		t  = t+dt
-		ts = ts+1
-	end subroutine leapFrog
-
 	subroutine doBox
 		!! Returns moving atoms into the simulation box
 		integer::k
@@ -141,7 +117,7 @@ contains
 	subroutine rnem(k)
 		integer, intent(in)::k
 		integer,dimension(:), allocatable::l
-        real(wp),dimension(10)::temperatures
+		real(wp),dimension(N_slabs)::temperatures
 		integer::j, h, c
 		real(wp):: abc, t
 		
@@ -149,14 +125,12 @@ contains
 		
 		do j=1, N_slabs
 			l = regionList(j*abc - abc, j*abc)
-            temperatures(j) = listTemp(l)
+			temperatures(j) = listTemp(l)
 			if (j==1) hot = selectHot(l)
-			if (j==6) cold = selectCold(l)
+			if (j==N_slabs/2+1) cold = selectCold(l)
 		end do
 		
-        mullerplathe(k+1)%temps(:) = (/real(convert((k*dt),'s','ps'),wp),real(k,wp),&
-                temperatures/)
-        
+		mullerplathe(k)%temps = [ real(convert((k*dt),'s','ps'),wp),real(k,wp),temperatures ]
 	end subroutine rnem
 	
 	subroutine swapAtoms(k)
@@ -164,19 +138,16 @@ contains
 	  !! to swap masses (add when needed):
 	  !! - either change their types, or swap atoms of same type
 		real(wp)::t
-        integer::i
+		integer::i
 		integer,  intent(in)::k
 		real(wp), dimension(3)::swapv
 		t = convert((k*dt),'s','ps')
                           
-        mullerplathe(k+1)%energies(:)= (/ t, real(k,wp),&
-            convert(KEi(hot), 'J','eV'), &
-            convert(KEi(cold), 'J','eV')/)
+		mullerplathe(k)%energies = [ t,real(k,wp),convert(KEi(hot),'J','eV'),convert(KEi(cold),'J','eV') ]
         		
 		swapv = atoms(hot)%v
 		atoms(hot)%v = atoms(cold)%v
 		atoms(cold)%v = swapv
-	   
 	end subroutine swapAtoms
 	
 end module integrate_mod
