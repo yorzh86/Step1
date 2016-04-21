@@ -80,31 +80,37 @@ contains
 	subroutine writeBasicInfo ()
 		integer::i
 
-		write(*,'(1X,1A26,T35,1A1,2(1F4.1,", "), 1F5.1, 1A1)')'\x1B[37;1mBox size[A]:\x1B[33;1m:', &
+		write(*,'(1X,1A26,T35,1A1,2(1F4.1,", "),1F5.1,1A1)')'\x1B[37;1mBox size[A]:\x1B[33;1m:', &
 			&  '[',[(convert(box(i), 'm','A'),i=1,3)],']'
-		write(*,'(1X, 1A29, T35, 1A6)') '\x1B[37;1mTemperature[K]:\x1B[33;1m',    &
+		write(*,'(1X, 1A29, T35, 1A6)') '\x1B[37;1mTemperature[K]:\x1B[33;1m',&
 			& adjustl(real2char(T0))
-		write(*,'(1X, 1A30, T35, 1A6)')  '\x1B[37;1mNumber of atoms:\x1B[33;1m', & 
+		write(*,'(1X, 1A30, T35, 1A6)')  '\x1B[37;1mNumber of atoms:\x1B[33;1m',& 
 			& adjustl(int2char(size(atoms)))
-		write(*,'(1X, 1A30, T35, 1A6)')  '\x1B[37;1mNumber of steps:\x1B[33;1m', &
+		write(*,'(1X, 1A30, T35, 1A6)')  '\x1B[37;1mNumber of steps:\x1B[33;1m',&
 			& adjustl(trim(int2char(N_steps)))
-		write(*,'(1X, 1A31, T35, 1A6)')'\x1B[37;1mUpdate neighbors:\x1B[33;1m', &
+		write(*,'(1X, 1A31, T35, 1A6)')'\x1B[37;1mUpdate neighbors:\x1B[33;1m',&
 			& adjustl(int2char(skip_neighbor))
-		write(*,'(1X, 1A31, T35, 1A6,/)')'\x1B[37;1mSkip_swap factor:\x1B[33;1m', &
+		write(*,'(1X, 1A31, T35, 1A6,/)')'\x1B[37;1mSkip_swap factor:\x1B[33;1m',&
 			& adjustl(int2char(skip_swap))
 		print *, '\x1B[0m'
 
 	end subroutine writeBasicInfo
 
 
-	subroutine doMessage(priority, msg, output)
+	subroutine doMessage(priority, msg, prntToScr, output)
 		integer, intent(in)::priority
 		character(len=*), intent(in)::msg
 		integer, optional,intent(in)::output
+		logical, intent(in)::prntToScr
+		character(12) :: time
+		integer,dimension(8) :: values
 
 		character(:), allocatable::temp1
 		character(:), allocatable::color1
 		character(:), allocatable::color2
+		
+		call date_and_time(VALUES=values)
+		time = '<'//int2char(values(5))//':'//int2char(values(6))//':'//int2char(values(7))//'>'
 
 		select case (priority)
 			case(1)
@@ -130,7 +136,7 @@ contains
 			write(output,*) temp1, msg 
 		end if
 
-		write(*,*) color1//temp1//color2, msg
+		if (prntToScr) write(*,*)color1//time, color1//temp1//color2, msg
 		print *, '\x1B[0m'
 	end subroutine doMessage
 

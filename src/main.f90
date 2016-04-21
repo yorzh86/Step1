@@ -74,8 +74,9 @@ contains
 	
 	subroutine endSim
 	integer::i
+
 	do i=1, 4
-		call doMessage(i, 'hello world!', iou_log)
+		call doMessage(i, 'hello world!', .true., iou_log)
 	end do
 		close(iou_xyz)
 		close(iou_temps)
