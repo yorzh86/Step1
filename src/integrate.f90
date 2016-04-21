@@ -115,22 +115,20 @@ contains
 	
 	subroutine rnem(k)
 		integer, intent(in)::k
-		integer,dimension(:), allocatable::l
+		
 		real(wp),dimension(N_slabs)::temperatures
 		integer::j
-		real(wp):: abc
-		
-		abc = real(latM(3)*lattice_const/N_slabs, wp)
-		
+
 		do j=1, N_slabs
-			l = regionList(j*abc - abc, j*abc)
-			temperatures(j) = listTemp(l)
-			if (j==1) hot = selectHot(l)
-			if (j==N_slabs/2+1) cold = selectCold(l)
+			temperatures(j) = listTemp(listofRegions)
+			if (j==1) hot = selectHot(listofRegions)
+			if (j==N_slabs/2+1) cold = selectCold(listofRegions)
 		end do
 		
 		regions(k)%temps = [ real(convert((k*dt),'s','ps'),wp),real(k,wp),temperatures ]
+	
 	end subroutine rnem
+
 	
 	subroutine swapAtoms(k)
 	  !! Swapping atoms' velocities

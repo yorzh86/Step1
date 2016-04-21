@@ -17,8 +17,10 @@ program main_prg
 		!! I/O unit to write energies before swap
 	integer::iou_temps
 		!! I/O unit to write temperatures
+	integer::iou_log
+		!! I/O unit for log_file
 	real(wp)::p
-		
+
 	call setupSim()
 	call runSim()
 	call endSim()
@@ -26,11 +28,12 @@ program main_prg
 contains
 
 	subroutine setupSim
-		
+
 		open(file='step1.xyz',newunit=iou_xyz)        
 		open(file='step1.temps',newunit=iou_temps)
 		open(file='step1.energies',newunit=iou_energies)
-		
+		open(file='step1.log',newunit=iou_log)
+
 		call initialize_parameters()
 
 		enableLennardJones = .true.
@@ -42,7 +45,7 @@ contains
 		call writeLammpsData('Ar.data')
 		call writeLammpsVars('Ar.vars')
 	end subroutine setupSim
-		
+
 	subroutine runSim
 		integer::k
 
@@ -53,8 +56,9 @@ contains
 				call setThermostat(.false.)
 				call setBarostat(.false.)
 			end if
-			
+
 			call rnem(k)
+
 			if(mod(k,skip_swap)==0)     call swapAtoms(k)
 			if(mod(k,skip_thermo)==0)   call writeStepThermo(k, iou_temps)
 			if(mod(k,skip_swap)==0)     call writeStepEnergies(k,iou_energies)
@@ -65,15 +69,18 @@ contains
 			call doBox()
 		end do
 		
-		write(*,'(/,1X, 1A11 )') 'FINISHED!!!'
-
-
+		write(*,'(/,1X, 1A23,/ )') '\x1B[37;42mFINISHED!!!\x1B[0m'
 	end subroutine runSim
 	
 	subroutine endSim
+	integer::i
+	do i=1, 4
+		call doMessage(i, 'hellow world!', iou_log)
+	end do
 		close(iou_xyz)
 		close(iou_temps)
 		close(iou_energies)
+		close(iou_log)
 	end subroutine endSim
-	
+
 end program main_prg 

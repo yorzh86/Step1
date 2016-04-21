@@ -64,6 +64,9 @@ module system_mod
 	real(wp),dimension(3)::box
 		!! Bounds of the simulation box
 	
+	integer,dimension(:),allocatable::listofRegions
+	
+	public::listofRegions
 	
 	integer::ts
 		!! Time step counter
@@ -370,11 +373,19 @@ contains
 	end function Si
 
 	subroutine updateAllNeighbors()
-		integer::k
+		integer::k, j
+		real(wp)::abc
+		
+		abc = real(latM(3)*lattice_const/N_slabs, wp)
 		
 		do k=1,size(atoms)
 			call updateNeighbors(k)
 		end do
+		
+		do j=1, N_slabs
+			listofRegions = regionList(j*abc - abc, j*abc)
+		end do
+		
 	end subroutine updateAllNeighbors
 
 	subroutine updateNeighbors(i)
@@ -383,7 +394,7 @@ contains
 		real(wp),dimension(3)::r
 		integer::k
 		
-		atoms(i)%neighbors = [integer::] !! WHAT IS THIS and can we do it with REGIONS?
+		atoms(i)%neighbors = [integer::]
 		do k=1,size(atoms)
 			if(i==k) cycle
 			r  = deltaR(atoms(i),atoms(k))

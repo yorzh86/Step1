@@ -80,16 +80,58 @@ contains
 	subroutine writeBasicInfo ()
 		integer::i
 
-		write(*,'(/, 1X,1A12, T29, 1A1, 2(1F4.1,", "), 1F5.1, 1A1)')'Box size[A]:', &
+		write(*,'(1X,1A22,T30,1A1,2(1F4.1,", "), 1F5.1, 1A1)')'\x1B[37mBox size[A]:\x1B[33m:', &
 			&  '[',[(convert(box(i), 'm','A'),i=1,3)],']'
-		write(*,'(1X, 1A15, T30, 1F5.1)') 'Temperature[K]:', T0
-		write(*,'(1X, 1A16, T30, 1I5)') 'Number of atoms:', size(atoms)
-		write(*,'(1X, 1A16, T30, 1I6)') 'Number of steps:', N_steps
-		write(*,'(1X, 1A17, T30, 1I3,/)') 'Skip_swap factor:', skip_swap
+		write(*,'(1X, 1A25, T30, 1A6)') '\x1B[37mTemperature[K]:\x1B[33m',    &
+			& adjustl(real2char(T0))
+		write(*,'(1X, 1A26, T30, 1A6)')  '\x1B[37mNumber of atoms:\x1B[33m', & 
+			& adjustl(int2char(size(atoms)))
+		write(*,'(1X, 1A26, T30, 1A6)')  '\x1B[37mNumber of steps:\x1B[33m', &
+			& adjustl(trim(int2char(N_steps)))
+		write(*,'(1X, 1A27, T30, 1A6)')'\x1B[37mUpdate neighbors:\x1B[33m', &
+			& adjustl(int2char(skip_neighbor))
+		write(*,'(1X, 1A27, T30, 1A6,/)')'\x1B[37mSkip_swap factor:\x1B[33m', &
+			& adjustl(int2char(skip_swap))
+		print *, '\x1B[0m'
 
-		
 	end subroutine writeBasicInfo
 
 
+	subroutine doMessage(priority, msg, output)
+		integer, intent(in)::priority
+		character(len=*), intent(in)::msg
+		integer, optional,intent(in)::output
+
+		character(:), allocatable::temp1
+		character(:), allocatable::color1
+		character(:), allocatable::color2
+
+		select case (priority)
+			case(1)
+				temp1='Error: '
+				color1 = '\x1B[31m'
+				color2 = '\x1B[37m'
+			case(2)
+				temp1='Warning: '
+				color1 = '\x1B[33m'
+				color2 = '\x1B[37m'
+			case(3)
+				temp1='Debug: '
+				color1 = '\x1B[35m'
+				color2 = '\x1B[37m'
+			case default
+				temp1='Attention: '
+				color1 = '\x1B[36m'
+				color2 = '\x1B[37m'
+		end select
+
+		if (present (output)) then
+		!! write into log file
+			write(output,*) temp1, msg 
+		end if
+
+		write(*,*) color1//temp1//color2, msg
+		print *, '\x1B[0m'
+	end subroutine doMessage
 
 end module output_mod

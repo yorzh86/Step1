@@ -14,8 +14,8 @@ set(source
 	)
 
 set(CMAKE_Fortran_FLAGS "")
-set(CMAKE_Fortran_FLAGS_DEBUG "-g -Wall -Wtabs -fcheck=all -ffpe-trap=invalid,zero,overflow -fbacktrace -finit-real=snan -fbackslash")
-set(CMAKE_Fortran_FLAGS_RELEASE "-O3 -mtune=native -march=native")
+set(CMAKE_Fortran_FLAGS_DEBUG "-g -fbackslash -Wall -Wtabs -fcheck=all -ffpe-trap=invalid,zero,overflow -fbacktrace -finit-real=snan")
+set(CMAKE_Fortran_FLAGS_RELEASE "-O3 -mtune=native -march=native -fbackslash")
 
 #include(FindPkgConfig)
 #pkg_search_module(PLPLOT REQUIRED plplot-f95 plplotd-f95)
