@@ -127,7 +127,7 @@ contains
 		end do
 		forall(k=1:3) atoms(:)%v(k) = atoms(:)%v(k)-sum(atoms(:)%v(k))/real(size(atoms),wp)
 		
-		call updateAllNeighbors()
+		call updateAllLists()
 		
 		do k=1,size(atoms)
 			atoms(k)%atom_id = k
@@ -372,7 +372,7 @@ contains
 		
 	end function Si
 
-	subroutine updateAllNeighbors()
+	subroutine updateAllLists()
 		integer::k, j
 		real(wp)::abc
 		
@@ -386,7 +386,7 @@ contains
 			listofRegions = regionList(j*abc - abc, j*abc)
 		end do
 		
-	end subroutine updateAllNeighbors
+	end subroutine updateAllLists
 
 	subroutine updateNeighbors(i)
 		integer,intent(in)::i
