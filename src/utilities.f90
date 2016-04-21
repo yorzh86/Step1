@@ -233,7 +233,7 @@ contains
 		character(20)::pre
 		character(3)::cb
 		
-		write(cb,'(1I3)') 36*c(1)+6*c(2)+c(3)+16
+		write(cb,'(1I3)') 6**2*c(1)+6*c(2)+c(3)+16
 		pre = ESC//'[38;5;'//trim(adjustl(cb))//'m'
 		o = trim(pre)//s//ESC//'[0m'
 	end function colorize

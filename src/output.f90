@@ -97,13 +97,13 @@ contains
 	end subroutine writeBasicInfo
 
 
-	subroutine doMessage(priority, msg, prntToScr, output)
+	subroutine doMessage(priority, msg, ious)
 		integer, intent(in)::priority
 		character(len=*), intent(in)::msg
-		integer, optional,intent(in)::output
-		logical, intent(in)::prntToScr
+		integer, dimension(:),intent(in)::ious
 		character(12) :: time
 		integer,dimension(8) :: values
+		integer::k
 
 		character(:), allocatable::temp1
 		character(:), allocatable::color1
@@ -130,14 +130,15 @@ contains
 				color1 = '\x1B[36;1m'
 				color2 = '\x1B[37;1m'
 		end select
-
-		if (present (output)) then
-		!! write into log file
-			write(output,*) time, temp1, msg 
-		end if
-
-		if (prntToScr) write(*,*)color1//time, color1//temp1//color2, msg
-		print *, '\x1B[0m'
+		
+		do k=1,size(ious)
+			if(ious(k)==stdout) then
+				write(*,*) color1//time, color1//temp1//color2, msg
+				print *, '\x1B[0m'
+			else
+				write(ious(k),*) time, temp1, msg
+			end if
+		end do
 	end subroutine doMessage
 
 end module output_mod
