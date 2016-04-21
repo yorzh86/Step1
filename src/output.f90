@@ -80,17 +80,17 @@ contains
 	subroutine writeBasicInfo ()
 		integer::i
 
-		write(*,'(1X,1A22,T30,1A1,2(1F4.1,", "), 1F5.1, 1A1)')'\x1B[37mBox size[A]:\x1B[33m:', &
+		write(*,'(1X,1A26,T35,1A1,2(1F4.1,", "), 1F5.1, 1A1)')'\x1B[37;1mBox size[A]:\x1B[33;1m:', &
 			&  '[',[(convert(box(i), 'm','A'),i=1,3)],']'
-		write(*,'(1X, 1A25, T30, 1A6)') '\x1B[37mTemperature[K]:\x1B[33m',    &
+		write(*,'(1X, 1A29, T35, 1A6)') '\x1B[37;1mTemperature[K]:\x1B[33;1m',    &
 			& adjustl(real2char(T0))
-		write(*,'(1X, 1A26, T30, 1A6)')  '\x1B[37mNumber of atoms:\x1B[33m', & 
+		write(*,'(1X, 1A30, T35, 1A6)')  '\x1B[37;1mNumber of atoms:\x1B[33;1m', & 
 			& adjustl(int2char(size(atoms)))
-		write(*,'(1X, 1A26, T30, 1A6)')  '\x1B[37mNumber of steps:\x1B[33m', &
+		write(*,'(1X, 1A30, T35, 1A6)')  '\x1B[37;1mNumber of steps:\x1B[33;1m', &
 			& adjustl(trim(int2char(N_steps)))
-		write(*,'(1X, 1A27, T30, 1A6)')'\x1B[37mUpdate neighbors:\x1B[33m', &
+		write(*,'(1X, 1A31, T35, 1A6)')'\x1B[37;1mUpdate neighbors:\x1B[33;1m', &
 			& adjustl(int2char(skip_neighbor))
-		write(*,'(1X, 1A27, T30, 1A6,/)')'\x1B[37mSkip_swap factor:\x1B[33m', &
+		write(*,'(1X, 1A31, T35, 1A6,/)')'\x1B[37;1mSkip_swap factor:\x1B[33;1m', &
 			& adjustl(int2char(skip_swap))
 		print *, '\x1B[0m'
 
@@ -109,20 +109,20 @@ contains
 		select case (priority)
 			case(1)
 				temp1='Error: '
-				color1 = '\x1B[31m'
-				color2 = '\x1B[37m'
+				color1 = '\x1B[31;1m'
+				color2 = '\x1B[37;1m'
 			case(2)
 				temp1='Warning: '
-				color1 = '\x1B[33m'
-				color2 = '\x1B[37m'
+				color1 = '\x1B[33;1m'
+				color2 = '\x1B[37;1m'
 			case(3)
 				temp1='Debug: '
-				color1 = '\x1B[35m'
-				color2 = '\x1B[37m'
+				color1 = '\x1B[35;1m'
+				color2 = '\x1B[37;1m'
 			case default
 				temp1='Attention: '
-				color1 = '\x1B[36m'
-				color2 = '\x1B[37m'
+				color1 = '\x1B[36;1m'
+				color2 = '\x1B[37;1m'
 		end select
 
 		if (present (output)) then
