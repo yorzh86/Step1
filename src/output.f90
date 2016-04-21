@@ -133,7 +133,7 @@ contains
 
 		if (present (output)) then
 		!! write into log file
-			write(output,*) temp1, msg 
+			write(output,*) time, temp1, msg 
 		end if
 
 		if (prntToScr) write(*,*)color1//time, color1//temp1//color2, msg
