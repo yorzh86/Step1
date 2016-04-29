@@ -63,7 +63,7 @@ contains
 		integer, intent(in)::k, iou_energies
 		real(wp)::t
 		
-		t = convert((k*dt),'s','ps')
+		t = convert(real(k,wp)*dt,'s','ps')
 		
 		if (k==0) then      
 			write(iou_energies,'(1X, 1A8, 2X, 1A8, 2X, 1A37)') 'Time[ps],', & 
@@ -83,7 +83,7 @@ contains
 		write(*,'(1X,1A26,T35,1A1,2(1F4.1,", "),1F5.1,1A1)')'\x1B[37;1mBox size[A]:\x1B[33;1m:', &
 			&  '[',[(convert(box(i), 'm','A'),i=1,3)],']'
 		write(*,'(1X, 1A29, T35, 1A6)') '\x1B[37;1mTemperature[K]:\x1B[33;1m',&
-			& adjustl(real2char(T0))
+			& adjustl(real2char(real(T0)))
 		write(*,'(1X, 1A30, T35, 1A6)')  '\x1B[37;1mNumber of atoms:\x1B[33;1m',& 
 			& adjustl(int2char(size(atoms)))
 		write(*,'(1X, 1A30, T35, 1A6)')  '\x1B[37;1mNumber of steps:\x1B[33;1m',&

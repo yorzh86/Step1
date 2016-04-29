@@ -12,13 +12,17 @@ module autodiff_mod
 		real(wp),dimension(S)::d = 0.0_wp
 	end type
 	
-!~ 	interface assignment(=)
-!~ 		module procedure assign_ra
-!~ 		module procedure assign_ar
-!~ 	end interface
+	interface assignment(=)
+		module procedure assign_ra
+		module procedure assign_ar
+	end interface
 	
 	interface real
 		module procedure real_a
+	end interface
+	
+	interface norm2
+		module procedure norm2_a
 	end interface
 	
 	interface matmul
@@ -46,6 +50,10 @@ module autodiff_mod
 	
 	interface exp
 		module procedure exp_a
+	end interface
+	
+	interface sqrt
+		module procedure sqrt_a
 	end interface
 	
 	interface operator(+)
@@ -81,15 +89,19 @@ module autodiff_mod
 	end interface
 
 	public::ad_t
+	public::constant
 	public::diff
 	public::real
+	public::norm2
 	public::matmul
+	public::dyadic
 	public::sum
 	
 	public::sin
 	public::cos
 	public::log
 	public::exp
+	public::sqrt
 
 	public::assignment(=)
 	public::operator(+)
@@ -109,6 +121,14 @@ contains
 	!================!
 	!= Constructors =!
 	!================!
+	
+	pure function constant(v) result(o)
+		real(wp),intent(in)::v
+		type(ad_t)::o
+		
+		o%x = v
+		o%d = 0.0_wp
+	end function constant
 	
 	pure function diff(v,di) result(o)
 		real(wp),intent(in)::v
@@ -179,6 +199,13 @@ contains
 	!= Matmul =!
 	!==========!
 
+	function norm2_a(u) result(o)
+		type(ad_t),dimension(:),intent(in)::u
+		type(ad_t)::o
+		
+		o = sqrt_a(sum_a1(u**2))
+	end function norm2_a
+
 	function matmul_ra(A,x) result(o)
 		real(wp),dimension(:,:),intent(in)::A
 		type(ad_t),dimension(size(A,2)),intent(in)::x
@@ -192,6 +219,21 @@ contains
 			o(k) = sum_a1(A(k,:)*x(:))
 		end do
 	end function matmul_ra
+
+	function dyadic(u,v) result(o)
+			type(ad_t),dimension(:),intent(in)::u,v
+			type(ad_t),dimension(:,:),allocatable::o
+			
+			integer::N,M
+			integer::i,j
+			
+			N = size(u)
+			M = size(v)
+			
+			allocate(o(N,M))
+			
+			forall(i=1:N,j=1:M) o(i,j) = u(i)*v(j)
+		end function dyadic
 
 	!============================!
 	!= Transcendental Functions =!
@@ -229,24 +271,31 @@ contains
 		o%d(1:N) = exp(u%x)*u%d(1:N)
 	end function exp_a
 
+	elemental function sqrt_a(u) result(o)
+		type(ad_t),intent(in)::u
+		type(ad_t)::o
+		
+		o = u**(0.5_wp)
+	end function sqrt_a
+
 	!==============!
 	!= Assignment =!
 	!==============!
 	
-!~ 	elemental subroutine assign_ra(u,v)
-!~ 		real(wp),intent(out)::u
-!~ 		type(ad_t),intent(in)::v
-!~ 		
-!~ 		u = v%x
-!~ 	end subroutine assign_ra
-!~ 
-!~ 	elemental subroutine assign_ar(u,v)
-!~ 		type(ad_t),intent(out)::u
-!~ 		real(wp),intent(in)::v
-!~ 		
-!~ 		u%x = v
-!~ 		u%d(1:N) = 0.0_wp
-!~ 	end subroutine assign_ar
+	elemental subroutine assign_ra(u,v)
+		real(wp),intent(out)::u
+		type(ad_t),intent(in)::v
+		
+		u = v%x
+	end subroutine assign_ra
+
+	elemental subroutine assign_ar(u,v)
+		type(ad_t),intent(out)::u
+		real(wp),intent(in)::v
+		
+		u%x = v
+		u%d(1:N) = 0.0_wp
+	end subroutine assign_ar
 
 	!============!
 	!= Addition =!

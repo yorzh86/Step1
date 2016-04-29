@@ -29,10 +29,10 @@ module settings_mod
 	
 	type::nosehoover_t
 		!real(wp)::set = 10.0_wp
-		type(ad_t)::set = 10.0
+		type(ad_t)::set
 			!! Set value
 		!real(wp)::tau = 100.0_wp
-		type(ad_t)::tau = 100.0
+		type(ad_t)::tau
 			!! Characteristic time
 	end type
 	
@@ -135,7 +135,7 @@ contains
 		write(iou,'(1A,1EN25.5)') 'variable cutoff        equal ',convert(lj%cutoff,'m','A')
 		write(iou,'(1A,1EN25.5)') 'variable skin          equal ',convert(lj%skin,'m','A')
 		
-		write(iou,'(1A,1EN25.5)') 'variable box_length    equal ',latM(3)*lattice_const*1E10_wp 
+		write(iou,'(1A,1EN25.5)') 'variable box_length    equal ',real(latM(3),wp)*convert(lattice_const,'m','A')
 		
 		close(iou)
 	end subroutine writeLammpsVars

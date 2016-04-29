@@ -66,10 +66,10 @@ module system_mod
 	type(region_t),dimension(:),allocatable::regions
 	
 	!real(wp)::Teta = 0.0_wp
-	type(ad_t)::Teta = 0.0_wp
+	type(ad_t)::Teta
 		!! Thermostat DOF
 	!real(wp)::Pepsilon = 0.0_wp
-	type(ad_t)::Pepsilon = 0.0_wp
+	type(ad_t)::Pepsilon
 		!! Barostat DOF
 	!real(wp),dimension(3)::box
 	type(ad_t),dimension(3)::box
@@ -93,7 +93,7 @@ contains
 			!! Lattice constant
 		integer,dimension(3),intent(in)::N
 			!! Number of unit cells
-		real(wp),intent(in)::Ti
+! 		real(wp),intent(in)::Ti
 		type(ad_t),intent(in)::Ti
 			!! Initial temperature
 		real(wp), dimension(3,4), parameter::rcell= &
@@ -102,6 +102,9 @@ contains
 				 0.0_wp, 0.5_wp, 0.5_wp, &
 				 0.5_wp, 0.0_wp, 0.5_wp  ], [3,4])
 		integer::i,j,k,l,idx, ns
+		
+		Teta = 0.0_wp
+		Pepsilon = 0.0_wp
 		
 		box = a*real(N,wp)
 		ns = nint(real(N_steps/skip_swap,wp))
@@ -128,10 +131,10 @@ contains
 		
 		do k=1,size(atoms)
 			!! Create random direction of velocities
-			call random_number(atoms(k)%v)
+			call random_number(atoms(k)%v%x)
 			atoms(k)%v = 2.0_wp*atoms(k)%v-1.0_wp
-			do while(norm2(atoms(k)%v)>1.0_wp .and. norm2(atoms(k)%v)<0.1_wp)
-				call random_number(atoms(k)%v)
+			do while(norm2(real(atoms(k)%v))>1.0_wp .and. norm2(real(atoms(k)%v))<0.1_wp)
+				call random_number(atoms(k)%v%x)
 				atoms(k)%v = 2.0_wp*atoms(k)%v-1.0_wp
 			end do
 			atoms(k)%v = atoms(k)%v/norm2(atoms(k)%v)
@@ -220,7 +223,7 @@ contains
 			do j=1,size(atoms(i)%neighbors)
 				aj = atoms(i)%neighbors(j)
 				d = deltaR(atoms(aj),atoms(i))
-				if( norm2(d)>lj%cutoff ) cycle
+				if( norm2(real(d))>real(lj%cutoff) ) cycle
 				l = S0/norm2(d)
 				o = o+( 0.5_wp ) * ( 4.0_wp*E0*l**6*(l**6-1.0_wp) )
 					!! Only include half of the bond energy for each atom in the bond
@@ -243,7 +246,7 @@ contains
 		do j=1,size(atoms(i)%neighbors)
 			aj = atoms(i)%neighbors(j)
 			r  = deltaR(atoms(i),atoms(aj))
-			if( norm2(r)>lj%cutoff ) cycle
+			if( norm2(real(r))>real(lj%cutoff) ) cycle
 			o = o+delVij(i,aj,r)
 		end do
 	end function delV
@@ -286,8 +289,7 @@ contains
 		!real(wp),dimension(3)::d
 		type(ad_t),dimension(3)::d
 		d = a1%r-a2%r
-		o = d-box*real(nint(d/box),wp)
-		
+		o = d-box*real(nint(real(d/box)),wp)
 	end function deltaR
 
 	function temperature() result(o)
@@ -350,7 +352,7 @@ contains
 		
 		v0 = 0.0_wp
 		if(present(vBulk)) v0 = vBulk
-		o = 0.5_wp*types(atoms(i)%t)%m*norm2(atoms(i)%v-v0)**2
+		o = 0.5_wp*types(atoms(i)%t)%m*sum((atoms(i)%v-v0)**2)
 	end function KEi
 	
 	function PE() result (o)
@@ -382,39 +384,20 @@ contains
 		integer::j,aj
 		
 		v = atoms(i)%v
-		o = -types(atoms(i)%t)%m*matmul(asCol(v),asRow(v))
+		o = -types(atoms(i)%t)%m*dyadic(v,v)
 		
 		do j=1,size(atoms(i)%neighbors)
 			aj = atoms(i)%neighbors(j)
 			r  = deltaR(atoms(i),atoms(aj))
-			if( norm2(r)>lj%cutoff ) cycle
+			if( norm2(real(r))>real(lj%cutoff) ) cycle
 			F = delVij(i,aj,r)
-			o = o-0.5_wp*(matmul(asCol(r),asRow(F))+matmul(asCol(F),asRow(r)))
+			o = o-0.5_wp*(dyadic(r,F)+dyadic(F,r))
 		end do
-	
-	contains
-	
-		function asCol(v) result(o)
-			!real(wp),dimension(:),intent(in)::v
-			type(ad_t),dimension(:),intent(in)::v
-			!real(wp),dimension(size(v),1)::o
-			type(ad_t),dimension(size(v),1)::o
-			o(:,1) = v(:)
-		end function asCol
-
-		function asRow(v) result(o)
-			!real(wp),dimension(:),intent(in)::v
-			type(ad_t),dimension(:),intent(in)::v
-			!real(wp),dimension(1,size(v))::o
-			type(ad_t),dimension(1,size(v))::o
-			
-			o(1,:) = v(:)
-		end function asRow
 		
 	end function Si
 
 	subroutine updateAllLists()
-		integer::k, j
+		integer::k
 		!real(wp)::abc
 		
 		!abc = real(latM(3)*lattice_const/N_slabs, wp)
@@ -441,7 +424,7 @@ contains
 		do k=1,size(atoms)
 			if(i==k) cycle
 			r  = deltaR(atoms(i),atoms(k))
-			if( norm2(r)>(lj%cutoff+lj%skin) ) cycle
+			if( norm2(real(r))>real(lj%cutoff+lj%skin) ) cycle
 			atoms(i)%neighbors = [atoms(i)%neighbors,k]
 		end do
 	end subroutine updateNeighbors
@@ -466,9 +449,9 @@ contains
 			do j=1,size(atoms(i)%neighbors)
 				aj = atoms(i)%neighbors(j)
 				r  = deltaR(atoms(i),atoms(aj))
-				if( norm2(r)>lj%cutoff ) cycle
+				if( norm2(real(r))>real(lj%cutoff) ) cycle
 				F = delVij(i,aj,r)
-				o = o+0.5_wp*dot_product(F,r)
+				o = o+0.5_wp*sum(F*r)
 			end do
 		end do
 	end function virial
@@ -477,7 +460,7 @@ contains
 		!real(wp)::o
 		type(ad_t)::o
 		
-		o = (real(size(atoms),wp)*kB*temperature()-virial()/3.0_wp)/product(box)
+		o = (real(size(atoms),wp)*kB*temperature()-virial()/3.0_wp)/(box(1)*box(2)*box(3))
 	end function pressure
 
 	function regionList(zl,zh) result(o)
@@ -488,7 +471,7 @@ contains
 		
 		integer::k
 		
-		o = pack( [( k, k=1,size(atoms))] , atoms%r(3)>=zl .and. atoms%r(3)<zh )
+		o = pack( [( k, k=1,size(atoms))] , real(atoms%r(3))>=zl .and. real(atoms%r(3))<zh )
 	end function regionList
 	
 	function listTemp(l) result(o)

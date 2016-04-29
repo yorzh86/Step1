@@ -99,8 +99,8 @@ contains
 		integer::k
 		
 		forall(k=1:3)
-			where(atoms(:)%r(k)>box(k)) atoms(:)%r(k) = atoms(:)%r(k)-box(k)
-			where(atoms(:)%r(k)<0.0_wp) atoms(:)%r(k) = atoms(:)%r(k)+box(k)
+			where(real(atoms(:)%r(k))>real(box(k))) atoms(:)%r(k) = atoms(:)%r(k)-box(k)
+			where(real(atoms(:)%r(k))<0.0_wp) atoms(:)%r(k) = atoms(:)%r(k)+box(k)
 		end forall
 	end subroutine doBox
 
@@ -128,7 +128,7 @@ contains
 		real(wp)::abc
 		integer,dimension(:),allocatable::l
 		
-		abc = real(latM(3)*lattice_const/N_slabs, wp)
+		abc = real(latM(3),wp)*lattice_const/real(N_slabs,wp)
 		do j=1, N_slabs
 			!l = regionList(j*abc - abc, j*abc)
 			listofRegions = regionList(j*abc - abc, j*abc)
@@ -137,7 +137,11 @@ contains
 			if (j==N_slabs/2+1) cold = selectCold(listofRegions)
 		end do
 		
-		regions(k)%temps = [ real(convert((k*dt),'s','ps'),wp),real(k,wp),temperatures ]
+		if(allocated(regions(k)%temps)) deallocate(regions(k)%temps)
+		allocate(regions(k)%temps(2+N_slabs))
+		regions(k)%temps(1)  = convert(real(k,wp)*dt,'s','ps')
+		regions(k)%temps(2)  = real(k,wp)
+		regions(k)%temps(3:) = temperatures
 	
 	end subroutine rnem
 
@@ -149,9 +153,14 @@ contains
 		real(wp)::t
 		integer,  intent(in)::k
 		real(wp), dimension(3)::swapv
-		t = convert((k*dt),'s','ps')
-
-		regions(k)%energies = [ t,real(k,wp),KEi(hot),KEi(cold) ]
+		t = convert((real(k,wp)*dt),'s','ps')
+		
+		if(allocated(regions(k)%energies)) deallocate(regions(k)%energies)
+		allocate(regions(k)%energies(4))
+		regions(k)%energies(1) = t
+		regions(k)%energies(2) = constant(real(k,wp))
+		regions(k)%energies(3) = KEi(hot)
+		regions(k)%energies(4) = KEi(cold)
 
 		swapv = atoms(hot)%v
 		atoms(hot)%v = atoms(cold)%v
