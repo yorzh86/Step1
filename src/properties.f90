@@ -17,7 +17,7 @@ module properties_mod
 
 			kSI = flux/grad
 			print *, 
-			write(*,*)'kSI:', kSI
+			write(*,'(1X, 1A4, 1F8.4, 1A8 )')'kSI:', kSI, '[W/m.K]'
 			print *, 
 			
 			contains
@@ -44,14 +44,10 @@ module properties_mod
 						end if
 					end do
 
-					mdE = sum(dE(:))/size(dE(:))
+					mdE = sum(dE)/size(dE)
 					A = (lattice_const**2)*latM(1)*latM(2)
-					
-					print *, 'mdE', mdE
-					print *, 'A', A
 
 					o = mdE/dt/skip_swap/A
-					print *, 'flux', o
 				end function calculateFlux
 				
 				function calculateGrad() result(o)
@@ -72,15 +68,12 @@ module properties_mod
 						ar9(i)= regions(i)%temps(12)
 					end do
 					
-					m0 =  sum(ar0(:))/size(ar0(:))
-					m5 =  sum(ar5(:))/size(ar5(:))
-					m9 =  sum(ar9(:))/size(ar9(:))
+					m0 =  sum(ar0)/size(ar0)
+					m5 =  sum(ar5)/size(ar5)
+					m9 =  sum(ar9)/size(ar9)
 					dz = latM(3)*lattice_const/2.0_wp
-					
-					print *, 'dz', dz
-					print *, 'm0', m0, 'm5', m5, 'm9', m9
+
 					o = ((m5-m0)+(m5-m9))/2.0_wp/dz !!!!INCORRECT!
-					print *, 'grad(o)', o
 				end function calculateGrad
 				
 		end subroutine thermalConductivity

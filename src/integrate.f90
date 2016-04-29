@@ -144,7 +144,7 @@ contains
 		real(wp), dimension(3)::swapv
 		t = convert((k*dt),'s','ps')
 
-		regions(k)%energies = [ t,real(k,wp),convert(KEi(hot),'J','eV'),convert(KEi(cold),'J','eV') ]
+		regions(k)%energies = [ t,real(k,wp),KEi(hot),KEi(cold) ]
 
 		swapv = atoms(hot)%v
 		atoms(hot)%v = atoms(cold)%v

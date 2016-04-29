@@ -76,7 +76,7 @@ contains
 	subroutine endSim
 		!call showResults()
 		call thermalConductivity()
-		call doMessage(1, "Fix units kSI...", [stdout])
+
 		call doMessage(5, "Check grad calculation properties.f90 line75", [stdout])
 		call doMessage(3, "Re-do updateAllLists in system, check commit Meeting", [stdout])
 		call doMessage(3, "Check lammps script with system relaxation, and correct py-script", [stdout])
