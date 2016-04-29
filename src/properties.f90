@@ -8,9 +8,10 @@ module properties_mod
 	implicit none
 	
 	contains
-	
+
 		subroutine thermalConductivity()
-			real(wp)::grad, flux, kSI
+			!real(wp)::grad, flux, kSI
+			type(ad_t)::grad, flux, kSI
 			
 			flux = calculateFlux()
 			grad = calculateGrad()
@@ -23,10 +24,10 @@ module properties_mod
 			contains
 
 				function calculateFlux() result(o)
-					real(wp), dimension(:),allocatable::dE
-					real(wp)::mdE, A
+					type(ad_t),dimension(:),allocatable::dE
+					type(ad_t)::mdE, A
 					integer::i,j, skip1
-					real(wp)::o
+					type(ad_t):o
 					
 					skip1 = 0
 					j = 0
@@ -51,9 +52,9 @@ module properties_mod
 				end function calculateFlux
 				
 				function calculateGrad() result(o)
-					real(wp)::o
-					real(wp), dimension(:),allocatable::ar0, ar5, ar9
-					real(wp)::m0, m5, m9, dz  
+					type(ad_t)::o
+					type(ad_t), dimension(:),allocatable::ar0, ar5, ar9
+					type(ad_t)::m0, m5, m9, dz  
 					integer::i,j,skip2
 
 					skip2 = 0

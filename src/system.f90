@@ -3,6 +3,7 @@ module system_mod
 	use utilities_mod
 	use units_mod
 	use settings_mod
+	use autodiff_mod
 	implicit none
 	
 	!=========!
@@ -10,22 +11,27 @@ module system_mod
 	!=========!
 	
 	type::type_t
-		real(wp)::m
+		!real(wp)::m
+		type(ad_t)::m
 			!! Atomic mass
 		character(2)::atom_name
 			!! Atom symbol (use standard periodic tables)
 	end type
 	
 	type::atom_t
-		real(wp),dimension(3)::r
+		!real(wp),dimension(3)::r
+		type(ad_t),dimension(3)::r
 			!! Atomic position
-		real(wp),dimension(3)::v
+		!real(wp),dimension(3)::v
+		type(ad_t),dimension(3)::v
 			!! Atomic velocity
-		real(wp),dimension(3)::a
+		!real(wp),dimension(3)::a
+		type(ad_t),dimension(3)::a
 			!! Atomic acceleration
-		real(wp),dimension(3)::f
+		!real(wp),dimension(3)::f
+		type(ad_t),dimension(3)::f
 			!! Atomic force
-		real(wp)::tt
+		!real(wp)::tt
 			!! Atom temperature
 		integer::atom_id
 			!! Atom id
@@ -37,9 +43,12 @@ module system_mod
 	end type
 	
 	type:: region_t
-		real(wp),dimension(:),allocatable::temps
-		real(wp),dimension(:),allocatable::energies
-		real(wp)::zl,zh
+		!real(wp),dimension(:),allocatable::temps
+		type(ad_t),dimension(:),allocatable::temps
+		!real(wp),dimension(:),allocatable::energies
+		type(ad_t),dimension(:),allocatable::energies
+		!real(wp)::zl,zh
+		type(ad_t)::zl, zh
 	end type
 	
 	
@@ -56,11 +65,14 @@ module system_mod
 		!! All atoms in system
 	type(region_t),dimension(:),allocatable::regions
 	
-	real(wp)::Teta = 0.0_wp
+	!real(wp)::Teta = 0.0_wp
+	type(ad_t)::Teta = 0.0_wp
 		!! Thermostat DOF
-	real(wp)::Pepsilon = 0.0_wp !was used as 0.01
+	!real(wp)::Pepsilon = 0.0_wp
+	type(ad_t)::Pepsilon = 0.0_wp
 		!! Barostat DOF
-	real(wp),dimension(3)::box
+	!real(wp),dimension(3)::box
+	type(ad_t),dimension(3)::box
 		!! Bounds of the simulation box
 	
 	integer,dimension(:),allocatable::listofRegions
@@ -68,18 +80,21 @@ module system_mod
 	
 	integer::ts
 		!! Time step counter
-	real(wp)::t
+	!real(wp)::t
+	type(ad_t)::t
 		!! System time
 	
 contains
 
 	subroutine buildSystem(a,N,Ti)
 		implicit none
-		real(wp),intent(in)::a
+		!real(wp),intent(in)::a
+		type(ad_t), intent(in)::a
 			!! Lattice constant
 		integer,dimension(3),intent(in)::N
 			!! Number of unit cells
 		real(wp),intent(in)::Ti
+		type(ad_t),intent(in)::Ti
 			!! Initial temperature
 		real(wp), dimension(3,4), parameter::rcell= &
 		reshape([0.0_wp, 0.0_wp, 0.0_wp, &
@@ -141,6 +156,7 @@ contains
 		character(*),intent(in)::fn
 		
 		integer::i,k,iou
+		!type(ad_t)::E0,S0
 		real(wp)::E0,S0
 		
 		E0 = lj%coeffs(1)
@@ -181,7 +197,8 @@ contains
 
 	function V(i) result(o)
 		integer,intent(in)::i
-		real(wp)::o
+		!real(wp)::o
+		type(ad_t)::o
 		
 		o = 0.0_wp
 		if(enableLennardJones) call doLennardJones(o)
@@ -189,9 +206,12 @@ contains
 	contains
 	
 		subroutine doLennardJones(o)
-			real(wp),intent(out)::o
-			real(wp),dimension(3)::d
-			real(wp)::l,E0,S0
+			!real(wp),intent(out)::o
+			type(ad_t),intent(out)::o
+			!real(wp),dimension(3)::d
+			type(ad_t),dimension(3)::d
+			!real(wp)::l,E0,S0
+			type(ad_t)::l,E0,S0
 			integer::j,aj
 			
 			E0 = lj%coeffs(1)
@@ -212,8 +232,10 @@ contains
 	function delV(i) result(o)
 		!! Total force on atom
 		integer,intent(in)::i
-		real(wp),dimension(3)::o
-		real(wp),dimension(3)::r
+		!real(wp),dimension(3)::o
+		type(ad_t),dimension(3)::o
+		!real(wp),dimension(3)::r
+		type(ad_t),dimension(3)::r
 		
 		integer::j,aj
 		
@@ -229,8 +251,10 @@ contains
 	function delVij(i,j,d) result (o)
 		!! Force between two atoms
 		integer,intent(in)::i,j
-		real(wp),dimension(3),intent(in)::d
-		real(wp),dimension(3)::o
+		!real(wp),dimension(3),intent(in)::d
+		type(ad_t),dimension(3),intent(in)::d
+		!real(wp),dimension(3)::o
+		type(ad_t),dimension(3)::o
 		
 		o = 0.0_wp
 		if(i==j) return
@@ -240,8 +264,10 @@ contains
 	contains
 		
 		subroutine doLennardJones(o)
-			real(wp),dimension(3),intent(out)::o
-			real(wp)::l,E0,S0
+			!real(wp),dimension(3),intent(out)::o
+			type(ad_t),dimension(3),intent(out)::o
+			!real(wp)::l,E0,S0
+			type(ad_t)::l,E0,S0
 			
 			E0 = lj%coeffs(1)
 			S0 = lj%coeffs(2)
@@ -254,19 +280,24 @@ contains
 
 	function deltaR(a1,a2) result(o)
 		type(atom_t),intent(in)::a1,a2
-		real(wp),dimension(3)::o
+		!real(wp),dimension(3)::o
+		type(ad_t),dimension(3)::o
 		
-		real(wp),dimension(3)::d
+		!real(wp),dimension(3)::d
+		type(ad_t),dimension(3)::d
 		d = a1%r-a2%r
 		o = d-box*real(nint(d/box),wp)
 		
 	end function deltaR
 
 	function temperature() result(o)
-		real(wp)::o
+		!real(wp)::o
+		type(ad_t)::o
 		
-		real(wp),dimension(3)::vBulk
-		real(wp)::SKE
+		!real(wp),dimension(3)::vBulk
+		type(ad_t),dimension(3)::vBulk
+		!real(wp)::SKE
+		type(ad_t)::SKE
 		integer::k
 		
 		forall(k=1:3) vBulk(k) = sum(atoms%v(k))/real(size(atoms),wp)
@@ -279,7 +310,8 @@ contains
 	end function temperature
 
 	function E() result(o)
-		real(wp)::o
+		!real(wp)::o
+		type(ad_t)::o
 		integer::k
 		
 		o = 0.0_wp
@@ -290,7 +322,8 @@ contains
 
 	function Ei(i) result(o)
 		integer,intent(in)::i
-		real(wp)::o
+		!real(wp)::o
+		type(ad_t)::o
 		
 		o = KEi(i) + PEi(i)
 	end function Ei
@@ -307,10 +340,13 @@ contains
 	
 	function KEi(i,vBulk) result (o)
 		integer,intent(in)::i
-		real(wp),dimension(3),intent(in),optional::vBulk
-		real(wp)::o
+		!real(wp),dimension(3),intent(in),optional::vBulk
+		type(ad_t),dimension(3),intent(in),optional::vBulk
+		!real(wp)::o
+		type(ad_t)::o
 		
-		real(wp),dimension(3)::v0
+		!real(wp),dimension(3)::v0
+		type(ad_t),dimension(3)::v0
 		
 		v0 = 0.0_wp
 		if(present(vBulk)) v0 = vBulk
@@ -318,7 +354,8 @@ contains
 	end function KEi
 	
 	function PE() result (o)
-		real(wp)::o
+		!real(wp)::o
+		type(ad_t)::o
 		integer::k
 		
 		o = 0.0_wp
@@ -329,16 +366,19 @@ contains
 
 	function PEi(i) result (o)
 		integer,intent(in)::i
-		real(wp)::o
+		!real(wp)::o
+		type(ad_t)::o
 		
 		o = V(i)
 	end function PEi
 
 	function Si(i) result(o)
 		integer,intent(in)::i
-		real(wp),dimension(3,3)::o
+		!real(wp),dimension(3,3)::o
+		type(ad_t),dimension(3,3)::o
 		
-		real(wp),dimension(3)::v,r,F
+		!real(wp),dimension(3)::v,r,F
+		type(ad_t),dimension(3)::v,r,F
 		integer::j,aj
 		
 		v = atoms(i)%v
@@ -355,15 +395,18 @@ contains
 	contains
 	
 		function asCol(v) result(o)
-			real(wp),dimension(:),intent(in)::v
-			real(wp),dimension(size(v),1)::o
-			
+			!real(wp),dimension(:),intent(in)::v
+			type(ad_t),dimension(:),intent(in)::v
+			!real(wp),dimension(size(v),1)::o
+			type(ad_t),dimension(size(v),1)::o
 			o(:,1) = v(:)
 		end function asCol
 
 		function asRow(v) result(o)
-			real(wp),dimension(:),intent(in)::v
-			real(wp),dimension(1,size(v))::o
+			!real(wp),dimension(:),intent(in)::v
+			type(ad_t),dimension(:),intent(in)::v
+			!real(wp),dimension(1,size(v))::o
+			type(ad_t),dimension(1,size(v))::o
 			
 			o(1,:) = v(:)
 		end function asRow
@@ -389,7 +432,9 @@ contains
 	subroutine updateNeighbors(i)
 		integer,intent(in)::i
 		
-		real(wp),dimension(3)::r
+		!real(wp),dimension(3)::r
+		type(ad_t),dimension(3)::r
+		
 		integer::k
 		
 		atoms(i)%neighbors = [integer::]
@@ -402,16 +447,18 @@ contains
 	end subroutine updateNeighbors
 
 	function averageNeighbors() result(o)
-		real(wp)::o
+		!real(wp)::o
+		type(ad_t)::o
 		integer::k
 		
 		o = sum([( size(atoms(k)%neighbors) , k=1,size(atoms) )]) / real(size(atoms),wp)/2.0_wp
 	end function averageNeighbors
 
 	function virial() result(o)
-		real(wp)::o
-		
-		real(wp),dimension(3)::F,r
+		!real(wp)::o
+		type(ad_t)::o
+		!real(wp),dimension(3)::F,r
+		type(ad_t),dimension(3)::F,r
 		integer::i,j,aj
 		
 		o = 0.0_wp
@@ -427,7 +474,8 @@ contains
 	end function virial
 
 	function pressure() result(o)
-		real(wp)::o
+		!real(wp)::o
+		type(ad_t)::o
 		
 		o = (real(size(atoms),wp)*kB*temperature()-virial()/3.0_wp)/product(box)
 	end function pressure
@@ -435,6 +483,7 @@ contains
 	function regionList(zl,zh) result(o)
 		!! Stores an array of atoms(i)%atoms_id that belong to a region
 		real(wp),intent(in)::zl,zh
+		
 		integer,dimension(:),allocatable::o
 		
 		integer::k
@@ -446,6 +495,7 @@ contains
 		!! Calculates the average temperature of atoms in list L
 		integer,dimension(:),intent(in)::l
 		real(wp)::o
+		
 		
 		integer::k,ai
 		

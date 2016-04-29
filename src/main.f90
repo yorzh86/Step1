@@ -10,6 +10,7 @@ program main_prg
 	use integrate_mod
 	use output_mod
 	use properties_mod
+	use autodiff_mod
 	implicit none
 	
 	integer::iou_xyz

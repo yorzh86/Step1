@@ -1,6 +1,7 @@
 module integrate_mod
 	use kinds_mod
 	use system_mod
+	use autodiff_mod
 	implicit none
 	private
 	
@@ -22,7 +23,8 @@ contains
 	subroutine setThermostat(state,T,tau)
 		!! Turns on/off damping parameter "eta" in the Integrator
 		logical,intent(in)::state
-		real(wp),intent(in),optional::T,tau
+		!real(wp),intent(in),optional::T,tau
+		type(ad_t), intent(in), optional::T, tau
 		
 		if(state .and. present(T) .and. present(tau) ) then
 			thermostat%set = T
@@ -41,7 +43,8 @@ contains
 	subroutine setBarostat(state,P,tau)
 		!! Turns on/off damping parameter "eta" in the Integrator
 		logical,intent(in)::state
-		real(wp),intent(in),optional::P,tau
+		!real(wp),intent(in),optional::P,tau
+		type(ad_t),intent(in),optional::P,tau
 		
 		if(state .and. present(P) .and. present(tau) ) then
 			barostat%set = P
@@ -59,9 +62,11 @@ contains
 
 	subroutine velocityVerlet(dt)
 		!! Velocity-Verlet integration
-		real(wp),intent(in)::dt
+		!real(wp),intent(in)::dt
+		type(ad_t), intent(in)::dt
 		
-		real(wp),dimension(3)::d
+		!real(wp),dimension(3)::d
+		type(ad_t), dimension(3)::d
 		integer::k
 		
 		do k=1,size(atoms)
@@ -101,22 +106,24 @@ contains
 
 	function DetaDt() result(o)
 		!! Calculates damping parameter("eta") change over time
-		real(wp)::o
+		!real(wp)::o
+		type(ad_t)::o
 		
 		o = (1.0_wp/thermostat%tau**2)*(temperature()/thermostat%set-1.0_wp)
 	end function DetaDt
 
 	function DepsilonDt() result(o)
 		!! Calculates damping parameter("eta") change over time.
-		real(wp)::o
-		
+		!real(wp)::o
+		type(ad_t)::o
 		o = (1.0_wp/barostat%tau**2)*(pressure()/barostat%set-1.0_wp)
 	end function DepsilonDt
 	
 	subroutine rnem(k)
 		integer, intent(in)::k
 		
-		real(wp),dimension(N_slabs)::temperatures
+		!real(wp),dimension(N_slabs)::temperatures
+		type(ad_t),dimension(N_slabs)::temperatures
 		integer::j
 		real(wp)::abc
 		integer,dimension(:),allocatable::l
