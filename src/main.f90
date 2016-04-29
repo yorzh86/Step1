@@ -9,6 +9,7 @@ program main_prg
 	use system_mod
 	use integrate_mod
 	use output_mod
+	use properties_mod
 	implicit none
 	
 	integer::iou_xyz
@@ -69,15 +70,17 @@ contains
 			call doBox()
 		end do
 		
-		write(*,'(/,1X, 1A23,/ )') '\x1B[37;42mFINISHED!!!\x1B[0m'
+		write(*,'(/,1X, 1A22,/ )') '\x1B[32;1mFINISHED!!!\x1B[0m'
 	end subroutine runSim
 	
 	subroutine endSim
-	integer::i
-
-		do i=1, 4
-			call doMessage(i, 'hello world!', [stdout,iou_log])
-		end do
+		!call showResults()
+		call thermalConductivity()
+		call doMessage(1, "Fix units kSI...", [stdout])
+		call doMessage(5, "Check grad calculation properties.f90 line75", [stdout])
+		call doMessage(3, "Re-do updateAllLists in system, check commit Meeting", [stdout])
+		call doMessage(3, "Check lammps script with system relaxation, and correct py-script", [stdout])
+		call doMessage(5, "Add to code calc dkSI/dEpsilon", [stdout])
 		close(iou_xyz)
 		close(iou_temps)
 		close(iou_energies)

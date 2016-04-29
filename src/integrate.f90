@@ -118,8 +118,13 @@ contains
 		
 		real(wp),dimension(N_slabs)::temperatures
 		integer::j
-
+		real(wp)::abc
+		integer,dimension(:),allocatable::l
+		
+		abc = real(latM(3)*lattice_const/N_slabs, wp)
 		do j=1, N_slabs
+			!l = regionList(j*abc - abc, j*abc)
+			listofRegions = regionList(j*abc - abc, j*abc)
 			temperatures(j) = listTemp(listofRegions)
 			if (j==1) hot = selectHot(listofRegions)
 			if (j==N_slabs/2+1) cold = selectCold(listofRegions)

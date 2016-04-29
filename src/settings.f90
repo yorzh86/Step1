@@ -81,12 +81,12 @@ contains
         lj%coeffs = [E0,S0]
         
         != Simulation =!
-        N_steps       = 70
+        N_steps       = 400
         N_slabs       = 10
-        skip_swap     = 100
+        skip_swap     = 10
         skip_thermo   = 1
         skip_dump     = 1
-        skip_neighbor = 200
+        skip_neighbor = 100
         
         lattice_const = convert(5.40_wp, 'A', 'm')
         latM = [5,5,15]

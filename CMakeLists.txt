@@ -11,6 +11,7 @@ set(source
 	"src/settings.f90"
 	"src/units.f90"
 	"src/utilities.f90"
+	"src/properties.f90"
 	)
 
 set(CMAKE_Fortran_FLAGS "")

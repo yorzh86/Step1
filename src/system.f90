@@ -56,7 +56,6 @@ module system_mod
 		!! All atoms in system
 	type(region_t),dimension(:),allocatable::regions
 	
-	
 	real(wp)::Teta = 0.0_wp
 		!! Thermostat DOF
 	real(wp)::Pepsilon = 0.0_wp !was used as 0.01
@@ -65,7 +64,6 @@ module system_mod
 		!! Bounds of the simulation box
 	
 	integer,dimension(:),allocatable::listofRegions
-	
 	public::listofRegions
 	
 	integer::ts
@@ -374,17 +372,17 @@ contains
 
 	subroutine updateAllLists()
 		integer::k, j
-		real(wp)::abc
+		!real(wp)::abc
 		
-		abc = real(latM(3)*lattice_const/N_slabs, wp)
+		!abc = real(latM(3)*lattice_const/N_slabs, wp)
 		
 		do k=1,size(atoms)
 			call updateNeighbors(k)
 		end do
 		
-		do j=1, N_slabs
-			listofRegions = regionList(j*abc - abc, j*abc)
-		end do
+!		do j=1, N_slabs
+!			listofRegions = regionList(j*abc - abc, j*abc)
+!		end do
 		
 	end subroutine updateAllLists
 
