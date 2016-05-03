@@ -12,7 +12,7 @@ contains
 		print *,
 		write(*,*) 'Writing time[ps], timestep and temperatures for regions:'
 		do i=0, N_steps
-			write(*,'(1X, 1F8.2, 1F10.0, 10F15.8 )') regions(i)%temps
+			write(*,'(1X, 1F8.2, 1F10.0, 10F15.8 )') real(regions(i)%temps)
 		end do
 
 		print *,

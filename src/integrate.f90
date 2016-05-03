@@ -124,6 +124,7 @@ contains
 		
 		!real(wp),dimension(N_slabs)::temperatures
 		type(ad_t),dimension(N_slabs)::temperatures
+		!real(wp),dimension(N_slabs)::temperatures
 		integer::j
 		real(wp)::abc
 		integer,dimension(:),allocatable::l

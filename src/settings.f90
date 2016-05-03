@@ -92,7 +92,7 @@ contains
 		lj%coeffs = [E0,S0]
 		
 		!= Simulation =!
-		N_steps       = 400
+		N_steps       = 40
 		N_slabs       = 10
 		skip_swap     = 10
 		skip_thermo   = 1
