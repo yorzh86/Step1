@@ -80,7 +80,7 @@ contains
 
 	subroutine initialize_parameters()
 		!real(wp)::E0,S0
-		type(ad_t)::E0, S0
+		real(wp)::E0, S0
 		
 		!= Potential =!
 		
@@ -89,12 +89,12 @@ contains
 		lj%cutoff = 2.0_wp*S0
 		lj%skin = 0.5_wp*S0
 		
-		lj%coeffs = [E0,S0]
+		lj%coeffs = [diff(E0,1),diff(S0,2)]
 		
 		!= Simulation =!
 		N_steps       = 40
 		N_slabs       = 10
-		skip_swap     = 10
+		skip_swap     = 1
 		skip_thermo   = 1
 		skip_dump     = 1
 		skip_neighbor = 100

@@ -63,12 +63,12 @@ module properties_mod
 			allocate(ar5(0:N_steps))
 			allocate(ar9(0:N_steps))
 			do k=0, N_steps
-				ar1(k)= real(regions(i)%temps(4))
-				ar5(k)= regions(i)%temps(8)
-				ar9(k)= regions(i)%temps(12)
+				ar1(k)= regions(k)%temps(4)
+				ar5(k)= regions(k)%temps(8)
+				ar9(k)= regions(k)%temps(12)
 			end do
 			
-			m1 =  sum(real(ar1))/real(size(real(ar1)),wp)
+			m1 =  sum(ar1)/real(size(ar1),wp)
 			m5 =  sum(ar5)/real(size(ar5),wp)
 			m9 =  sum(ar9)/real(size(ar9),wp)
 			dz = real(latM(3),wp)*lattice_const*0.4_wp

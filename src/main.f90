@@ -64,7 +64,7 @@ contains
 			if(mod(k,skip_swap)==0)     call swapAtoms(k)
 			if(mod(k,skip_thermo)==0)   call writeStepThermo(k, iou_temps)
 			if(mod(k,skip_swap)==0)     call writeStepEnergies(k,iou_energies)
-			!if(mod(k,skip_dump)==0)    call writeStepXYZ(iou_xyz)
+! 			if(mod(k,skip_dump)==0)    call writeStepXYZ(iou_xyz)
 			if(mod(k,skip_neighbor)==0) call updateAllLists()
 			
 			call velocityVerlet(dt)

@@ -153,13 +153,13 @@ contains
 	  !! - either change their types, or swap atoms of same type
 		real(wp)::t
 		integer,  intent(in)::k
-		real(wp), dimension(3)::swapv
+		type(ad_t), dimension(3)::swapv
 		t = convert((real(k,wp)*dt),'s','ps')
 		
 		if(allocated(regions(k)%energies)) deallocate(regions(k)%energies)
 		allocate(regions(k)%energies(4))
 		regions(k)%energies(1) = t
-		regions(k)%energies(2) = constant(real(k,wp))
+		regions(k)%energies(2) = real(k,wp)
 		regions(k)%energies(3) = KEi(hot)
 		regions(k)%energies(4) = KEi(cold)
 

@@ -21,7 +21,7 @@ contains
 		!how we store energies:
 		do i=0, N_steps
 			if(.not. allocated(regions(i)%energies)) cycle
-			write(*, '(1X, 1F8.2, 1F10.0, 2F17.10)') regions(i)%energies
+			write(*, '(1X, 1F8.2, 1F10.0, 2E25.15 )') real(regions(i)%energies)
 		end do
 		
 	end subroutine showResults
@@ -36,7 +36,7 @@ contains
 		write(iou,'(1A)') trim(adjustl(buf))
 		write(iou,'(1A,1I10)') 'Atoms. Timestep: ',ts
 		do k=1,size(atoms)
-			write(iou,'(1I4, 3F5.1,6F13.9)') atoms(k)%atom_id, &
+			write(iou,'(1I4, 3F5.1,6E25.15)') atoms(k)%atom_id, &
 				& [(convert(atoms(k)%r(i),'m','A'),i=1,3)], &
 				& [(convert(atoms(k)%v(i),'m/s', 'A/ps'), i=1,3)], &
 				& [(convert(atoms(k)%f(i), 'N', 'eV/A'), i=1,3)]            

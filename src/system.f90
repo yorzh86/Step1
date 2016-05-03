@@ -39,7 +39,6 @@ module system_mod
 			!! Atom type
 		integer,dimension(:),allocatable::neighbors
 			!! Nearest neighbors
-
 	end type
 	
 	type:: region_t
@@ -477,7 +476,7 @@ contains
 	function listTemp(l) result(o)
 		!! Calculates the average temperature of atoms in list L
 		integer,dimension(:),intent(in)::l
-		real(wp)::o
+		type(ad_t)::o
 		
 		
 		integer::k,ai

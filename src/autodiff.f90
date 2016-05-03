@@ -4,8 +4,8 @@ module autodiff_mod
 
 	private
 
-	integer,parameter::S = 3
-	integer::N = 3
+	integer,parameter::S = 2
+	integer::N = 2
 
 	type::ad_t
 		real(wp)::x = 0.0_wp
