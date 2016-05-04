@@ -92,9 +92,9 @@ contains
 		lj%coeffs = [diff(E0,1),diff(S0,2)]
 		
 		!= Simulation =!
-		N_steps       = 40
+		N_steps       = 400
 		N_slabs       = 10
-		skip_swap     = 1
+		skip_swap     = 50
 		skip_thermo   = 1
 		skip_dump     = 1
 		skip_neighbor = 100

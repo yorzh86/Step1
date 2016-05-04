@@ -94,7 +94,7 @@ module properties_mod
 		function slope(left, right) result (o)
 			integer, intent(in)::left, right
 			type(ad_t):: o
-			type(ad_t)::avX, avY, sXY,sXX, sX
+			type(ad_t)::avX, avY, sXY,sXX, sX, sY
 			integer::i, j, k
 			
 			!sX - sum of x values (postions)
@@ -102,26 +102,32 @@ module properties_mod
 			!sXY - sum of products of corresponding x and av y (temperatures)
 			!avX - mean of x values
 			!avY - mean of y values
-			do i=0, N_steps
-				do j=left,right
-					avY = avY + regions(i)%temps(j)/real(N_steps,wp)/real((right-left), wp)
-				end do
+			sX  = 0.0_wp
+			sY  = 0.0_wp
+			sXX = 0.0_wp
+			sXY = 0.0_wp
+			avX = 0.0_wp
+			avY = 0.0_wp
+			
+			do i=0,N_steps
+				sY = sY+sum(regions(i)%temps(left:right))
 			end do
+			avY = sY/(real(N_steps,wp)*real(right-left,wp))
 				
-			do i=1, (N_slabs/2 +1)
-				sX = sX + lattice_const*real(latM(3)/N_slabs*i, wp)
-				sXX = sXX + (lattice_const*real(latM(3)/N_slabs*i, wp))**2
+			do i=1,N_slabs/2+1
+				sX  =  sX+lattice_const*real(latM(3),wp)/real(N_slabs*i,wp)
+				sXX = sXX+(lattice_const*real(latM(3),wp)/real(N_slabs*i,wp))**2
 			end do
-			avX = sX/real((N_slabs/2 +1), wp)
+			avX = sX/real(N_slabs/2+1,wp)
 				
-			do i=0, N_steps
+			do i=0,N_steps
 				do j=left, right
-					sXY = sXY + (regions(i)%temps(j)/real(N_slabs,wp))*(lattice_const*real(latM(3)/N_slabs*(i-2.0_wp), wp))
+					sXY = sXY + (regions(i)%temps(j)/real(N_steps,wp)) * (lattice_const*real(latM(3),wp)/real(N_slabs*(j-2),wp))
 				end do
 			end do
 			
 			!equation for slope:
-			o = (sXY - sX*avY)/(sXX-sX*avX)
+			o = (sXY-sX*avY)/(sXX-sX*avX)
 			end function slope
 
 	end subroutine thermalConductivity
