@@ -8,22 +8,23 @@ module output_mod
 contains
 
 	subroutine showResults
-		integer::i
-		print *,
-		write(*,*) 'Writing time[ps], timestep and temperatures for regions:'
-		do i=0, N_steps
-			write(*,'(1X, 1F8.2, 1F10.0, 10F15.8 )') real(regions(i)%temps)
-		end do
+		integer::i, j
 
 		print *,
-		write(*,*) 'Writing time[ps], timestep and kinetic energies before swap:'
+		write(*,*) 'Writing temperatures for regions:'
 		
-		!how we store energies:
 		do i=0, N_steps
-			if(.not. allocated(regions(i)%energies)) cycle
-			write(*, '(1X, 1F8.2, 1F10.0, 2E25.15 )') real(regions(i)%energies)
+			write(*,'(1X, 10F15.8)') (regions(j)%temps(i)%x, j=1,10)
 		end do
 		
+		write(*,*)
+		write(*,*) 'Writing KEi of two atoms:'
+		do i=0, N_steps
+			!if(.not. allocated( (regions(j)%energies(i),j=1,2 ))) cycle !!!!!!!!!!does not work
+			write(*, *) (regions(j)%energies(i)%x, j=1,2)
+		end do
+		write(*,*)
+
 	end subroutine showResults
 
 	subroutine writeStepXYZ(iou)
@@ -46,6 +47,7 @@ contains
 	subroutine writeStepThermo (k, iou_temps)
 		integer, intent(in)::k, iou_temps 
 		real(wp)::t
+		integer::j,i
 			   
 		if (k==0) then
 			write(iou_temps, '(1X, 1A8, 2X, 1A8, 2X, 1A20, 1I3, 1A9 )')'Time[ps],', & 
@@ -53,9 +55,9 @@ contains
 			write(iou_temps,*)
 		end if
 		
-		t = k*1E-2_wp
-
-		write(iou_temps,'(1X, 1F8.2, 1F10.0, 10F15.8)') regions(k)%temps
+		t = convert(real(k,wp)*dt,'s','ps')
+		
+		write(iou_temps,'(1X, 1F8.2, 1F10.0, 10F15.8)') t, real(ts, wp), (regions(j)%temps(k)%x, j=1,10)
 
 	end subroutine writeStepThermo
 	

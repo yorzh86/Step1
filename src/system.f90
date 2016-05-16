@@ -110,8 +110,15 @@ contains
 				
 		allocate(types(1))
 		allocate(atoms(size(rcell,2)*product(N)))
-		allocate(regions(0:N_steps))
-					   
+		!allocate(regions(0:N_steps))
+		allocate(regions(N_slabs))
+		do i=1, N_slabs
+			allocate(regions(i)%temps(0:N_steps))
+		end do
+		do i=1, 2
+			allocate(regions(i)%energies(0:N_steps))
+		end do
+		
 		types%m = convert(39.948_wp,'u','kg')
 		types%atom_name = 'Ar'
 		atoms(:)%t = 1

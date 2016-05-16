@@ -64,7 +64,7 @@ contains
 			if(mod(k,skip_swap)==0)     call swapAtoms(k)
 			if(mod(k,skip_thermo)==0)   call writeStepThermo(k, iou_temps)
 			if(mod(k,skip_swap)==0)     call writeStepEnergies(k,iou_energies)
-! 			if(mod(k,skip_dump)==0)    call writeStepXYZ(iou_xyz)
+ 			!if(mod(k,skip_dump)==0)     call writeStepXYZ(iou_xyz)
 			if(mod(k,skip_neighbor)==0) call updateAllLists()
 			
 			call velocityVerlet(dt)
@@ -75,11 +75,13 @@ contains
 	end subroutine runSim
 	
 	subroutine endSim
-! 		call showResults()
+ 		call showResults()
 		call thermalConductivity()
 
 !		call doMessage(5, "Check grad calculation properties.f90 line75", [stdout])
-!		call doMessage(3, "Re-do updateAllLists in system, check commit Meeting", [stdout])
+		call doMessage(3, "Learn, how not to save zero values of energies(integrate.f90 sub swap, &
+					& properties.f90 sub calculate flux).", [stdout])
+		call doMessage(3, "Make (semi)final amendments to code.", [stdout])
 !		call doMessage(3, "Check lammps script with system relaxation, and correct py-script", [stdout])
 !		call doMessage(5, "Add to code calc dkSI/dEpsilon", [stdout])
 		close(iou_xyz)

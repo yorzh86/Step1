@@ -138,11 +138,15 @@ contains
 			if (j==N_slabs/2+1) cold = selectCold(listofRegions)
 		end do
 		
-		if(allocated(regions(k)%temps)) deallocate(regions(k)%temps)
-		allocate(regions(k)%temps(2+N_slabs))
-		regions(k)%temps(1)  = convert(real(k,wp)*dt,'s','ps')
-		regions(k)%temps(2)  = real(k,wp)
-		regions(k)%temps(3:) = temperatures
+		
+		do j=1, N_slabs
+			regions(j)%temps(k)=temperatures(j)
+		end do
+!		if(allocated(regions(k)%temps)) deallocate(regions(k)%temps)
+!		allocate(regions(k)%temps(2+N_slabs))
+!		regions(k)%temps(1)  = convert(real(k,wp)*dt,'s','ps')
+!		regions(k)%temps(2)  = real(k,wp)
+!		regions(k)%temps(3:) = temperatures
 	
 	end subroutine rnem
 
@@ -156,12 +160,15 @@ contains
 		type(ad_t), dimension(3)::swapv
 		t = convert((real(k,wp)*dt),'s','ps')
 		
-		if(allocated(regions(k)%energies)) deallocate(regions(k)%energies)
-		allocate(regions(k)%energies(4))
-		regions(k)%energies(1) = t
-		regions(k)%energies(2) = real(k,wp)
-		regions(k)%energies(3) = KEi(hot)
-		regions(k)%energies(4) = KEi(cold)
+		regions(1)%energies(k) = KEi(cold)
+		regions(2)%energies(k) = KEi(hot)
+		
+!		if(allocated(regions(k)%energies)) deallocate(regions(k)%energies)
+!		allocate(regions(k)%energies(4))
+!		regions(k)%energies(1) = t
+!		regions(k)%energies(2) = real(k,wp)
+!		regions(k)%energies(3) = KEi(hot)
+!		regions(k)%energies(4) = KEi(cold)
 
 		swapv = atoms(hot)%v
 		atoms(hot)%v = atoms(cold)%v
