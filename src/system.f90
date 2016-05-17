@@ -116,7 +116,7 @@ contains
 			allocate(regions(i)%temps(0:N_steps))
 		end do
 		do i=1, 2
-			allocate(regions(i)%energies(0:N_steps))
+			allocate(regions(i)%energies(0:N_steps/skip_swap))
 		end do
 		
 		types%m = convert(39.948_wp,'u','kg')

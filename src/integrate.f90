@@ -160,8 +160,8 @@ contains
 		type(ad_t), dimension(3)::swapv
 		t = convert((real(k,wp)*dt),'s','ps')
 		
-		regions(1)%energies(k) = KEi(cold)
-		regions(2)%energies(k) = KEi(hot)
+		regions(1)%energies(k/skip_swap) = KEi(cold)
+		regions(2)%energies(k/skip_swap) = KEi(hot)
 		
 !		if(allocated(regions(k)%energies)) deallocate(regions(k)%energies)
 !		allocate(regions(k)%energies(4))

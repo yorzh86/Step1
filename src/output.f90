@@ -19,7 +19,7 @@ contains
 		
 		write(*,*)
 		write(*,*) 'Writing KEi of two atoms:'
-		do i=0, N_steps
+		do i=0, N_steps/skip_swap
 			!if(.not. allocated( (regions(j)%energies(i),j=1,2 ))) cycle !!!!!!!!!!does not work
 			write(*, *) (regions(j)%energies(i)%x, j=1,2)
 		end do

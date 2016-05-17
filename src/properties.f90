@@ -17,7 +17,7 @@ module properties_mod
 
 		kSI = flux/grad
 		print *, 
-		write(*,'(1X, 1A4, 1F8.4, 1A8 )')'kSI:', real(kSI), '[W/m.K]'
+		write(*,*)'kSI:', kSI, '[W/m.K]'
 		print *, 
 		
 	contains
@@ -29,12 +29,12 @@ module properties_mod
 			type(ad_t)::mdE, A
 			integer::i,j,skip1,k
 
-			allocate(dE(0:N_steps))
+			allocate(dE(0:N_steps/skip_swap))
 
-			do k=0, N_steps
+			do k=0,N_steps/skip_swap
 				dE(k) = regions(1)%energies(k) - regions(2)%energies(k)
 			end do
-			write (*,'(1X,1A19, 10ES20.9 )')  "Array of KE1 - KE2:", dE
+			write (*,'(1X,1A19, 10ES20.9 )')  "Array of KE1 - KE2:", real(dE)
 
 			mdE = sum(dE)/real(N_steps/skip_swap+1, wp)
 			!mdE = sum(dE)/real(size(dE),wp)
