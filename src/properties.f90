@@ -34,13 +34,15 @@ module properties_mod
 			do k=0,N_steps/skip_swap
 				dE(k) = regions(1)%energies(k) - regions(2)%energies(k)
 			end do
-			write (*,'(1X,1A19, 10ES20.9 )')  "Array of KE1 - KE2:", real(dE)
+			!write (*,'(1X,1A19, 10ES20.9 )')  "Array of KE1 - KE2:", real(dE)
 
 			mdE = sum(dE)/real(N_steps/skip_swap+1, wp)
 			!mdE = sum(dE)/real(size(dE),wp)
 			A = (lattice_const**2)*real(latM(1)*latM(2),wp)
 				
 			o = mdE/(dt*real(skip_swap,wp)*A)
+			
+			write(*,*)"flux:", o
 
 			write (*,*)
 		end function calculateFlux
@@ -49,16 +51,16 @@ module properties_mod
 			type(ad_t)::o,  mL, mR
 			integer::i,j,k,skip2
 			type(ad_t), dimension(:),allocatable::ar1, ar5, ar9
-			type(ad_t)::m1,m5,m9, dz, slope1, slope2
+			type(ad_t)::m1, m5, m9, dz, slope1, slope2
 			skip2 = 0
 			allocate(ar1(0:N_steps))
 			allocate(ar5(0:N_steps))
 			allocate(ar9(0:N_steps))
 			
 			do k=0, N_steps
-				ar1(k)= regions(2)%temps(k)%x
-				ar5(k)= regions(6)%temps(k)%x
-				ar9(k)= regions(10)%temps(k)%x
+				ar1(k)= regions(2)%temps(k)
+				ar5(k)= regions(6)%temps(k)
+				ar9(k)= regions(10)%temps(k)
 			end do
 
 			m1 =  sum(ar1)/real(size(ar1),wp)
@@ -69,13 +71,39 @@ module properties_mod
 			slope1 = ((m5-m1)+(m5-m9))/2.0_wp/dz
 			
 			!mL,mR - slopes of left and right curves
-			mL = slope(1,6)
-			mR = slope(6,10)
-			slope2 = (mL + mR)/2.0_wp
+			!mL = slope(1,6)
+			!mR = slope(6,10)
+			!slope2 = (mL + mR)/2.0_wp
 			
-			o = slope2
+			o = slope1
 			write(*,*)"Slope manually:", slope1
-			write(*,*)"Slope least squares method:", slope2
+			!write(*,*)"Slope least squares method(used in kSI):", slope2
+!			write(*, *) "Showing Ar1:"
+!			do k=0, N_steps
+!				write(*,*) ar1(k)%x
+!			end do
+			
+!			write(*, *) "Showing Ar5:"
+!			do k=0, N_steps
+!				write(*,*) ar5(k)%x
+!			end do
+			
+!			write(*, *) "Showing Ar9:"
+!			do k=0, N_steps
+!				write(*,*) ar9(k)%x
+!			end do
+			
+			do k=0, N_steps
+				write(*,*) regions(2)%temps(k)
+			end do
+			
+			write(*,*) "m1: ", m1
+			write(*,*) "m5: ", m5
+			write(*,*) "m9: ", m9
+			
+			print *, 
+			print *, "ar1:", ar1
+			
 
 		end function calculateGrad
 		
@@ -103,7 +131,7 @@ module properties_mod
 			avY = sY/(real(N_steps,wp)*real(right-left+1,wp))
 			
 			do i=left,right
-				sX  =  sX+real(i,wp)*lattice_const*real(latM(3),wp)/real(N_slabs,wp)
+				sX  = sX+real(i,wp)*lattice_const*real(latM(3),wp)/real(N_slabs,wp)
 				sXX = sXX+(real(i,wp)*lattice_const*real(latM(3),wp)/real(N_slabs,wp))**2
 			end do
 			avX = sX/real(right-left+1,wp)

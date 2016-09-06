@@ -86,21 +86,21 @@ contains
 		
 		E0 = kB*convert(125.7_wp,'K','K')
 		S0 = convert(3.345_wp,'A','m')
-		lj%cutoff = 2.0_wp*S0
+		lj%cutoff = 2.5_wp*S0
 		lj%skin = 0.5_wp*S0
 		
 		lj%coeffs = [diff(E0,1),diff(S0,2)]
 		
 		!= Simulation =!
-		N_steps       = 100
+		N_steps       = 30
 		N_slabs       = 10
-		skip_swap     = 50
-		skip_thermo   = 1
+		skip_swap     = 550
+		skip_thermo   = 100
 		skip_dump     = 1
-		skip_neighbor = 100
+		skip_neighbor = 200
 		
 		lattice_const = convert(5.40_wp, 'A', 'm')
-		latM = [5,5,15]
+		latM = [5,5,10]
 		
 		T0 = convert(45.0_wp,'K','K')
 		P0 = convert(1.0_wp,'bar','Pa')

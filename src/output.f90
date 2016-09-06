@@ -37,10 +37,10 @@ contains
 		write(iou,'(1A)') trim(adjustl(buf))
 		write(iou,'(1A,1I10)') 'Atoms. Timestep: ',ts
 		do k=1,size(atoms)
-			write(iou,'(1I4, 3F5.1,6E25.15)') atoms(k)%atom_id, &
-				& [(convert(atoms(k)%r(i),'m','A'),i=1,3)], &
-				& [(convert(atoms(k)%v(i),'m/s', 'A/ps'), i=1,3)], &
-				& [(convert(atoms(k)%f(i), 'N', 'eV/A'), i=1,3)]            
+			write(iou,'(1I7, 3F5.1)') atoms(k)%atom_id, &
+				& [(convert(atoms(k)%r(i),'m','A'),i=1,3)]
+				!& [(convert(atoms(k)%v(i),'m/s', 'A/ps'), i=1,3)], &
+				!& [(convert(atoms(k)%f(i), 'N', 'eV/A'), i=1,3)]            
 		end do
 	end subroutine writeStepXYZ
 	

@@ -79,9 +79,6 @@ contains
 		call thermalConductivity()
 
 !		call doMessage(5, "Check grad calculation properties.f90 line75", [stdout])
-		call doMessage(3, "Learn, how not to save zero values of energies(integrate.f90 sub swap, &
-					& properties.f90 sub calculate flux).", [stdout])
-		call doMessage(3, "Make (semi)final amendments to code.", [stdout])
 !		call doMessage(3, "Check lammps script with system relaxation, and correct py-script", [stdout])
 !		call doMessage(5, "Add to code calc dkSI/dEpsilon", [stdout])
 		close(iou_xyz)
