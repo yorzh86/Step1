@@ -75,7 +75,7 @@ contains
 	end subroutine runSim
 	
 	subroutine endSim
- 		call showResults()
+ 		!call showResults()
 		call thermalConductivity()
 
 !		call doMessage(5, "Check grad calculation properties.f90 line75", [stdout])

@@ -21,7 +21,7 @@ contains
 		write(*,*) 'Writing KEi of two atoms:'
 		do i=0, N_steps/skip_swap
 			!if(.not. allocated( (regions(j)%energies(i),j=1,2 ))) cycle !!!!!!!!!!does not work
-			write(*, *) (regions(j)%energies(i)%x, j=1,2)
+			write(*, *) (regions(j)%energies(i), j=1,2)
 		end do
 		write(*,*)
 
@@ -69,13 +69,14 @@ contains
 		
 		if (k==0) then      
 			write(iou_energies,'(1X, 1A8, 2X, 1A8, 2X, 1A37)') 'Time[ps],', & 
-				& 'TimeStep[ms],', 'Kinetic energy[eV] of swapped atoms.'
+				& 'TimeStep[ms],', 'Kinetic energy[J] of swapped atoms.'
 			write(iou_energies,*)
 		end if
 		
-		write(iou_energies,'(1X, 1F7.2, 1I7, 2F15.8)') t,  k, & 
-			& convert(KEi(hot), 'J','eV'), &
-			& convert(KEi(cold), 'J', 'eV')
+		write(iou_energies,*) t,  k, KEi(hot), KEi(cold) !!!NOT CONVERTED!!!
+		!write(iou_energies,'(1X, 1F7.2, 1I7, 2F15.8)') t,  k, &
+			!& convert(KEi(hot), 'J','eV'), &
+			!& convert(KEi(cold), 'J', 'eV')
 			
 	end subroutine writeStepEnergies
 	
