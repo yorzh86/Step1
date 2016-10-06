@@ -376,6 +376,7 @@ contains
 	!==================!
 
 	elemental function mul_ra(u,v) result(o)
+	! VERIFIED
 		real(wp),intent(in)::u
 		type(ad_t),intent(in)::v
 		type(ad_t)::o
@@ -385,6 +386,7 @@ contains
 	end function mul_ra
 
 	elemental function mul_ar(u,v) result(o)
+	! VERIFIED
 		type(ad_t),intent(in)::u
 		real(wp),intent(in)::v
 		type(ad_t)::o
@@ -394,6 +396,7 @@ contains
 	end function mul_ar
 
 	elemental function mul_aa(u,v) result(o)
+	! VERIFIED
 		type(ad_t),intent(in)::u
 		type(ad_t),intent(in)::v
 		type(ad_t)::o
@@ -425,11 +428,12 @@ contains
 	end function div_ar
 
 	elemental function div_aa(u,v) result(o)
+	! VERIFIED
 		type(ad_t),intent(in)::u
 		type(ad_t),intent(in)::v
 		type(ad_t)::o
 		
-		o%x = u%x/v%x
+		o%x = (u%x/v%x)
 		o%d(1:N) = (v%x*u%d(1:N)-u%x*v%d(1:N))/(v%x**2)
 	end function div_aa
 
@@ -470,7 +474,8 @@ contains
 		type(ad_t)::o
 
 		o%x = u%x**v%x
-		o%d(1:N) = (u%x**(v%x-1.0_wp)*v%x)*u%d(1:N)+(u%x**v%x*log(u%x))*v%d(1:N)
+		!o%d(1:N) = (u%x**(v%x-1.0_wp)*v%x)*u%d(1:N)+(u%x**v%x*log(u%x))*v%d(1:N)
+		o%d(1:N) = u%x**v%x * (v%x/u%x * u%d(1:N) + log(u%x)*v%d(1:N))
 	end function pow_aa
 
 end module autodiff_mod

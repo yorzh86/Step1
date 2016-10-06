@@ -14,7 +14,8 @@ contains
 		write(*,*) 'Writing temperatures for regions:'
 		
 		do i=0, N_steps
-			write(*,'(1X, 10F15.8)') (regions(j)%temps(i)%x, j=1,10)
+			!write(*,'(1X, 10F15.8)') (regions(j)%temps(i)%x, j=1,10) showing 1 region now:
+			if (mod(i,skip_swap)==0) write(*,*) (regions(1)%temps(i))
 		end do
 		
 		write(*,*)
@@ -61,8 +62,8 @@ contains
 
 	end subroutine writeStepThermo
 	
-	subroutine writeStepEnergies(k, iou_energies)
-		integer, intent(in)::k, iou_energies
+	subroutine writeStepEnergies(k, iou_energies, iou_penergies )
+		integer, intent(in)::k, iou_energies, iou_penergies
 		real(wp)::t
 		
 		t = convert(real(k,wp)*dt,'s','ps')
@@ -71,9 +72,15 @@ contains
 			write(iou_energies,'(1X, 1A8, 2X, 1A8, 2X, 1A37)') 'Time[ps],', & 
 				& 'TimeStep[ms],', 'Kinetic energy[J] of swapped atoms.'
 			write(iou_energies,*)
+			
+			write(iou_penergies,'(1X, 1A8, 2X, 1A8, 2X, 1A37)') 'Time[ps],', & 
+				& 'TimeStep[ms],', 'Potential energy[J] of swapped atoms.'
+			write(iou_penergies,*)
 		end if
 		
 		write(iou_energies,*) t,  k, KEi(hot), KEi(cold) !!!NOT CONVERTED!!!
+		write(iou_penergies,*) t,  k, PEi(hot), PEi(cold) 
+		
 		!write(iou_energies,'(1X, 1F7.2, 1I7, 2F15.8)') t,  k, &
 			!& convert(KEi(hot), 'J','eV'), &
 			!& convert(KEi(cold), 'J', 'eV')

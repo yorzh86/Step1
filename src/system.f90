@@ -358,7 +358,10 @@ contains
 		
 		v0 = 0.0_wp
 		if(present(vBulk)) v0 = vBulk
+		!o%d(1) = 1.0_wp !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		!o%d(2) = 1.0_wp
 		o = 0.5_wp*types(atoms(i)%t)%m*sum((atoms(i)%v-v0)**2)
+		
 	end function KEi
 	
 	function PE() result (o)
