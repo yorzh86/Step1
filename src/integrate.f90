@@ -23,7 +23,6 @@ contains
 	subroutine setThermostat(state,T,tau)
 		!! Turns on/off damping parameter "eta" in the Integrator
 		logical,intent(in)::state
-		!real(wp),intent(in),optional::T,tau
 		type(ad_t), intent(in), optional::T, tau
 		
 		if(state .and. present(T) .and. present(tau) ) then
@@ -43,7 +42,6 @@ contains
 	subroutine setBarostat(state,P,tau)
 		!! Turns on/off damping parameter "eta" in the Integrator
 		logical,intent(in)::state
-		!real(wp),intent(in),optional::P,tau
 		type(ad_t),intent(in),optional::P,tau
 		
 		if(state .and. present(P) .and. present(tau) ) then
@@ -62,12 +60,28 @@ contains
 
 	subroutine velocityVerlet(dt)
 		!! Velocity-Verlet integration
-		!real(wp),intent(in)::dt
 		type(ad_t), intent(in)::dt
-		
-		!real(wp),dimension(3)::d
 		type(ad_t), dimension(3)::d
 		integer::k
+		
+		!!new!!
+		do k=1, size(atoms)
+			atoms(k)%r%d(1) = 0.0_wp !this changes deriv of ke, and t
+			atoms(k)%r%d(2) = 0.0_wp
+			
+			!atoms(k)%r%d = 0.0_wp    ! - doenst work
+			!Error: Two or more part references with nonzero rank must not be specified at (1
+			
+			atoms(k)%v%d(1) = 0.0_wp
+			atoms(k)%v%d(2) = 0.0_wp
+			
+			atoms(k)%a%d(1) = 0.0_wp
+			atoms(k)%a%d(2) = 0.0_wp
+			
+			atoms(k)%f%d(1) = 0.0_wp
+			atoms(k)%f%d(2) = 0.0_wp
+		end do
+		!!/new!!
 		
 		do k=1,size(atoms)
 			d = atoms(k)%v*dt+0.5_wp*atoms(k)%a*dt**2
@@ -106,7 +120,6 @@ contains
 
 	function DetaDt() result(o)
 		!! Calculates damping parameter("eta") change over time
-		!real(wp)::o
 		type(ad_t)::o
 		
 		o = (1.0_wp/thermostat%tau**2)*(temperature()/thermostat%set-1.0_wp)
@@ -114,15 +127,12 @@ contains
 
 	function DepsilonDt() result(o)
 		!! Calculates damping parameter("eta") change over time.
-		!real(wp)::o
 		type(ad_t)::o
 		o = (1.0_wp/barostat%tau**2)*(pressure()/barostat%set-1.0_wp)
 	end function DepsilonDt
 	
 	subroutine rnem(k)
 		integer, intent(in)::k
-		
-		!real(wp),dimension(N_slabs)::temperatures
 		type(ad_t),dimension(N_slabs)::temperatures
 		integer::j
 		real(wp)::abc

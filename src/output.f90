@@ -11,7 +11,7 @@ contains
 		integer::i, j
 
 		print *,
-		write(*,*) 'Writing temperatures for regions:'
+		write(*,*) 'Writing temperatures for region1 (temperature, Deriv1, Deriv2):'
 		
 		do i=0, N_steps
 			!write(*,'(1X, 10F15.8)') (regions(j)%temps(i)%x, j=1,10) showing 1 region now:
@@ -19,7 +19,7 @@ contains
 		end do
 		
 		write(*,*)
-		write(*,*) 'Writing KEi of two atoms:'
+		write(*,*) 'Writing KEi of two atoms(atom1, deriv1, deriv2, atom2, deriv1, deriv2):'
 		do i=0, N_steps/skip_swap
 			!if(.not. allocated( (regions(j)%energies(i),j=1,2 ))) cycle !!!!!!!!!!does not work
 			write(*, *) (regions(j)%energies(i), j=1,2)

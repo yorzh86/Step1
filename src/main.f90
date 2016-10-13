@@ -77,16 +77,16 @@ contains
 	end subroutine runSim
 	
 	subroutine endSim
- 		!call showResults()
-		!call thermalConductivity()
-		call test_diff()
+ 		call showResults()
+		call thermalConductivity()
+		!call test_diff()
 
 !		call doMessage(5, "Check grad calculation properties.f90 line75", [stdout])
 !		call doMessage(3, "Check lammps script with system relaxation, and correct py-script", [stdout])
 !		call doMessage(5, "Add to code calc dkSI/dEpsilon", [stdout])
 		print *, 
-		call doMessage(3, "Find whether I initialize derivatives for atom mass, velocity, etc", [stdout])
-		call doMessage(3, "Understand how autodiff works with easy example...", [stdout])
+		!call doMessage(3, "Find whether I initialize derivatives for atom mass, velocity, etc", [stdout])
+		!call doMessage(3, "Understand how autodiff works with easy example...", [stdout])
 		close(iou_xyz)
 		close(iou_temps)
 		close(iou_energies)
@@ -95,20 +95,13 @@ contains
 	end subroutine endSim
 	
 	subroutine test_diff
-		type(ad_t):: f, x,y
-		!real(wp)::x
+		type(ad_t):: f, x
 		integer::i
-		!x = 0.0_wp
-		!x%x = 1.0_wp
 		x%d = 1.0_wp
-		y%d = 1.0_wp
 		do i=1,30
-			x = x + 1.0_wp
-			y = x/5.0_wp
-			!x = real(i, wp)
-			f = (x**4.0_wp)*sin(x)+5.0_wp*y/exp(y)
-			!f = (x**2.0_wp)*sin(x)+5.0_wp*x/exp(x)
-			
+			x%x = x%x + 1.0_wp
+			f = (x**2.0_wp)*sin(x)+5.0_wp*x/exp(x)
+			!f = cos(x)
 			write(*,*) f
 		end do
 	end subroutine test_diff

@@ -358,14 +358,12 @@ contains
 		
 		v0 = 0.0_wp
 		if(present(vBulk)) v0 = vBulk
-		!o%d(1) = 1.0_wp !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-		!o%d(2) = 1.0_wp
+
 		o = 0.5_wp*types(atoms(i)%t)%m*sum((atoms(i)%v-v0)**2)
 		
 	end function KEi
 	
 	function PE() result (o)
-		!real(wp)::o
 		type(ad_t)::o
 		integer::k
 		
@@ -377,7 +375,6 @@ contains
 
 	function PEi(i) result (o)
 		integer,intent(in)::i
-		!real(wp)::o
 		type(ad_t)::o
 		
 		o = V(i)
@@ -385,10 +382,7 @@ contains
 
 	function Si(i) result(o)
 		integer,intent(in)::i
-		!real(wp),dimension(3,3)::o
 		type(ad_t),dimension(3,3)::o
-		
-		!real(wp),dimension(3)::v,r,F
 		type(ad_t),dimension(3)::v,r,F
 		integer::j,aj
 		
@@ -423,8 +417,6 @@ contains
 
 	subroutine updateNeighbors(i)
 		integer,intent(in)::i
-		
-		!real(wp),dimension(3)::r
 		type(ad_t),dimension(3)::r
 		
 		integer::k
@@ -439,7 +431,6 @@ contains
 	end subroutine updateNeighbors
 
 	function averageNeighbors() result(o)
-		!real(wp)::o
 		type(ad_t)::o
 		integer::k
 		
@@ -447,9 +438,7 @@ contains
 	end function averageNeighbors
 
 	function virial() result(o)
-		!real(wp)::o
 		type(ad_t)::o
-		!real(wp),dimension(3)::F,r
 		type(ad_t),dimension(3)::F,r
 		integer::i,j,aj
 		
