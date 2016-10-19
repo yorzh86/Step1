@@ -66,20 +66,20 @@ contains
 		
 		!!new!!
 		do k=1, size(atoms)
-			atoms(k)%r%d(1) = 0.0_wp !this changes deriv of ke, and t
-			atoms(k)%r%d(2) = 0.0_wp
+			atoms(k)%r%d(1) = 1.0_wp !this changes deriv of ke, and t
+			atoms(k)%r%d(2) = 1.0_wp
 			
 			!atoms(k)%r%d = 0.0_wp    ! - doenst work
 			!Error: Two or more part references with nonzero rank must not be specified at (1
 			
-			atoms(k)%v%d(1) = 0.0_wp
-			atoms(k)%v%d(2) = 0.0_wp
+			atoms(k)%v%d(1) = 1.0_wp
+			atoms(k)%v%d(2) = 1.0_wp
 			
-			atoms(k)%a%d(1) = 0.0_wp
-			atoms(k)%a%d(2) = 0.0_wp
+			atoms(k)%a%d(1) = 1.0_wp
+			atoms(k)%a%d(2) = 1.0_wp
 			
-			atoms(k)%f%d(1) = 0.0_wp
-			atoms(k)%f%d(2) = 0.0_wp
+			atoms(k)%f%d(1) = 1.0_wp
+			atoms(k)%f%d(2) = 1.0_wp
 		end do
 		!!/new!!
 		

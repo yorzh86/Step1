@@ -159,6 +159,8 @@ contains
 
 		ts = 0
 		t  = 0.0_wp
+		
+		
 	end subroutine buildSystem
 
 	subroutine writeLammpsData(fn)

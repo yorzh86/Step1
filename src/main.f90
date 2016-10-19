@@ -96,7 +96,10 @@ contains
 	
 	subroutine test_diff
 		type(ad_t):: f, x
+		type(ad_t), dimension(3):: y
 		integer::i
+		
+		!y%d = (/ 0.0_wp, 0.0_wp, 0.0_wp/)
 		x%d = 1.0_wp
 		do i=1,30
 			x%x = x%x + 1.0_wp
