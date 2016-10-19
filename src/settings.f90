@@ -22,8 +22,8 @@ module settings_mod
 		!real(wp)::skin
 		type(ad_t)::skin
 			!! Skin beyond cutoff for neighbor lists
-		!real(wp),dimension(:),allocatable::coeffs
-		type(ad_t),dimension(:),allocatable::coeffs
+		!type(ad_t),dimension(:),allocatable::coeffs
+		type(ad_t),dimension(2)::coeffs
 			!! Potential coefficients       
 	end type
 	
@@ -79,7 +79,6 @@ module settings_mod
 contains
 
 	subroutine initialize_parameters()
-		!real(wp)::E0,S0
 		real(wp)::E0, S0
 		
 		!= Potential =!
@@ -92,7 +91,7 @@ contains
 		lj%coeffs = [diff(E0,1),diff(S0,2)]
 		
 		!= Simulation =!
-		N_steps       = 20000
+		N_steps       = 5
 		N_slabs       = 10
 		skip_swap     = 500
 		skip_thermo   = 100
@@ -100,7 +99,7 @@ contains
 		skip_neighbor = 200
 		
 		lattice_const = convert(5.40_wp, 'A', 'm')
-		latM = [5,5,15]
+		latM = [2,2,3]
 		
 		T0 = convert(45.0_wp,'K','K')
 		P0 = convert(1.0_wp,'bar','Pa')

@@ -65,21 +65,23 @@ contains
 		integer::k
 		
 		!!new!!
-		do k=1, size(atoms)
-			atoms(k)%r%d(1) = 1.0_wp !this changes deriv of ke, and t
-			atoms(k)%r%d(2) = 1.0_wp
+		print *,
+		do k=1, 5
+			write(*,'(1X,1A6,1I2,1A14, 2ES15.7)') 'Atom:',k, 'r(1), r%d(1):', &
+				& atoms(k)%r(1)%x, atoms(k)%r(1)%d(1)
+			write(*,'(1X,1A6,1I2,1A14, 2ES15.7)') 'Atom:',k, 'v%d(1):', &
+				& atoms(k)%v(1)%x, atoms(k)%v(1)%d(1)
+			!write(*,*) 'Atom:',k, 'a%d(1):',atoms(k)%a(1)%d(1)
+			!write(*,*) 'Atom:',k, 'f%d(1):',atoms(k)%f(1)%d(1)
 			
-			!atoms(k)%r%d = 0.0_wp    ! - doenst work
-			!Error: Two or more part references with nonzero rank must not be specified at (1
-			
-			atoms(k)%v%d(1) = 1.0_wp
-			atoms(k)%v%d(2) = 1.0_wp
-			
-			atoms(k)%a%d(1) = 1.0_wp
-			atoms(k)%a%d(2) = 1.0_wp
-			
-			atoms(k)%f%d(1) = 1.0_wp
-			atoms(k)%f%d(2) = 1.0_wp
+!			atoms(k)%r%d(1) = 1.0_wp
+!			atoms(k)%r%d(2) = 1.0_wp
+!			atoms(k)%v%d(1) = 1.0_wp
+!			atoms(k)%v%d(2) = 1.0_wp
+!			atoms(k)%a%d(1) = 1.0_wp
+!			atoms(k)%a%d(2) = 1.0_wp
+!			atoms(k)%f%d(1) = 1.0_wp
+!			atoms(k)%f%d(2) = 1.0_wp
 		end do
 		!!/new!!
 		

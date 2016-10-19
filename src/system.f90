@@ -104,6 +104,7 @@ contains
 		
 		Teta = 0.0_wp
 		Pepsilon = 0.0_wp
+		!write(*,*) '\x1B[33;1m:Building system started!\x1B[37;1m'
 		
 		box = a*real(N,wp)
 		ns = nint(real(N_steps/skip_swap,wp))
@@ -159,8 +160,7 @@ contains
 
 		ts = 0
 		t  = 0.0_wp
-		
-		
+		!write(*,*) '\x1B[33;1m:Building system finished!\x1B[37;1m'
 	end subroutine buildSystem
 
 	subroutine writeLammpsData(fn)
