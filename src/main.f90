@@ -68,8 +68,9 @@ contains
 			if(mod(k,skip_swap)==0)     call writeStepEnergies(k,iou_energies, iou_penergies)
  			!if(mod(k,skip_dump)==0)     call writeStepXYZ(iou_xyz)
 			if(mod(k,skip_neighbor)==0) call updateAllLists()
-			print *,
-			write (*,*) 'Step_N:', k
+			
+			
+			if(mod(k,50)==0) call test_diff(k)
 			call velocityVerlet(dt)
 			call doBox()
 		end do
@@ -87,8 +88,8 @@ contains
 !		call doMessage(5, "Add to code calc dkSI/dEpsilon", [stdout])
 		print *, 
 		
-		call doMessage(1, "Switch to dim(2) coeffs, change E0=coeffs(1)%x - didnt work.", [stdout])
-		call doMessage(1, "Switch to to E1=coeffs(1) - didn't work.", [stdout])
+!		call doMessage(1, "Switch to dim(2) coeffs, change E0=coeffs(1)%x - didnt work.", [stdout])
+!		call doMessage(1, "Switch to to E1=coeffs(1) - didn't work.", [stdout])
 		
 		call doMessage(5, "Examine the initialization of values to ensure that the slots are used correctly.", [stdout])
 		call doMessage(5, "Examine  the derivatives of many quantities in the first few time steps.", [stdout])

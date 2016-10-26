@@ -17,6 +17,7 @@ module integrate_mod
 	public::doBox
 	public::swapAtoms
 	public::rnem
+	!public:: test_diff
 	
 contains
 
@@ -65,15 +66,7 @@ contains
 		integer::k
 		
 		!!new!!
-		print *,
-		do k=1, 5
-			write(*,'(1X,1A6,1I2,1A14, 2ES15.7)') 'Atom:',k, 'r(1), r%d(1):', &
-				& atoms(k)%r(1)%x, atoms(k)%r(1)%d(1)
-			write(*,'(1X,1A6,1I2,1A14, 2ES15.7)') 'Atom:',k, 'v%d(1):', &
-				& atoms(k)%v(1)%x, atoms(k)%v(1)%d(1)
-			!write(*,*) 'Atom:',k, 'a%d(1):',atoms(k)%a(1)%d(1)
-			!write(*,*) 'Atom:',k, 'f%d(1):',atoms(k)%f(1)%d(1)
-			
+!		do k=1, size(atoms)
 !			atoms(k)%r%d(1) = 1.0_wp
 !			atoms(k)%r%d(2) = 1.0_wp
 !			atoms(k)%v%d(1) = 1.0_wp
@@ -82,7 +75,7 @@ contains
 !			atoms(k)%a%d(2) = 1.0_wp
 !			atoms(k)%f%d(1) = 1.0_wp
 !			atoms(k)%f%d(2) = 1.0_wp
-		end do
+!		end do
 		!!/new!!
 		
 		do k=1,size(atoms)

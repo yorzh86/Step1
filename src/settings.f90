@@ -91,7 +91,7 @@ contains
 		lj%coeffs = [diff(E0,1),diff(S0,2)]
 		
 		!= Simulation =!
-		N_steps       = 5
+		N_steps       = 3000
 		N_slabs       = 10
 		skip_swap     = 500
 		skip_thermo   = 100
@@ -99,7 +99,7 @@ contains
 		skip_neighbor = 200
 		
 		lattice_const = convert(5.40_wp, 'A', 'm')
-		latM = [2,2,3]
+		latM = [5,5,10]
 		
 		T0 = convert(45.0_wp,'K','K')
 		P0 = convert(1.0_wp,'bar','Pa')
