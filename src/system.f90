@@ -19,20 +19,15 @@ module system_mod
 	end type
 	
 	type::atom_t
-		!real(wp),dimension(3)::r
+		
 		type(ad_t),dimension(3)::r
 			!! Atomic position
-		!real(wp),dimension(3)::v
 		type(ad_t),dimension(3)::v
 			!! Atomic velocity
-		!real(wp),dimension(3)::a
 		type(ad_t),dimension(3)::a
 			!! Atomic acceleration
-		!real(wp),dimension(3)::f
 		type(ad_t),dimension(3)::f
 			!! Atomic force
-		!real(wp)::tt
-			!! Atom temperature
 		integer::atom_id
 			!! Atom id
 		integer::t
@@ -42,11 +37,8 @@ module system_mod
 	end type
 	
 	type:: region_t
-		!real(wp),dimension(:),allocatable::temps
 		type(ad_t),dimension(:),allocatable::temps
-		!real(wp),dimension(:),allocatable::energies
 		type(ad_t),dimension(:),allocatable::energies
-		!real(wp)::zl,zh
 		type(ad_t)::zl, zh
 	end type
 	
@@ -64,13 +56,10 @@ module system_mod
 		!! All atoms in system
 	type(region_t),dimension(:),allocatable::regions
 	
-	!real(wp)::Teta = 0.0_wp
 	type(ad_t)::Teta
 		!! Thermostat DOF
-	!real(wp)::Pepsilon = 0.0_wp
 	type(ad_t)::Pepsilon
 		!! Barostat DOF
-	!real(wp),dimension(3)::box
 	type(ad_t),dimension(3)::box
 		!! Bounds of the simulation box
 	
@@ -79,7 +68,6 @@ module system_mod
 	
 	integer::ts
 		!! Time step counter
-	!real(wp)::t
 	type(ad_t)::t
 		!! System time
 	
@@ -87,12 +75,10 @@ contains
 
 	subroutine buildSystem(a,N,Ti)
 		implicit none
-		!real(wp),intent(in)::a
 		type(ad_t), intent(in)::a
 			!! Lattice constant
 		integer,dimension(3),intent(in)::N
 			!! Number of unit cells
-! 		real(wp),intent(in)::Ti
 		type(ad_t),intent(in)::Ti
 			!! Initial temperature
 		real(wp), dimension(3,4), parameter::rcell= &
@@ -104,14 +90,12 @@ contains
 		
 		Teta = 0.0_wp
 		Pepsilon = 0.0_wp
-		!write(*,*) '\x1B[33;1m:Building system started!\x1B[37;1m'
 		
 		box = a*real(N,wp)
 		ns = nint(real(N_steps/skip_swap,wp))
 				
 		allocate(types(1))
 		allocate(atoms(size(rcell,2)*product(N)))
-		!allocate(regions(0:N_steps))
 		allocate(regions(N_slabs))
 		do i=1, N_slabs
 			allocate(regions(i)%temps(0:N_steps))
@@ -138,24 +122,35 @@ contains
 		
 		do k=1,size(atoms)
 			!! Create random direction of velocities
-			call random_number(atoms(k)%v%x)
-			atoms(k)%v = 2.0_wp*atoms(k)%v-1.0_wp
-			do while(norm2(real(atoms(k)%v))>1.0_wp .and. norm2(real(atoms(k)%v))<0.1_wp)
+			call random_number(atoms(k)%v%x)  !must be %x
+			atoms(k)%v%x = 2.0_wp*atoms(k)%v%x-1.0_wp  !trying %x
+			do while(norm2(real(atoms(k)%v%x))>1.0_wp .and. norm2(real(atoms(k)%v%x))<0.1_wp) !trying %x
 				call random_number(atoms(k)%v%x)
-				atoms(k)%v = 2.0_wp*atoms(k)%v-1.0_wp
+				atoms(k)%v%x = 2.0_wp*atoms(k)%v%x-1.0_wp !trying %x
 			end do
-			atoms(k)%v = atoms(k)%v/norm2(atoms(k)%v)
+			atoms(k)%v%x = atoms(k)%v%x/norm2(atoms(k)%v%x) !trying %x
 			!! Set velocity magnitude
-			atoms(k)%v = atoms(k)%v*sqrt(2.0_wp*kB*Ti/types(atoms(k)%t)%m)*abs(randomNormal()+1.0_wp)
+			atoms(k)%v%x = atoms(k)%v%x*sqrt(2.0_wp*kB*Ti/types(atoms(k)%t)%m%x)*abs(randomNormal()+1.0_wp)!trying %x
 		end do
-		forall(k=1:3) atoms(:)%v(k) = atoms(:)%v(k)-sum(atoms(:)%v(k))/real(size(atoms),wp)
+		forall(k=1:3) atoms(:)%v(k)%x = atoms(:)%v(k)%x-sum(atoms(:)%v(k)%x)/real(size(atoms),wp) !trying %x
 		
 		call updateAllLists()
 		
 		do k=1,size(atoms)
 			atoms(k)%atom_id = k
-			atoms(k)%a = -delV(k)/types(atoms(k)%t)%m
-			atoms(k)%f = -delV(k)
+			atoms(k)%a%x = -delV(k)/types(atoms(k)%t)%m%x  !trying %x
+			atoms(k)%f%x = -delV(k)                        !trying %x
+		end do
+		
+		do k=1, size(atoms)
+			atoms(k)%r%d(1) = 1.0_wp
+			atoms(k)%r%d(2) = 1.0_wp
+			atoms(k)%v%d(1) = 1.0_wp
+			atoms(k)%v%d(2) = 1.0_wp
+			atoms(k)%a%d(1) = 1.0_wp
+			atoms(k)%a%d(2) = 1.0_wp
+			atoms(k)%f%d(1) = 1.0_wp
+			atoms(k)%f%d(2) = 1.0_wp
 		end do
 
 		ts = 0

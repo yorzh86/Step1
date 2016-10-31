@@ -10,10 +10,12 @@ contains
 	subroutine test_diff(k)
 		integer, intent(in)::k
 		integer::i 
-		if (k< 50) write(*,'(1X, 1A9, 3X, 1A5, 4X, 1A19, 24X, 1A32)') '\x1B[32;1m#','Step', &
-			& 'Positions %r(x,y,z)','Derivatives r(x,y,z)%d(1)\x1B[0m'
-		write(*,'(1X,1I2, 1I7, 3F9.3, 3ES20.5)')k/50, k, (convert(atoms(100)%r(i)%x, 'm','A'), i=1,3), &
-			& atoms(100)%r(1)%d(1), atoms(100)%r(2)%d(1), atoms(100)%r(3)%d(1)
+		if (k< 1) write(*,'(1X, 1A9, 3X, 1A5, 4X, 1A19, 24X, 1A32)') '\x1B[32;1m#','Step', &
+			& 'Velocities %v(x,y,z)','Derivatives v(x,y,z)%d(1)\x1B[0m'
+		write(*,'(1X,1I2, 1I7, 3F9.3, 3ES20.5)')k/1, k, &
+		(atoms(100)%v(i)%x, i=1,3), &
+		!(convert(atoms(100)%r(i)%x, 'm','A'), i=1,3), &
+			& (atoms(100)%v(i)%d(1), i=1,3)
 
 	end subroutine test_diff
 

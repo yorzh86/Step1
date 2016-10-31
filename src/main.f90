@@ -70,7 +70,7 @@ contains
 			if(mod(k,skip_neighbor)==0) call updateAllLists()
 			
 			
-			if(mod(k,50)==0) call test_diff(k)
+			if(mod(k,1)==0) call test_diff(k)
 			call velocityVerlet(dt)
 			call doBox()
 		end do

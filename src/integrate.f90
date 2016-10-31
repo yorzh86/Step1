@@ -17,7 +17,7 @@ module integrate_mod
 	public::doBox
 	public::swapAtoms
 	public::rnem
-	!public:: test_diff
+
 	
 contains
 
