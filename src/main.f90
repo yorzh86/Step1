@@ -55,7 +55,7 @@ contains
 
 		do k=0, N_steps
 			p = real(k,wp)/real(N_steps, wp)
-			!call showProgress(' Simulation ongoing', p)
+			call showProgress(' Simulation ongoing', p)
 			if(k==N_steps/3) then
 				call setThermostat(.false.)
 				call setBarostat(.false.)
@@ -65,12 +65,12 @@ contains
 
 			if(mod(k,skip_swap)==0)     call swapAtoms(k)
 			if(mod(k,skip_thermo)==0)   call writeStepThermo(k, iou_temps)
-			if(mod(k,skip_swap)==0)     call writeStepEnergies(k,iou_energies, iou_penergies)
+			if(mod(k,skip_swap)==0)     call writeStepEnergies(k,iou_energies, iou_penergies) !output.f90
  			!if(mod(k,skip_dump)==0)     call writeStepXYZ(iou_xyz)
 			if(mod(k,skip_neighbor)==0) call updateAllLists()
 			
 			
-			if(mod(k,1)==0) call test_diff(k)
+			!if(mod(k,1)==0) call test_diff(k) !output.f90 prints 
 			call velocityVerlet(dt)
 			call doBox()
 		end do
@@ -79,8 +79,8 @@ contains
 	end subroutine runSim
 	
 	subroutine endSim
- 		!call showResults()
-		!call thermalConductivity()
+ 		call showResults()  !output.f90
+		!call thermalConductivity() !calculates k
 		
 
 !		call doMessage(5, "Check grad calculation properties.f90 line75", [stdout])

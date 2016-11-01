@@ -8,6 +8,7 @@ module output_mod
 contains
 	
 	subroutine test_diff(k)
+	!! prints atom 100 velocities, and derivatives
 		integer, intent(in)::k
 		integer::i 
 		if (k< 1) write(*,'(1X, 1A9, 3X, 1A5, 4X, 1A19, 24X, 1A32)') '\x1B[32;1m#','Step', &
