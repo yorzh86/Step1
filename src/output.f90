@@ -11,16 +11,12 @@ contains
 	!! prints atom 100 velocities, and derivatives
 		integer, intent(in)::k
 		integer::i 
-		if (k< 1) write(*,'(1X, 1A9, 3X, 1A5, 4X, 1A19, 24X, 1A32)') '\x1B[32;1m#','Step', &
+		if (k< 1) write(*,'(1X, 1A9, 3X, 1A5, 4X, 1A125, 24X, 1A32)') '\x1B[32;1m#','Step', &
 			& 'Velocities %v(x,y,z)','Derivatives v(x,y,z)%d(1)\x1B[0m'
 		write(*,'(1X,1I2, 1I7, 3F9.3, 3ES20.5)')k/1, k, &
-		(atoms(100)%v(i)%x, i=1,3), &
-		!(convert(atoms(100)%r(i)%x, 'm','A'), i=1,3), &
-			& (atoms(100)%v(i)%d(1), i=1,3)
+		(atoms(100)%v(i)%x, i=1,3), (atoms(100)%v(i)%d(1), i=1,3)
 
 	end subroutine test_diff
-
-
 
 	subroutine showResults
 		integer::i, j
@@ -29,14 +25,13 @@ contains
 		write(*,*) 'Writing temperatures for region1 (temperature, Deriv1, Deriv2):'
 		
 		do i=0, N_steps
-			!write(*,'(1X, 10F15.8)') (regions(j)%temps(i)%x, j=1,10) showing 1 region now:
+			!write(*,'(1X, 10F15.8)') (regions(j)%temps(i)%x, j=1,10) or, showing 1 region now:
 			if (mod(i,skip_swap)==0) write(*,*) (regions(1)%temps(i))
 		end do
 		
 		write(*,*)
 		write(*,*) 'Writing KEi of two atoms(atom1, deriv1, deriv2, atom2, deriv1, deriv2):'
 		do i=0, N_steps/skip_swap
-			!if(.not. allocated( (regions(j)%energies(i),j=1,2 ))) cycle !!!!!!!!!!does not work
 			write(*, *) (regions(j)%energies(i), j=1,2)
 		end do
 		write(*,*)
@@ -52,11 +47,12 @@ contains
 		write(buf,*) size(atoms)
 		write(iou,'(1A)') trim(adjustl(buf))
 		write(iou,'(1A,1I10)') 'Atoms. Timestep: ',ts
+		write (iou,*) 'atom_id, position[A], velocity[A/ps], force[eV/A]'
 		do k=1,size(atoms)
-			write(iou,'(1I7, 3F5.1)') atoms(k)%atom_id, &
-				& [(convert(atoms(k)%r(i),'m','A'),i=1,3)]
-				!& [(convert(atoms(k)%v(i),'m/s', 'A/ps'), i=1,3)], &
-				!& [(convert(atoms(k)%f(i), 'N', 'eV/A'), i=1,3)]            
+			write(iou,'(1I7, 9F5.1)') atoms(k)%atom_id, &
+				& [(convert(atoms(k)%r(i),'A','A'),i=1,3)], &
+				& [(convert(atoms(k)%v(i),'A/ps', 'A/ps'), i=1,3)], &
+				& [(convert(atoms(k)%f(i), 'eV/A', 'eV/A'), i=1,3)]  
 		end do
 	end subroutine writeStepXYZ
 	
@@ -64,15 +60,13 @@ contains
 		integer, intent(in)::k, iou_temps 
 		real(wp)::t
 		integer::j,i
-			   
+  
 		if (k==0) then
 			write(iou_temps, '(1X, 1A8, 2X, 1A8, 2X, 1A20, 1I3, 1A9 )')'Time[ps],', & 
 				& 'TimeStep[ms],', 'Temperatures[K] for:', N_slabs, ' regions.'
 			write(iou_temps,*)
 		end if
-		
-		t = convert(real(k,wp)*dt,'s','ps')
-		
+		t = convert(real(k,wp)*dt,'ps','ps')
 		write(iou_temps,'(1X, 1F8.2, 1F10.0, 10F15.8)') t, real(ts, wp), (regions(j)%temps(k)%x, j=1,10)
 
 	end subroutine writeStepThermo
@@ -81,32 +75,28 @@ contains
 		integer, intent(in)::k, iou_energies, iou_penergies
 		real(wp)::t
 		
-		t = convert(real(k,wp)*dt,'s','ps')
+		t = convert(real(k,wp)*dt,'ps','ps')
 		
 		if (k==0) then      
 			write(iou_energies,'(1X, 1A8, 2X, 1A8, 2X, 1A37)') 'Time[ps],', & 
-				& 'TimeStep[ms],', 'Kinetic energy[J] of swapped atoms.'
+				& 'TimeStep[ms],', 'Kinetic energy[eV] of swapped atoms.'
 			write(iou_energies,*)
 			
 			write(iou_penergies,'(1X, 1A8, 2X, 1A8, 2X, 1A37)') 'Time[ps],', & 
-				& 'TimeStep[ms],', 'Potential energy[J] of swapped atoms.'
+				& 'TimeStep[ms],', 'Potential energy[eV] of swapped atoms.'
 			write(iou_penergies,*)
 		end if
 		
-		write(iou_energies,*) t,  k, KEi(hot), KEi(cold) !!!NOT CONVERTED!!!
-		write(iou_penergies,*) t,  k, PEi(hot), PEi(cold) 
-		
-		!write(iou_energies,'(1X, 1F7.2, 1I7, 2F15.8)') t,  k, &
-			!& convert(KEi(hot), 'J','eV'), &
-			!& convert(KEi(cold), 'J', 'eV')
-			
+		write(iou_energies,*) t,  k, convert(KEi(hot), 'eV','eV'), convert(KEi(cold), 'eV', 'eV')
+		write(iou_penergies,*)t,  k, convert(PEi(hot), 'eV','eV'), convert(PEi(cold), 'eV','eV') 
+
 	end subroutine writeStepEnergies
 	
 	subroutine writeBasicInfo ()
 		integer::i
 
 		write(*,'(1X,1A26,T35,1A1,2(1F4.1,", "),1F5.1,1A1)')'\x1B[37;1mBox size[A]:\x1B[33;1m:', &
-			&  '[',[(convert(box(i), 'm','A'),i=1,3)],']'
+			&  '[',[(convert(box(i), 'A','A'),i=1,3)],']'
 		write(*,'(1X, 1A29, T35, 1A6)') '\x1B[37;1mTemperature[K]:\x1B[33;1m',&
 			& adjustl(real2char(real(T0)))
 		write(*,'(1X, 1A30, T35, 1A6)')  '\x1B[37;1mNumber of atoms:\x1B[33;1m',& 

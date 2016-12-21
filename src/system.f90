@@ -104,7 +104,10 @@ contains
 			allocate(regions(i)%energies(0:N_steps/skip_swap))
 		end do
 		
-		types%m = convert(39.948_wp,'u','kg')
+		!! Attention: units changed
+		types%m = 39.948_wp
+		!types%m = convert(39.948_wp,'u','kg')
+		
 		types%atom_name = 'Ar'
 		atoms(:)%t = 1
 		
@@ -123,46 +126,34 @@ contains
 		do k=1,size(atoms)
 			!! Create random direction of velocities
 			call random_number(atoms(k)%v%x)  !must be %x
-			atoms(k)%v%x = 2.0_wp*atoms(k)%v%x-1.0_wp  !trying %x
-			do while(norm2(real(atoms(k)%v%x))>1.0_wp .and. norm2(real(atoms(k)%v%x))<0.1_wp) !trying %x
+			atoms(k)%v = 2.0_wp*atoms(k)%v-1.0_wp
+			do while(norm2(real(atoms(k)%v))>1.0_wp .and. norm2(real(atoms(k)%v))<0.1_wp)
 				call random_number(atoms(k)%v%x)
-				atoms(k)%v%x = 2.0_wp*atoms(k)%v%x-1.0_wp !trying %x
+				atoms(k)%v = 2.0_wp*atoms(k)%v-1.0_wp
 			end do
-			atoms(k)%v%x = atoms(k)%v%x/norm2(atoms(k)%v%x) !trying %x
+			atoms(k)%v = atoms(k)%v/norm2(atoms(k)%v)
 			!! Set velocity magnitude
-			atoms(k)%v%x = atoms(k)%v%x*sqrt(2.0_wp*kB*Ti/types(atoms(k)%t)%m%x)*abs(randomNormal()+1.0_wp)!trying %x
+			atoms(k)%v = atoms(k)%v*sqrt(2.0_wp*kB*Ti/types(atoms(k)%t)%m)*abs(randomNormal()+1.0_wp)
 		end do
-		forall(k=1:3) atoms(:)%v(k)%x = atoms(:)%v(k)%x-sum(atoms(:)%v(k)%x)/real(size(atoms),wp) !trying %x
+		forall(k=1:3) atoms(:)%v(k) = atoms(:)%v(k)-sum(atoms(:)%v(k))/real(size(atoms),wp)
 		
 		call updateAllLists()
 		
 		do k=1,size(atoms)
 			atoms(k)%atom_id = k
-			atoms(k)%a%x = -delV(k)/types(atoms(k)%t)%m%x  !trying %x
-			atoms(k)%f%x = -delV(k)                        !trying %x
+			atoms(k)%a = -delV(k)/types(atoms(k)%t)%m
+			atoms(k)%f = -delV(k)
 		end do
 		
-		do k=1, size(atoms)
-			atoms(k)%r%d(1) = 1.0_wp
-			atoms(k)%r%d(2) = 1.0_wp
-			atoms(k)%v%d(1) = 1.0_wp
-			atoms(k)%v%d(2) = 1.0_wp
-			atoms(k)%a%d(1) = 1.0_wp
-			atoms(k)%a%d(2) = 1.0_wp
-			atoms(k)%f%d(1) = 1.0_wp
-			atoms(k)%f%d(2) = 1.0_wp
-		end do
-
 		ts = 0
 		t  = 0.0_wp
-		!write(*,*) '\x1B[33;1m:Building system finished!\x1B[37;1m'
+
 	end subroutine buildSystem
 
 	subroutine writeLammpsData(fn)
 		character(*),intent(in)::fn
 		
 		integer::i,k,iou
-		!type(ad_t)::E0,S0
 		real(wp)::E0,S0
 		
 		E0 = lj%coeffs(1)
@@ -180,30 +171,33 @@ contains
 		write(iou,'(1A)') 'Masses'
 		write(iou,'(1A)') ''
 		do k=1,size(types)
-			write(iou,'(1I4,1X,1F13.6)') k,convert(types(k)%m,'kg','u')
+			!write(iou,'(1I4,1X,1F13.6)') k,types(k)%m
+			write(iou,'(1I4,1X,1F13.6)') k,convert(types(k)%m,'u','u')
 		end do
 		write(iou,'(1A)') ''
 		write(iou,'(1A)') 'PairIJ Coeffs # lj/cut'
 		write(iou,'(1A)') ''
-		write(iou,'(2I3,3F13.6)') 1, 1 , convert(E0,'J','eV'), convert(S0,'m','A'), convert(lj%cutoff,'m','A')
+!		write(iou,'(2I3,3F13.6)') 1, 1 , E0, S0, lj%cutoff
+		write(iou,'(2I3,3F13.6)') 1, 1 , convert(E0,'eV','eV'), convert(S0,'A','A'), convert(lj%cutoff,'A','A')
 		write(iou,'(1A)') ''
 		write(iou,'(1A)') 'Atoms'
 		write(iou,'(1A)') ''
 		do k=1,size(atoms)
-			write(iou,'(1I9,1X,1I2,1X,3E25.15)') k,atoms(k)%t,[( convert(atoms(k)%r(i),'m','A') , i=1,3 )]
+!			write(iou,'(1I9,1X,1I2,1X,3E25.15)') k,atoms(k)%t,atoms(k)%r
+			write(iou,'(1I9,1X,1I2,1X,3E25.15)') k,atoms(k)%t,[( convert(atoms(k)%r(i),'A','A') , i=1,3 )]
 		end do
 		write(iou,'(1A)') ''
 		write(iou,'(1A)') 'Velocities'
 		write(iou,'(1A)') ''
 		do k=1,size(atoms)
-			write(iou,'(1I9,1X,1X,3E25.15)') k,[( convert(atoms(k)%v(i),'m/s','A/ps') , i=1,3 )]
+!			write(iou,'(1I9,1X,1X,3E25.15)') k,atoms(k)%v
+			write(iou,'(1I9,1X,1X,3E25.15)') k,[( convert(atoms(k)%v(i),'A/ps','A/ps') , i=1,3 )]
 		end do
 		close(iou)
 	end subroutine writeLammpsData
 
 	function V(i) result(o)
 		integer,intent(in)::i
-		!real(wp)::o
 		type(ad_t)::o
 		
 		o = 0.0_wp
@@ -212,11 +206,8 @@ contains
 	contains
 	
 		subroutine doLennardJones(o)
-			!real(wp),intent(out)::o
 			type(ad_t),intent(out)::o
-			!real(wp),dimension(3)::d
 			type(ad_t),dimension(3)::d
-			!real(wp)::l,E0,S0
 			type(ad_t)::l,E0,S0
 			integer::j,aj
 			
@@ -238,11 +229,8 @@ contains
 	function delV(i) result(o)
 		!! Total force on atom
 		integer,intent(in)::i
-		!real(wp),dimension(3)::o
 		type(ad_t),dimension(3)::o
-		!real(wp),dimension(3)::r
 		type(ad_t),dimension(3)::r
-		
 		integer::j,aj
 		
 		o = 0.0_wp
@@ -257,9 +245,7 @@ contains
 	function delVij(i,j,d) result (o)
 		!! Force between two atoms
 		integer,intent(in)::i,j
-		!real(wp),dimension(3),intent(in)::d
 		type(ad_t),dimension(3),intent(in)::d
-		!real(wp),dimension(3)::o
 		type(ad_t),dimension(3)::o
 		
 		o = 0.0_wp
@@ -270,9 +256,7 @@ contains
 	contains
 		
 		subroutine doLennardJones(o)
-			!real(wp),dimension(3),intent(out)::o
 			type(ad_t),dimension(3),intent(out)::o
-			!real(wp)::l,E0,S0
 			type(ad_t)::l,E0,S0
 			
 			E0 = lj%coeffs(1)
@@ -286,22 +270,15 @@ contains
 
 	function deltaR(a1,a2) result(o)
 		type(atom_t),intent(in)::a1,a2
-		!real(wp),dimension(3)::o
 		type(ad_t),dimension(3)::o
-		
-		!real(wp),dimension(3)::d
 		type(ad_t),dimension(3)::d
 		d = a1%r-a2%r
 		o = d-box*real(nint(real(d/box)),wp)
 	end function deltaR
 
 	function temperature() result(o)
-		!real(wp)::o
 		type(ad_t)::o
-		
-		!real(wp),dimension(3)::vBulk
 		type(ad_t),dimension(3)::vBulk
-		!real(wp)::SKE
 		type(ad_t)::SKE
 		integer::k
 		
@@ -315,7 +292,6 @@ contains
 	end function temperature
 
 	function E() result(o)
-		!real(wp)::o
 		type(ad_t)::o
 		integer::k
 		
@@ -327,7 +303,6 @@ contains
 
 	function Ei(i) result(o)
 		integer,intent(in)::i
-		!real(wp)::o
 		type(ad_t)::o
 		
 		o = KEi(i) + PEi(i)
@@ -345,12 +320,8 @@ contains
 	
 	function KEi(i,vBulk) result (o)
 		integer,intent(in)::i
-		!real(wp),dimension(3),intent(in),optional::vBulk
 		type(ad_t),dimension(3),intent(in),optional::vBulk
-		!real(wp)::o
 		type(ad_t)::o
-		
-		!real(wp),dimension(3)::v0
 		type(ad_t),dimension(3)::v0
 		
 		v0 = 0.0_wp
@@ -399,17 +370,14 @@ contains
 	subroutine updateAllLists()
 		integer::k
 		!real(wp)::abc
-		
 		!abc = real(latM(3)*lattice_const/N_slabs, wp)
 		
 		do k=1,size(atoms)
 			call updateNeighbors(k)
 		end do
-		
 !		do j=1, N_slabs
 !			listofRegions = regionList(j*abc - abc, j*abc)
 !		end do
-		
 	end subroutine updateAllLists
 
 	subroutine updateNeighbors(i)
@@ -452,7 +420,6 @@ contains
 	end function virial
 
 	function pressure() result(o)
-		!real(wp)::o
 		type(ad_t)::o
 		
 		o = (real(size(atoms),wp)*kB*temperature()-virial()/3.0_wp)/(box(1)*box(2)*box(3))

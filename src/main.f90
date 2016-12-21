@@ -1,6 +1,21 @@
-! Draw a bounding box in pymol
-!
-! http://www.pymolwiki.org/index.php/DrawBoundingBox
+!! Draw a bounding box in pymol
+!http://www.pymolwiki.org/index.php/DrawBoundingBox
+
+!! Back to metal units
+!mass = grams/mole +
+!distance = Angstroms +
+!time = picoseconds +
+!energy = eV +
+!velocity = Angstroms/picosecond +
+!force = eV/Angstrom +
+!torque = eV
+!temperature = Kelvin
+!pressure = bars +
+!dynamic viscosity = Poise
+!charge = multiple of electron charge (1.0 is a proton)
+!dipole = charge*Angstroms
+!electric field = volts/Angstrom
+!density = gram/cm^dim
 
 program main_prg
 	use kinds_mod
@@ -41,13 +56,14 @@ contains
 		call initialize_parameters()
 
 		enableLennardJones = .true.
-		call setThermostat(.true.,T0,10.0_wp*dt)
-		call setBarostat(.true.,P0, 5.0E10_wp*dt)
+		call setThermostat(.false.,T0,10.0_wp*dt) !turn it ON
+		call setBarostat(.false.,P0, 5.0E10_wp*dt)!turn it ON
 		call buildSystem(lattice_const,latM,T0)
 		call doBox()
 		call writeBasicInfo()
 		call writeLammpsData('Ar.data')
 		call writeLammpsVars('Ar.vars')
+		print *, "system setup successful"
 	end subroutine setupSim
 
 	subroutine runSim
@@ -55,7 +71,7 @@ contains
 
 		do k=0, N_steps
 			p = real(k,wp)/real(N_steps, wp)
-			!call showProgress(' Simulation ongoing', p)
+			call showProgress(' Simulation ongoing', p)
 			if(k==N_steps/3) then
 				call setThermostat(.false.)
 				call setBarostat(.false.)
@@ -64,13 +80,13 @@ contains
 			call rnem(k)
 
 			if(mod(k,skip_swap)==0)     call swapAtoms(k)
-			if(mod(k,skip_thermo)==0)   call writeStepThermo(k, iou_temps)
-			if(mod(k,skip_swap)==0)     call writeStepEnergies(k,iou_energies, iou_penergies) !output.f90
+			!if(mod(k,skip_thermo)==0)   call writeStepThermo(k, iou_temps)
+			!if(mod(k,skip_swap)==0)     call writeStepEnergies(k,iou_energies, iou_penergies)
  			!if(mod(k,skip_dump)==0)     call writeStepXYZ(iou_xyz)
 			if(mod(k,skip_neighbor)==0) call updateAllLists()
 			
 			
-			if(mod(k,1)==0) call test_diff(k) !output.f90 prints 
+			!if(mod(k,1)==0) call test_diff(k) !output.f90 prints 
 			call velocityVerlet(dt)
 			call doBox()
 		end do
@@ -82,17 +98,12 @@ contains
  		!call showResults()  !output.f90
 		!call thermalConductivity() !calculates k
 		
-
-!		call doMessage(5, "Check grad calculation properties.f90 line75", [stdout])
-!		call doMessage(3, "Check lammps script with system relaxation, and correct py-script", [stdout])
-!		call doMessage(5, "Add to code calc dkSI/dEpsilon", [stdout])
+		call doMessage(0, "test message, Check output.f90 doMessage subroutine.", [stdout])
 		print *, 
+		call doMessage(0, "check log files: step1.xyz, step1.energies, step1.penergies.", [stdout])
+		call doMessage(0, "all log files are in converted units for build: 'build'.", [stdout])
 		
-!		call doMessage(1, "Switch to dim(2) coeffs, change E0=coeffs(1)%x - didnt work.", [stdout])
-!		call doMessage(1, "Switch to to E1=coeffs(1) - didn't work.", [stdout])
-		
-		!call doMessage(5, "Examine the initialization of values to ensure that the slots are used correctly.", [stdout])
-		!call doMessage(5, "Examine  the derivatives of many quantities in the first few time steps.", [stdout])
+
 		close(iou_xyz)
 		close(iou_temps)
 		close(iou_energies)
@@ -100,6 +111,4 @@ contains
 		close(iou_log)
 	end subroutine endSim
 
-	
-
-end program main_prg 
+end program main_prg

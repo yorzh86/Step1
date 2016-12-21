@@ -17,7 +17,7 @@ module properties_mod
 
 		kSI = flux/grad
 		print *, 
-		write(*,*)'kSI:', kSI, '[W/m.K]'
+		write(*,*)'kMetal:', kSI, '[Metal units]'
 		print *, 
 		
 	contains

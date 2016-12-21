@@ -65,19 +65,6 @@ contains
 		type(ad_t), dimension(3)::d
 		integer::k
 		
-		!!new!!
-!		do k=1, size(atoms)
-!			atoms(k)%r%d(1) = 1.0_wp
-!			atoms(k)%r%d(2) = 1.0_wp
-!			atoms(k)%v%d(1) = 1.0_wp
-!			atoms(k)%v%d(2) = 1.0_wp
-!			atoms(k)%a%d(1) = 1.0_wp
-!			atoms(k)%a%d(2) = 1.0_wp
-!			atoms(k)%f%d(1) = 1.0_wp
-!			atoms(k)%f%d(2) = 1.0_wp
-!		end do
-		!!/new!!
-		
 		do k=1,size(atoms)
 			d = atoms(k)%v*dt+0.5_wp*atoms(k)%a*dt**2
 			atoms(k)%r =  atoms(k)%r+d+Pepsilon*atoms(k)%r
@@ -89,7 +76,7 @@ contains
 		
 		do k=1,size(atoms)
 			atoms(k)%a = -delV(k)/types(atoms(k)%t)%m-(Teta+Pepsilon)*atoms(k)%v
-			atoms(k)%f = -delV(k)
+			atoms(k)%f = -delV(k) !performance ?
 		end do
 		
 		do k=1,size(atoms)
@@ -135,7 +122,6 @@ contains
 		
 		abc = real(latM(3),wp)*lattice_const/real(N_slabs,wp)
 		do j=1, N_slabs
-			!l = regionList(j*abc - abc, j*abc)
 			listofRegions = regionList(j*abc - abc, j*abc)
 			temperatures(j) = listTemp(listofRegions)
 			if (j==1) hot = selectHot(listofRegions)
@@ -146,12 +132,7 @@ contains
 		do j=1, N_slabs
 			regions(j)%temps(k)=temperatures(j)
 		end do
-!		if(allocated(regions(k)%temps)) deallocate(regions(k)%temps)
-!		allocate(regions(k)%temps(2+N_slabs))
-!		regions(k)%temps(1)  = convert(real(k,wp)*dt,'s','ps')
-!		regions(k)%temps(2)  = real(k,wp)
-!		regions(k)%temps(3:) = temperatures
-	
+
 	end subroutine rnem
 
 	
@@ -159,20 +140,11 @@ contains
 	  !! Swapping atoms' velocities
 	  !! to swap masses (add when needed):
 	  !! - either change their types, or swap atoms of same type
-		real(wp)::t
 		integer,  intent(in)::k
 		type(ad_t), dimension(3)::swapv
-		t = convert((real(k,wp)*dt),'s','ps')
 		
 		regions(1)%energies(k/skip_swap) = KEi(cold)
 		regions(2)%energies(k/skip_swap) = KEi(hot)
-		
-!		if(allocated(regions(k)%energies)) deallocate(regions(k)%energies)
-!		allocate(regions(k)%energies(4))
-!		regions(k)%energies(1) = t
-!		regions(k)%energies(2) = real(k,wp)
-!		regions(k)%energies(3) = KEi(hot)
-!		regions(k)%energies(4) = KEi(cold)
 
 		swapv = atoms(hot)%v
 		atoms(hot)%v = atoms(cold)%v

@@ -8,8 +8,8 @@ module settings_mod
 	!= Universal Constants =!
 	!=======================!
 	
-	real(wp),parameter::kB = 1.3806504E-23_wp!1.3806488E-23_wp
-		!! Boltzmann constant in SI units
+	real(wp),parameter::kB = 8.617342371E+5_wp!1.3806488E-23_wp [J/K]
+		!! Boltzmann constant in metal units
 	
 	!=========!
 	!= Types =!
@@ -71,10 +71,10 @@ module settings_mod
 		!! Target temperature [K]
 	!real(wp)::P0
 	type(ad_t)::P0
-		!! Target pressure [Pa]
+		!! Target pressure [bar]
 	!real(wp)::dt
 	type(ad_t)::dt
-		!! Timestep [seconds]
+		!! Timestep [picoseconds]
 	
 contains
 
@@ -83,8 +83,8 @@ contains
 		
 		!= Potential =!
 		
-		E0 = kB*convert(125.7_wp,'K','K')
-		S0 = convert(3.345_wp,'A','m')
+		E0 = kB*125.7_wp
+		S0 = 3.345_wp ![A]
 		lj%cutoff = 2.5_wp*S0
 		lj%skin = 0.5_wp*S0
 		
@@ -98,18 +98,20 @@ contains
 		skip_dump     = 1
 		skip_neighbor = 200
 		
-		lattice_const = convert(5.40_wp, 'A', 'm')
+		lattice_const = 5.40_wp !not converted
 		latM = [5,5,10]
 		
-		T0 = convert(45.0_wp,'K','K')
-		P0 = convert(1.0_wp,'bar','Pa')
-		dt = convert(10.0_wp,'fs','s')
+		T0 = 45.0_wp !K
+		P0 = 1.0_wp !bar
+		dt = convert(10.0_wp,'fs','ps')
 		
 		!= Thermostat =!
-		thermostat%tau = convert(100.0_wp*dt,'s','ps')
+		thermostat%tau = 100.0_wp*dt
+		!thermostat%tau = convert(100.0_wp*dt,'s','ps')
 		
 		!= Barostat =!
-		barostat%tau = convert(1000.0_wp*dt,'s','ps')
+		barostat%tau = 1000.0_wp*dt
+		!barostat%tau = convert(1000.0_wp*dt,'s','ps')
 	end subroutine initialize_parameters
 
 	subroutine writeLammpsVars(fn)
@@ -124,17 +126,17 @@ contains
 		write(iou,'(1A,1I10)')   'variable skip_neighbor equal ',skip_neighbor
 		write(iou,'(1A,1I10)')   'variable N_slabs       equal ',N_slabs
 		write(iou,'(1A,1I10)')   'variable skip_swap     equal ',skip_swap
+		! all converts are cleared
+		write(iou,'(1A,1EN25.5)') 'variable dt            equal ',dt
+		write(iou,'(1A,1EN25.5)') 'variable tau_T         equal ',thermostat%tau
+		write(iou,'(1A,1EN25.5)') 'variable tau_P         equal ',barostat%tau
+		write(iou,'(1A,1EN25.5)') 'variable T0            equal ',T0
+		write(iou,'(1A,1EN25.5)') 'variable P0            equal ',P0
 		
-		write(iou,'(1A,1EN25.5)') 'variable dt            equal ',convert(dt,'s','ps')
-		write(iou,'(1A,1EN25.5)') 'variable tau_T         equal ',convert(thermostat%tau,'s','ps')
-		write(iou,'(1A,1EN25.5)') 'variable tau_P         equal ',convert(barostat%tau,'s','ps')
-		write(iou,'(1A,1EN25.5)') 'variable T0            equal ',convert(T0,'K','K')
-		write(iou,'(1A,1EN25.5)') 'variable P0            equal ',convert(P0,'Pa','bar')
+		write(iou,'(1A,1EN25.5)') 'variable cutoff        equal ',lj%cutoff
+		write(iou,'(1A,1EN25.5)') 'variable skin          equal ',lj%skin
 		
-		write(iou,'(1A,1EN25.5)') 'variable cutoff        equal ',convert(lj%cutoff,'m','A')
-		write(iou,'(1A,1EN25.5)') 'variable skin          equal ',convert(lj%skin,'m','A')
-		
-		write(iou,'(1A,1EN25.5)') 'variable box_length    equal ',real(latM(3),wp)*convert(lattice_const,'m','A')
+		write(iou,'(1A,1EN25.5)') 'variable box_length    equal ',real(latM(3),wp)*lattice_const
 		
 		close(iou)
 	end subroutine writeLammpsVars
