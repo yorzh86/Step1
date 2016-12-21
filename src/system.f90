@@ -105,8 +105,7 @@ contains
 		end do
 		
 		!! Attention: units changed
-		types%m = 39.948_wp
-		!types%m = convert(39.948_wp,'u','kg')
+		types%m = convert(39.948_wp,'u','u')
 		
 		types%atom_name = 'Ar'
 		atoms(:)%t = 1
@@ -164,33 +163,29 @@ contains
 		write(iou,'(1A)') '# Input geometry for lammps'
 		write(iou,'(1I9,1X,1A)') size(atoms),'atoms'
 		write(iou,'(1I9,1X,1A)') size(types),'atom types'
-		write(iou,'(2F13.6,1X,1A,1X,1A)') 0.0_wp,convert(box(1),'m','A'),'xlo','xhi'
-		write(iou,'(2F13.6,1X,1A,1X,1A)') 0.0_wp,convert(box(2),'m','A'),'ylo','yhi'
-		write(iou,'(2F13.6,1X,1A,1X,1A)') 0.0_wp,convert(box(3),'m','A'),'zlo','zhi'
+		write(iou,'(2F13.6,1X,1A,1X,1A)') 0.0_wp,convert(box(1),'A','A'),'xlo','xhi'
+		write(iou,'(2F13.6,1X,1A,1X,1A)') 0.0_wp,convert(box(2),'A','A'),'ylo','yhi'
+		write(iou,'(2F13.6,1X,1A,1X,1A)') 0.0_wp,convert(box(3),'A','A'),'zlo','zhi'
 		write(iou,'(1A)') ''
 		write(iou,'(1A)') 'Masses'
 		write(iou,'(1A)') ''
 		do k=1,size(types)
-			!write(iou,'(1I4,1X,1F13.6)') k,types(k)%m
 			write(iou,'(1I4,1X,1F13.6)') k,convert(types(k)%m,'u','u')
 		end do
 		write(iou,'(1A)') ''
 		write(iou,'(1A)') 'PairIJ Coeffs # lj/cut'
 		write(iou,'(1A)') ''
-!		write(iou,'(2I3,3F13.6)') 1, 1 , E0, S0, lj%cutoff
 		write(iou,'(2I3,3F13.6)') 1, 1 , convert(E0,'eV','eV'), convert(S0,'A','A'), convert(lj%cutoff,'A','A')
 		write(iou,'(1A)') ''
 		write(iou,'(1A)') 'Atoms'
 		write(iou,'(1A)') ''
 		do k=1,size(atoms)
-!			write(iou,'(1I9,1X,1I2,1X,3E25.15)') k,atoms(k)%t,atoms(k)%r
 			write(iou,'(1I9,1X,1I2,1X,3E25.15)') k,atoms(k)%t,[( convert(atoms(k)%r(i),'A','A') , i=1,3 )]
 		end do
 		write(iou,'(1A)') ''
 		write(iou,'(1A)') 'Velocities'
 		write(iou,'(1A)') ''
 		do k=1,size(atoms)
-!			write(iou,'(1I9,1X,1X,3E25.15)') k,atoms(k)%v
 			write(iou,'(1I9,1X,1X,3E25.15)') k,[( convert(atoms(k)%v(i),'A/ps','A/ps') , i=1,3 )]
 		end do
 		close(iou)

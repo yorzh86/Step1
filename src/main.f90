@@ -63,7 +63,7 @@ contains
 		call writeBasicInfo()
 		call writeLammpsData('Ar.data')
 		call writeLammpsVars('Ar.vars')
-		print *, "system setup successful"
+
 	end subroutine setupSim
 
 	subroutine runSim
@@ -80,9 +80,9 @@ contains
 			call rnem(k)
 
 			if(mod(k,skip_swap)==0)     call swapAtoms(k)
-			!if(mod(k,skip_thermo)==0)   call writeStepThermo(k, iou_temps)
-			!if(mod(k,skip_swap)==0)     call writeStepEnergies(k,iou_energies, iou_penergies)
- 			!if(mod(k,skip_dump)==0)     call writeStepXYZ(iou_xyz)
+			if(mod(k,skip_thermo)==0)   call writeStepThermo(k, iou_temps)
+			if(mod(k,skip_swap)==0)     call writeStepEnergies(k,iou_energies, iou_penergies)
+ 			if(mod(k,skip_dump)==0)     call writeStepXYZ(iou_xyz)
 			if(mod(k,skip_neighbor)==0) call updateAllLists()
 			
 			
