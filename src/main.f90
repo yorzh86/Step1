@@ -55,7 +55,7 @@ contains
 
 		do k=0, N_steps
 			p = real(k,wp)/real(N_steps, wp)
-			call showProgress(' Simulation ongoing', p)
+			!call showProgress(' Simulation ongoing', p)
 			if(k==N_steps/3) then
 				call setThermostat(.false.)
 				call setBarostat(.false.)
@@ -70,7 +70,7 @@ contains
 			if(mod(k,skip_neighbor)==0) call updateAllLists()
 			
 			
-			!if(mod(k,1)==0) call test_diff(k) !output.f90 prints 
+			if(mod(k,1)==0) call test_diff(k) !output.f90 prints 
 			call velocityVerlet(dt)
 			call doBox()
 		end do
@@ -79,7 +79,7 @@ contains
 	end subroutine runSim
 	
 	subroutine endSim
- 		call showResults()  !output.f90
+ 		!call showResults()  !output.f90
 		!call thermalConductivity() !calculates k
 		
 
@@ -91,8 +91,8 @@ contains
 !		call doMessage(1, "Switch to dim(2) coeffs, change E0=coeffs(1)%x - didnt work.", [stdout])
 !		call doMessage(1, "Switch to to E1=coeffs(1) - didn't work.", [stdout])
 		
-		call doMessage(5, "Examine the initialization of values to ensure that the slots are used correctly.", [stdout])
-		call doMessage(5, "Examine  the derivatives of many quantities in the first few time steps.", [stdout])
+		!call doMessage(5, "Examine the initialization of values to ensure that the slots are used correctly.", [stdout])
+		!call doMessage(5, "Examine  the derivatives of many quantities in the first few time steps.", [stdout])
 		close(iou_xyz)
 		close(iou_temps)
 		close(iou_energies)
