@@ -128,6 +128,7 @@ contains
 			if (j==N_slabs/2+1) cold = selectCold(listofRegions)
 		end do
 		
+		Totenergies(k) = E()
 		
 		do j=1, N_slabs
 			regions(j)%temps(k)=temperatures(j)
@@ -143,8 +144,8 @@ contains
 		integer,  intent(in)::k
 		type(ad_t), dimension(3)::swapv
 		
-		regions(1)%energies(k/skip_swap) = KEi(cold)
-		regions(2)%energies(k/skip_swap) = KEi(hot)
+		regions(1)%Kenergies(k/skip_swap) = KEi(cold)
+		regions(2)%Kenergies(k/skip_swap) = KEi(hot)
 
 		swapv = atoms(hot)%v
 		atoms(hot)%v = atoms(cold)%v

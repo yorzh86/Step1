@@ -5,13 +5,14 @@ module units_mod
 	implicit none
 	private
 	
-	integer,parameter::Nu = 29
+	integer,parameter::Nu = 31
 	
 	character(16),dimension(Nu),parameter::names = [ character(16):: &
 		& 'm','mm','um','nm','pm','fm','A', &
 		& 's','ms','us','ns','ps','fs', &
 		& 'J','eV', &
 		& 'kg','u', &
+		& 'g','u', &
 		& 'K', 'C', &
 		& 'Pa', 'bar', &
 		& 'm/s', 'A/ps', &
@@ -94,6 +95,7 @@ contains
 		
 		cf( getIndex('J' ) , getIndex('eV' ) ) = 6.24150636309E18_wp
 		cf( getIndex('kg') , getIndex('u'  ) ) = 6.02213665168E26_wp
+		cf( getIndex('g') , getIndex('u'  ) ) =  6.02213665168E23_wp
 		
 		cf( getIndex('K' ) , getIndex('C'  ) ) = 1.0_wp
 		cf( getIndex('Pa') , getIndex('bar') ) = 1.0E-5_wp

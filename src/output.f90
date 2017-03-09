@@ -25,14 +25,14 @@ contains
 		write(*,*) 'Writing temperatures for region1 (temperature, Deriv1, Deriv2):'
 		
 		do i=0, N_steps
-			!write(*,'(1X, 10F15.8)') (regions(j)%temps(i)%x, j=1,10) or, showing 1 region now:
-			if (mod(i,skip_swap)==0) write(*,*) (regions(1)%temps(i))
+			write(*,'(1X, 10F15.8)') (regions(j)%temps(i)%x, j=1,10)! or, showing 1 region now:
+			!if (mod(i,skip_swap)==0) write(*,*) (regions(1)%temps(i))
 		end do
 		
 		write(*,*)
 		write(*,*) 'Writing KEi of two atoms(atom1, deriv1, deriv2, atom2, deriv1, deriv2):'
 		do i=0, N_steps/skip_swap
-			write(*, *) (regions(j)%energies(i), j=1,2)
+			write(*, *) (regions(j)%Kenergies(i), j=1,2)
 		end do
 		write(*,*)
 
@@ -71,8 +71,8 @@ contains
 
 	end subroutine writeStepThermo
 	
-	subroutine writeStepEnergies(k, iou_energies, iou_penergies )
-		integer, intent(in)::k, iou_energies, iou_penergies
+	subroutine writeStepEnergies(k, iou_energies, iou_penergies, iou_totenergies )
+		integer, intent(in)::k, iou_energies, iou_penergies, iou_totenergies
 		real(wp)::t
 		
 		t = convert(real(k,wp)*dt,'ps','ps')
@@ -85,10 +85,15 @@ contains
 			write(iou_penergies,'(1X, 1A8, 2X, 1A8, 2X, 1A37)') 'Time[ps],', & 
 				& 'TimeStep[ms],', 'Potential energy[eV] of swapped atoms.'
 			write(iou_penergies,*)
+			
+			write(iou_totenergies,'(1X, 1A8, 2X, 1A8, 2X, 1A37)') 'Time[ps],', & 
+				& 'TimeStep[ms],', 'Total energy[eV] the system at a timestep.'
+			write(iou_totenergies,*)
 		end if
 		
 		write(iou_energies,*) t,  k, convert(KEi(hot), 'eV','eV'), convert(KEi(cold), 'eV', 'eV')
-		write(iou_penergies,*)t,  k, convert(PEi(hot), 'eV','eV'), convert(PEi(cold), 'eV','eV') 
+		!write(iou_penergies,*)t,  k, convert(PEi(hot), 'eV','eV'), convert(PEi(cold), 'eV','eV') 
+		write(iou_totenergies,*)t, k, E()
 
 	end subroutine writeStepEnergies
 	
@@ -96,7 +101,7 @@ contains
 		integer::i
 
 		write(*,'(1X,1A26,T35,1A1,2(1F4.1,", "),1F5.1,1A1)')'\x1B[37;1mBox size[A]:\x1B[33;1m:', &
-			&  '[',[(convert(box(i), 'A','A'),i=1,3)],']'
+			&  '[',[(convert(box(i), 'm','A'),i=1,3)],']'
 		write(*,'(1X, 1A29, T35, 1A6)') '\x1B[37;1mTemperature[K]:\x1B[33;1m',&
 			& adjustl(real2char(real(T0)))
 		write(*,'(1X, 1A30, T35, 1A6)')  '\x1B[37;1mNumber of atoms:\x1B[33;1m',& 

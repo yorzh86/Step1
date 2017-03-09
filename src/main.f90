@@ -31,8 +31,9 @@ program main_prg
 	integer::iou_xyz
 		!! I/O unit for xyz file output
 	integer::iou_energies
+	!! I/O unit to write energies before swap
 	integer::iou_penergies
-		!! I/O unit to write energies before swap
+	integer::iou_totenergies
 	integer::iou_temps
 		!! I/O unit to write temperatures
 	integer::iou_log
@@ -51,6 +52,7 @@ contains
 		open(file='step1.temps',newunit=iou_temps)
 		open(file='step1.energies',newunit=iou_energies)
 		open(file='step1.Penergies',newunit=iou_penergies)
+		open(file='step1.Totenergies',newunit=iou_totenergies)
 		open(file='step1.log',newunit=iou_log)
 
 		call initialize_parameters()
@@ -81,33 +83,33 @@ contains
 
 			if(mod(k,skip_swap)==0)     call swapAtoms(k)
 			if(mod(k,skip_thermo)==0)   call writeStepThermo(k, iou_temps)
-			if(mod(k,skip_swap)==0)     call writeStepEnergies(k,iou_energies, iou_penergies)
- 			if(mod(k,skip_dump)==0)     call writeStepXYZ(iou_xyz)
+			if(mod(k,skip_swap)==0)     call writeStepEnergies(k,iou_energies, iou_penergies, iou_totenergies)
+ 			!if(mod(k,skip_dump)==0)     call writeStepXYZ(iou_xyz)
 			if(mod(k,skip_neighbor)==0) call updateAllLists()
-			
 			
 			!if(mod(k,1)==0) call test_diff(k) !output.f90 prints 
 			call velocityVerlet(dt)
 			call doBox()
+			
 		end do
 		
 		write(*,'(/,1X, 1A22,/ )') '\x1B[32;1mFINISHED!!!\x1B[0m'
 	end subroutine runSim
 	
 	subroutine endSim
+		
  		!call showResults()  !output.f90
-		!call thermalConductivity() !calculates k
+		call thermalConductivity() !calculates k
+		!call specificHeat() !calculates Cp
+		
 		
 		call doMessage(0, "test message, Check output.f90 doMessage subroutine.", [stdout])
-		print *, 
-		call doMessage(0, "check log files: step1.xyz, step1.energies, step1.penergies.", [stdout])
-		call doMessage(0, "all log files are in converted units for build: 'build'.", [stdout])
 		
-
 		close(iou_xyz)
 		close(iou_temps)
 		close(iou_energies)
 		close(iou_penergies)
+		close(iou_totenergies)
 		close(iou_log)
 	end subroutine endSim
 

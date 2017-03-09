@@ -8,7 +8,7 @@ module settings_mod
 	!= Universal Constants =!
 	!=======================!
 	
-	real(wp),parameter::kB = 8.617342371E-5_wp!1.3806488E-23_wp [J/K]
+	real(wp),parameter::kB = 8.617342371E-5_wp !!1.3806488E-23_wp ![J/K] 
 		!! Boltzmann constant in metal units
 	
 	!=========!
@@ -91,25 +91,25 @@ contains
 		lj%coeffs = [diff(E0,1),diff(S0,2)]
 		
 		!= Simulation =!
-		N_steps       = 30
+		N_steps       = 500
 		N_slabs       = 10
-		skip_swap     = 5
+		skip_swap     = 50
 		skip_thermo   = 100
 		skip_dump     = 1
 		skip_neighbor = 200
 		
 		lattice_const = convert(5.40_wp, 'A', 'A')
-		latM = [5,5,10]
+		latM = [5,5,15]
 		
 		T0 = convert(45.0_wp,'K','K')
 		P0 = convert(1.0_wp,'bar','bar')
-		dt = convert(0.01_wp,'ps','ps') !10fs = 0.01 ps convert(10.0_wp,'fs','ps')
+		dt = convert(0.01_wp,'ps','ps') !10fs = 0.01 ps
 		
 		!= Thermostat =!
-		thermostat%tau = convert(100.0_wp*dt,'ps','ps')
+		thermostat%tau = convert(100.0_wp*dt,'s','ps')
 		
 		!= Barostat =!
-		barostat%tau = convert(1000.0_wp*dt,'ps','ps')
+		barostat%tau = convert(1000.0_wp*dt,'s','ps')
 	end subroutine initialize_parameters
 
 	subroutine writeLammpsVars(fn)

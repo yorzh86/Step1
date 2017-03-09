@@ -19,7 +19,6 @@ module system_mod
 	end type
 	
 	type::atom_t
-		
 		type(ad_t),dimension(3)::r
 			!! Atomic position
 		type(ad_t),dimension(3)::v
@@ -38,7 +37,7 @@ module system_mod
 	
 	type:: region_t
 		type(ad_t),dimension(:),allocatable::temps
-		type(ad_t),dimension(:),allocatable::energies
+		type(ad_t),dimension(:),allocatable::Kenergies
 		type(ad_t)::zl, zh
 	end type
 	
@@ -56,6 +55,9 @@ module system_mod
 		!! All atoms in system
 	type(region_t),dimension(:),allocatable::regions
 	
+	type(ad_t),dimension(:),allocatable::Totenergies
+		!! array for total energy of the system at a timestep
+	
 	type(ad_t)::Teta
 		!! Thermostat DOF
 	type(ad_t)::Pepsilon
@@ -70,6 +72,10 @@ module system_mod
 		!! Time step counter
 	type(ad_t)::t
 		!! System time
+	
+	public:: KE
+	public:: PE
+	public:: E
 	
 contains
 
@@ -101,8 +107,10 @@ contains
 			allocate(regions(i)%temps(0:N_steps))
 		end do
 		do i=1, 2
-			allocate(regions(i)%energies(0:N_steps/skip_swap))
+			allocate(regions(i)%Kenergies(0:N_steps/skip_swap))
 		end do
+		
+		allocate(Totenergies(0:N_steps))
 		
 		!! Attention: units changed
 		types%m = convert(39.948_wp,'u','u')
@@ -300,11 +308,12 @@ contains
 		integer,intent(in)::i
 		type(ad_t)::o
 		
-		o = KEi(i) + PEi(i)
+		o = KEi(i) + PEi(i) ! Do I need to do ABS?
 	end function Ei
 
 	function KE() result (o) 
-		real(wp)::o
+		type(ad_t)::o
+		!real(wp)::o
 		integer::k
 		
 		o = 0.0_wp
