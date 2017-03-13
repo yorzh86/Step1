@@ -99,10 +99,10 @@ contains
 	subroutine endSim
 		
  		!call showResults()  !output.f90
-		call thermalConductivity() !calculates k
-		!call specificHeat() !calculates Cp
+		!call thermalConductivity() !calculates k
+		call specificHeat() !calculates Cp
 		
-		
+		print *, 
 		call doMessage(0, "test message, Check output.f90 doMessage subroutine.", [stdout])
 		
 		close(iou_xyz)

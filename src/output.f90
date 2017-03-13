@@ -100,8 +100,8 @@ contains
 	subroutine writeBasicInfo ()
 		integer::i
 
-		write(*,'(1X,1A26,T35,1A1,2(1F4.1,", "),1F5.1,1A1)')'\x1B[37;1mBox size[A]:\x1B[33;1m:', &
-			&  '[',[(convert(box(i), 'm','A'),i=1,3)],']'
+		write(*,'(1X,1A26,T35,1A1,2(1F5.2,", "),1F5.2,1A1)')'\x1B[37;1mBox size[A]:\x1B[33;1m:', &
+			&  '[',[(convert(box(i), 'A','A'),i=1,3)],']'
 		write(*,'(1X, 1A29, T35, 1A6)') '\x1B[37;1mTemperature[K]:\x1B[33;1m',&
 			& adjustl(real2char(real(T0)))
 		write(*,'(1X, 1A30, T35, 1A6)')  '\x1B[37;1mNumber of atoms:\x1B[33;1m',& 
