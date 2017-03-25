@@ -67,24 +67,41 @@ contains
 		
 		do k=1,size(atoms)
 			d = atoms(k)%v*dt+0.5_wp*atoms(k)%a*dt**2
-			atoms(k)%r =  atoms(k)%r+d+Pepsilon*atoms(k)%r
+			atoms(k)%r =  atoms(k)%r+d!+Pepsilon*atoms(k)%r
+			!! d = A/ps * ps + A/ps^2 * ps^2 = A + A = [A] distance
+			!! atoms%r = [A] + [A] + eV / (ps * A^3 * bar)*[A] = ????  WEIRD!!!
 		end do
 		
 		do k=1,size(atoms)
 			atoms(k)%v =  atoms(k)%v+atoms(k)%a*0.5_wp*dt
+			!! v = self. + A/ps^2 * ps = [A]/[ps] - correct.
 		end do
 		
 		do k=1,size(atoms)
-			atoms(k)%a = -delV(k)/types(atoms(k)%t)%m-(Teta+Pepsilon)*atoms(k)%v
-			atoms(k)%f = -delV(k) !performance ?
+			atoms(k)%a = -delV(k)/types(atoms(k)%t)%m!-(Teta+Pepsilon)*atoms(k)%v
+			!! a = eV/A / gram/mole - (teta+pepsilon)* A/ps= eV/A / gram/mole - (1/ps + 1 / ps) (eV/A / A^2 * bar) * A/ps = Force/mass - (1/ps+1/ps(pressure*bar))*A/ps
+			!! A/ps^2 = eV/A / u
+			
+			!! 1 force unit = 1 mass unit * 1 acceleration unit
+			!atoms(k)%f = -delV(k) !performance ?
 		end do
 		
 		do k=1,size(atoms)
 			atoms(k)%v =  atoms(k)%v+atoms(k)%a*0.5_wp*dt
+			!! v = self. + A/ps^2 * ps = [A]/[ps] - correct.
 		end do
 		
 		if(doThermostat) Teta = Teta+DetaDt()*dt
+		!! teta = self. + detaDt * [ps] = 1/ps
 		if(doBarostat) Pepsilon = Pepsilon+DepsilonDt()*dt
+		!! pepsilon = self. + DepsilonDt * [ps]
+		
+		
+		!! Pepsilon = eV / (ps^2 * A^3 * bar)*[ps] = eV / (ps * A^3 * bar)
+		!! DepsilonDT = eV / (ps^2 * A^3 * bar)
+		!! detaDT  = [1/ps^2]
+		!! Teta = 1/ps
+		
 		box = box+Pepsilon*box
 		t  = t+dt
 		ts = ts+1
@@ -105,12 +122,16 @@ contains
 		type(ad_t)::o
 		
 		o = (1.0_wp/thermostat%tau**2)*(temperature()/thermostat%set-1.0_wp)
+		!! o = 1/ ps^2  *  K/ (K - int) = 1/ps^2
+		!! DetaDT = [1/ps^2]
 	end function DetaDt
 
 	function DepsilonDt() result(o)
 		!! Calculates damping parameter("eta") change over time.
 		type(ad_t)::o
 		o = (1.0_wp/barostat%tau**2)*(pressure()/barostat%set-1.0_wp)
+		!! o = 1 / ps^2 * eV/A^3 / (bar -1) = eV / (ps^2 * A^3 * bar) !!! Weird
+		
 	end function DepsilonDt
 	
 	subroutine rnem(k)

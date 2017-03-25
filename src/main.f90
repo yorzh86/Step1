@@ -74,13 +74,13 @@ contains
 		do k=0, N_steps
 			p = real(k,wp)/real(N_steps, wp)
 			call showProgress(' Simulation ongoing', p)
-			if(k==N_steps/3) then
-				call setThermostat(.false.)
-				call setBarostat(.false.)
-			end if
+			!if(k==N_steps/3) then
+			!	call setThermostat(.false.)
+			!	call setBarostat(.false.)
+			!end if
 			
 			call rnem(k)
-
+			
 			if(mod(k,skip_swap)==0)     call swapAtoms(k)
 			if(mod(k,skip_thermo)==0)   call writeStepThermo(k, iou_temps)
 			if(mod(k,skip_swap)==0)     call writeStepEnergies(k,iou_energies, iou_penergies, iou_totenergies)

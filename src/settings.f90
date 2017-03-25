@@ -9,7 +9,7 @@ module settings_mod
 	!=======================!
 	
 	real(wp),parameter::kB = 8.617342371E-5_wp !!1.3806488E-23_wp ![J/K] 
-		!! Boltzmann constant in metal units
+		!! Boltzmann constant in metal units [eV/K]
 	
 	!=========!
 	!= Types =!
@@ -91,19 +91,19 @@ contains
 		lj%coeffs = [diff(E0,1),diff(S0,2)]
 		
 		!= Simulation =!
-		N_steps       = 50
+		N_steps       = 11
 		N_slabs       = 10
-		skip_swap     = 5
-		skip_thermo   = 100
+		skip_swap     = 1
+		skip_thermo   = 2!100
 		skip_dump     = 1
 		skip_neighbor = 200
 		
 		lattice_const = convert(5.40_wp, 'A', 'A')
-		latM = [5,5,10]
+		latM = [2,2,5]
 		
 		T0 = convert(45.0_wp,'K','K')
 		P0 = convert(1.0_wp,'bar','bar')
-		dt = convert(0.01_wp,'ps','ps') !10fs = 0.01 ps
+		dt = convert(0.01_wp,'ps','ps')!10fs = 0.01 ps
 		
 		!= Thermostat =!
 		thermostat%tau = convert(100.0_wp*dt,'s','ps')

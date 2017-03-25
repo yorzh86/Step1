@@ -96,7 +96,7 @@ module properties_mod
 		
 		metalToSI = convert(1.0_wp, 'eV', 'J')/convert(1.0_wp, 'u', 'g')
 		
-		Cp_metal = (1.0_wp/mass)*(totEnergy/gradT)
+		Cp_metal = (1.0_wp/mass)*(totEnergy/gradT) 
 		
 		Cp_SI = Cp_metal*metalToSI 
 		
@@ -104,11 +104,11 @@ module properties_mod
 		! 34K 1bar 4.88 cal/mol.K = 0.51 J/g.K
 		
 		write (*,*) "mass:", mass, " [u]"
-		write (*,*) "gradT:", gradT, " [K]"
+		!write (*,*) "gradT:", gradT, " [K]"
 		write (*,*) "total energy average:", totEnergy, " [eV]"
-		
-		write(*,*) "Cp_metal: ", Cp_metal, "[eV/u.K]"
-		write(*,*) "Cp_SI: ", Cp_SI, "[J/g.K]"
+		write (*,*) "Temperature:", T0, "[K]"
+		!write(*,*) "Cp_metal: ", Cp_metal, "[eV/u.K]"
+		!write(*,*) "Cp_SI: ", Cp_SI, "[J/g.K]"
 		
 		contains 
 		

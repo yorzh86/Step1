@@ -141,8 +141,10 @@ contains
 			atoms(k)%v = atoms(k)%v/norm2(atoms(k)%v)
 			!! Set velocity magnitude
 			atoms(k)%v = atoms(k)%v*sqrt(2.0_wp*kB*Ti/types(atoms(k)%t)%m)*abs(randomNormal()+1.0_wp)
+			!! velocity = self. * sqrt (eV/K * K / gram/mole) = self. * sqrt(eV/ g/mole)
+			!! A/ps = eV/ u
 		end do
-		forall(k=1:3) atoms(:)%v(k) = atoms(:)%v(k)-sum(atoms(:)%v(k))/real(size(atoms),wp)
+		forall(k=1:3) atoms(:)%v(k) = (atoms(:)%v(k)-sum(atoms(:)%v(k))/real(size(atoms),wp))
 		
 		call updateAllLists()
 		
@@ -200,6 +202,8 @@ contains
 	end subroutine writeLammpsData
 
 	function V(i) result(o)
+	!! fn of potential
+	!! o - should be energy [eV]
 		integer,intent(in)::i
 		type(ad_t)::o
 		
@@ -216,21 +220,27 @@ contains
 			
 			E0 = lj%coeffs(1)
 			S0 = lj%coeffs(2)
+			!! E0 - energy [eV]
+			!! S0 - distance [A]
 			
 			do j=1,size(atoms(i)%neighbors)
 				aj = atoms(i)%neighbors(j)
+				!! aj - integer, number of neighbors
 				d = deltaR(atoms(aj),atoms(i))
+				!! d - distance [A]
 				if( norm2(real(d))>real(lj%cutoff) ) cycle
 				l = S0/norm2(d)
+				!! l - unitless distance/ distance
 				o = o+( 0.5_wp ) * ( 4.0_wp*E0*l**6*(l**6-1.0_wp) )
 					!! Only include half of the bond energy for each atom in the bond
+					!! o - energy [eV]
 			end do
 		end subroutine doLennardJones
 	
 	end function V
 
 	function delV(i) result(o)
-		!! Total force on atom
+		!! Total force on atom [eV/A]
 		integer,intent(in)::i
 		type(ad_t),dimension(3)::o
 		type(ad_t),dimension(3)::r
@@ -239,14 +249,18 @@ contains
 		o = 0.0_wp
 		do j=1,size(atoms(i)%neighbors)
 			aj = atoms(i)%neighbors(j)
+			!! aj - integer, number of neighbors
 			r  = deltaR(atoms(i),atoms(aj))
+			!! r - distance [A]
 			if( norm2(real(r))>real(lj%cutoff) ) cycle
 			o = o+delVij(i,aj,r)
+			!! o = eV/A
+			
 		end do
 	end function delV
 	
 	function delVij(i,j,d) result (o)
-		!! Force between two atoms
+		!! Force between two atoms [eV/A]
 		integer,intent(in)::i,j
 		type(ad_t),dimension(3),intent(in)::d
 		type(ad_t),dimension(3)::o
@@ -259,27 +273,38 @@ contains
 	contains
 		
 		subroutine doLennardJones(o)
+		!! o - should be force between atoms for LJ pot [eV/A]
 			type(ad_t),dimension(3),intent(out)::o
 			type(ad_t)::l,E0,S0
 			
 			E0 = lj%coeffs(1)
 			S0 = lj%coeffs(2)
+			!! E0 - energy [eV]
+			!! S0 - distance [A]
 			
 			l = S0/norm2(d)
+			! l - unitless (distance / distance)
 			o = o+24.0_wp*E0/sum(d*d)*(l**6)*(1.0_wp-2.0_wp*l**6)*d
+			!! 24* eV / A^2 * (unitless^6) * (1 - 2 * unitless^6)* [A]
+			!! eV/A
+			
 		end subroutine doLennardJones
 		
 	end function delVij
 
 	function deltaR(a1,a2) result(o)
+	!! distance between two atoms [A]
 		type(atom_t),intent(in)::a1,a2
 		type(ad_t),dimension(3)::o
 		type(ad_t),dimension(3)::d
 		d = a1%r-a2%r
+		!! d - distance between two atoms (array of [A])
 		o = d-box*real(nint(real(d/box)),wp)
+		!! o - distance between atoms and box [A]
 	end function deltaR
 
 	function temperature() result(o)
+	!! temperature [K]
 		type(ad_t)::o
 		type(ad_t),dimension(3)::vBulk
 		type(ad_t)::SKE
@@ -288,13 +313,16 @@ contains
 		forall(k=1:3) vBulk(k) = sum(atoms%v(k))/real(size(atoms),wp)
 		
 		SKE = 0.0_wp
+		!! sum of KE
 		do k=1,size(atoms)
 			SKE = SKE+KEi(k,vBulk)
 		end do
 		o = (2.0_wp*SKE)/(3.0_wp*real(size(atoms),wp)*kB)
+		!! eV / (integer * eV/K) = [K]
 	end function temperature
 
 	function E() result(o)
+	!! sum of energies of system [eV]
 		type(ad_t)::o
 		integer::k
 		
@@ -305,6 +333,7 @@ contains
 	end function E
 
 	function Ei(i) result(o)
+	!! sum of energies of atom [eV]
 		integer,intent(in)::i
 		type(ad_t)::o
 		
@@ -312,6 +341,7 @@ contains
 	end function Ei
 
 	function KE() result (o) 
+	!! sum of kinetic energies of system [eV]
 		type(ad_t)::o
 		!real(wp)::o
 		integer::k
@@ -323,6 +353,7 @@ contains
 	end function KE
 	
 	function KEi(i,vBulk) result (o)
+	!! kinetic energy of atom [eV]
 		integer,intent(in)::i
 		type(ad_t),dimension(3),intent(in),optional::vBulk
 		type(ad_t)::o
@@ -332,10 +363,17 @@ contains
 		if(present(vBulk)) v0 = vBulk
 
 		o = 0.5_wp*types(atoms(i)%t)%m*sum((atoms(i)%v-v0)**2)
+		!! o = 0.5 * gram/mole * ([A]/[ps])^2 = eV ??!!!!!!! ATTENTION
+		!! 1 eV = 1.602-19 [J]
+		!! for 1 atom, 1m, 1m/sec, mass 39.948: 
+		!! KE[SI] = 3.3168E-23
+		!! KE[metal] = 1.9974E-23   
+		!! 1.6605?
 		
 	end function KEi
 	
 	function PE() result (o)
+	!! sum of potential energies of system [eV]
 		type(ad_t)::o
 		integer::k
 		
@@ -346,6 +384,7 @@ contains
 	end function PE
 
 	function PEi(i) result (o)
+	!! potential energy of atom
 		integer,intent(in)::i
 		type(ad_t)::o
 		
@@ -353,6 +392,7 @@ contains
 	end function PEi
 
 	function Si(i) result(o)
+		!! we dont even use it...
 		integer,intent(in)::i
 		type(ad_t),dimension(3,3)::o
 		type(ad_t),dimension(3)::v,r,F
@@ -416,9 +456,11 @@ contains
 			do j=1,size(atoms(i)%neighbors)
 				aj = atoms(i)%neighbors(j)
 				r  = deltaR(atoms(i),atoms(aj))
+				!! r - distance [A]
 				if( norm2(real(r))>real(lj%cutoff) ) cycle
 				F = delVij(i,aj,r)
 				o = o+0.5_wp*sum(F*r)
+				!! o  = self. + 0.5* (eV/A * A) = eV
 			end do
 		end do
 	end function virial
@@ -427,6 +469,7 @@ contains
 		type(ad_t)::o
 		
 		o = (real(size(atoms),wp)*kB*temperature()-virial()/3.0_wp)/(box(1)*box(2)*box(3))
+		!! o = (atoms number * eV/K * K - (eV/A * A)/3)/A^3 = eV/A^3 = eV/A  / A^2 = force/area
 	end function pressure
 
 	function regionList(zl,zh) result(o)

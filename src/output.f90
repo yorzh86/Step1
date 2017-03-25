@@ -37,6 +37,7 @@ contains
 		write(*,*)
 
 	end subroutine showResults
+	
 
 	subroutine writeStepXYZ(iou)
 		integer,intent(in)::iou
@@ -92,8 +93,8 @@ contains
 		end if
 		
 		write(iou_energies,*) t,  k, convert(KEi(hot), 'eV','eV'), convert(KEi(cold), 'eV', 'eV')
-		!write(iou_penergies,*)t,  k, convert(PEi(hot), 'eV','eV'), convert(PEi(cold), 'eV','eV') 
-		write(iou_totenergies,*)t, k, E()
+		write(iou_penergies,*)t,  k, convert(PEi(hot), 'eV','eV'), convert(PEi(cold), 'eV','eV') 
+		write(iou_totenergies,*)t, k, convert(E(), 'eV', 'eV')
 
 	end subroutine writeStepEnergies
 	
