@@ -67,7 +67,7 @@ contains
 		
 		do k=1,size(atoms)
 			d = atoms(k)%v*dt+0.5_wp*atoms(k)%a*dt**2
-			atoms(k)%r =  atoms(k)%r+d!+Pepsilon*atoms(k)%r
+			atoms(k)%r =  atoms(k)%r+d+Pepsilon*atoms(k)%r*dt
 			!! d = A/ps * ps + A/ps^2 * ps^2 = A + A = [A] distance
 			!! atoms%r = [A] + [A] + eV / (ps * A^3 * bar)*[A] = ????  WEIRD!!!
 		end do
@@ -78,9 +78,13 @@ contains
 		end do
 		
 		do k=1,size(atoms)
-			atoms(k)%a = -delV(k)/types(atoms(k)%t)%m!-(Teta+Pepsilon)*atoms(k)%v
-			!! a = eV/A / gram/mole - (teta+pepsilon)* A/ps= eV/A / gram/mole - (1/ps + 1 / ps) (eV/A / A^2 * bar) * A/ps = Force/mass - (1/ps+1/ps(pressure*bar))*A/ps
+			atoms(k)%a = -delV(k)/types(atoms(k)%t)%m-(Teta+Pepsilon)*atoms(k)%v
+			!! a = eV/A / gram/mole - A/ps^2  !first term has to be coefficient
+			!mass*distan/time  = u*A/ps2             chancge EV mass*distance2/time2
+			!! redo barostate. fix line 70, 105, 81 ok,
 			!! A/ps^2 = eV/A / u
+			
+			!! recalculate kbt, change J/K - to mass*dist2/time2/K
 			
 			!! 1 force unit = 1 mass unit * 1 acceleration unit
 			!atoms(k)%f = -delV(k) !performance ?
@@ -97,12 +101,12 @@ contains
 		!! pepsilon = self. + DepsilonDt * [ps]
 		
 		
-		!! Pepsilon = eV / (ps^2 * A^3 * bar)*[ps] = eV / (ps * A^3 * bar)
+		!! Pepsilon = eV / (ps^2 * A^3 * bar)*[ps] = eV / (ps * A^3 * bar) = 1/ps
 		!! DepsilonDT = eV / (ps^2 * A^3 * bar)
 		!! detaDT  = [1/ps^2]
 		!! Teta = 1/ps
 		
-		box = box+Pepsilon*box
+		box = box+Pepsilon*box*dt
 		t  = t+dt
 		ts = ts+1
 	end subroutine velocityVerlet
