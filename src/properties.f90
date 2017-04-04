@@ -90,22 +90,22 @@ module properties_mod
 		
 		totEnergy = sum(Totenergies)/real(size(Totenergies), wp)
 		
-		gradT = calculateGrad()
+		!gradT = calculateGrad()
 		
 		mass = real(size(atoms),wp)*types(atoms(1)%t)%m
 		
-		metalToSI = convert(1.0_wp, 'eV', 'J')/convert(1.0_wp, 'u', 'g')
+		!metalToSI = convert(1.0_wp, 'eV', 'J')/convert(1.0_wp, 'u', 'g')
 		
-		Cp_metal = (1.0_wp/mass)*(totEnergy/gradT) 
+		!Cp_metal = (1.0_wp/mass)*(totEnergy/gradT) 
 		
-		Cp_SI = Cp_metal*metalToSI 
+		!Cp_SI = Cp_metal*metalToSI 
 		
 		! should be about:
 		! 34K 1bar 4.88 cal/mol.K = 0.51 J/g.K
 		
 		write (*,*) "mass:", mass, " [u]"
 		!write (*,*) "gradT:", gradT, " [K]"
-		write (*,*) "total energy average:", totEnergy, " [eV]"
+		write (*,*) "total energy average:", convert(totEnergy, 'uA2/ps2', 'eV'), " [eV]"
 		write (*,*) "Temperature:", T0, "[K]"
 		!write(*,*) "Cp_metal: ", Cp_metal, "[eV/u.K]"
 		!write(*,*) "Cp_SI: ", Cp_SI, "[J/g.K]"

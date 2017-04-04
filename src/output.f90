@@ -7,38 +7,6 @@ module output_mod
 	
 contains
 	
-	subroutine test_diff(k)
-	!! prints atom 100 velocities, and derivatives
-		integer, intent(in)::k
-		integer::i 
-		if (k< 1) write(*,'(1X, 1A9, 3X, 1A5, 4X, 1A125, 24X, 1A32)') '\x1B[32;1m#','Step', &
-			& 'Velocities %v(x,y,z)','Derivatives v(x,y,z)%d(1)\x1B[0m'
-		write(*,'(1X,1I2, 1I7, 3F9.3, 3ES20.5)')k/1, k, &
-		(atoms(100)%v(i)%x, i=1,3), (atoms(100)%v(i)%d(1), i=1,3)
-
-	end subroutine test_diff
-
-	subroutine showResults
-		integer::i, j
-
-		print *,
-		write(*,*) 'Writing temperatures for region1 (temperature, Deriv1, Deriv2):'
-		
-		do i=0, N_steps
-			write(*,'(1X, 10F15.8)') (regions(j)%temps(i)%x, j=1,10)! or, showing 1 region now:
-			!if (mod(i,skip_swap)==0) write(*,*) (regions(1)%temps(i))
-		end do
-		
-		write(*,*)
-		write(*,*) 'Writing KEi of two atoms(atom1, deriv1, deriv2, atom2, deriv1, deriv2):'
-		do i=0, N_steps/skip_swap
-			write(*, *) (regions(j)%Kenergies(i), j=1,2)
-		end do
-		write(*,*)
-
-	end subroutine showResults
-	
-
 	subroutine writeStepXYZ(iou)
 		integer,intent(in)::iou
 		
@@ -52,8 +20,7 @@ contains
 		do k=1,size(atoms)
 			write(iou,'(1I7, 9F5.1)') atoms(k)%atom_id, &
 				& [(convert(atoms(k)%r(i),'A','A'),i=1,3)], &
-				& [(convert(atoms(k)%v(i),'A/ps', 'A/ps'), i=1,3)], &
-				& [(convert(atoms(k)%f(i), 'eV/A', 'eV/A'), i=1,3)]  
+				& [(convert(atoms(k)%v(i),'A/ps', 'A/ps'), i=1,3)]	
 		end do
 	end subroutine writeStepXYZ
 	
@@ -74,7 +41,7 @@ contains
 	
 	subroutine writeStepEnergies(k, iou_energies, iou_penergies, iou_totenergies )
 		integer, intent(in)::k, iou_energies, iou_penergies, iou_totenergies
-		real(wp)::t
+		real(wp)::t, aux1, aux2, aux3
 		
 		t = convert(real(k,wp)*dt,'ps','ps')
 		
@@ -92,9 +59,9 @@ contains
 			write(iou_totenergies,*)
 		end if
 		
-		write(iou_energies,*) t,  k, convert(KEi(hot), 'eV','eV'), convert(KEi(cold), 'eV', 'eV')
-		write(iou_penergies,*)t,  k, convert(PEi(hot), 'eV','eV'), convert(PEi(cold), 'eV','eV') 
-		write(iou_totenergies,*)t, k, convert(E(), 'eV', 'eV')
+		write(iou_energies,*) t,  k, convert(KEi(hot), 'uA2/ps2','eV'), convert(KEi(cold), 'uA2/ps2', 'eV')
+		write(iou_penergies,*)t,  k, convert(PEi(hot), 'uA2/ps2','eV'), convert(PEi(cold), 'uA2/ps2','eV') 
+		write(iou_totenergies,*)t, k, convert(E(), 'uA2/ps2', 'eV')
 
 	end subroutine writeStepEnergies
 	

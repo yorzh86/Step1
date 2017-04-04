@@ -80,14 +80,6 @@ contains
 		do k=1,size(atoms)
 			atoms(k)%a = -delV(k)/types(atoms(k)%t)%m-(Teta+Pepsilon)*atoms(k)%v
 			!! a = eV/A / gram/mole - A/ps^2  !first term has to be coefficient
-			!mass*distan/time  = u*A/ps2             chancge EV mass*distance2/time2
-			!! redo barostate. fix line 70, 105, 81 ok,
-			!! A/ps^2 = eV/A / u
-			
-			!! recalculate kbt, change J/K - to mass*dist2/time2/K
-			
-			!! 1 force unit = 1 mass unit * 1 acceleration unit
-			!atoms(k)%f = -delV(k) !performance ?
 		end do
 		
 		do k=1,size(atoms)

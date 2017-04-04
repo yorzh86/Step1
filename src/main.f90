@@ -1,16 +1,22 @@
 !! Draw a bounding box in pymol
 !http://www.pymolwiki.org/index.php/DrawBoundingBox
 
-!! Back to metal units
-!mass = grams/mole +
-!distance = Angstroms +
-!time = picoseconds +
-!energy = eV +
+!! Using Advanced metal units
+
+!mass = grams/mole 
+!distance = Angstroms 
+!time = picoseconds 
+!---
+!energy = u*A^2/ps^2 (instead of eV)
+!---
 !velocity = Angstroms/picosecond +
-!force = eV/Angstrom +
-!torque = eV
-!temperature = Kelvin
-!pressure = bars +
+!---
+!force = u*A^2/ps^2/Angstrom= u*A/ps^2 (instead of eV/Angstrom)
+!---
+!torque = u*A^2/ps^2 (instead of eV)
+!---
+!temperature = Kelvin 
+!pressure = bars 
 !dynamic viscosity = Poise
 !charge = multiple of electron charge (1.0 is a proton)
 !dipole = charge*Angstroms
@@ -58,8 +64,8 @@ contains
 		call initialize_parameters()
 
 		enableLennardJones = .true.
-		call setThermostat(.false.,T0,10.0_wp*dt) !turn it ON
-		call setBarostat(.false.,P0, 5.0E10_wp*dt)!turn it ON
+		call setThermostat(.true.,T0,10.0_wp*dt) !turn it ON
+		call setBarostat(.true.,P0, 5.0E10_wp*dt)!turn it ON
 		call buildSystem(lattice_const,latM,T0)
 		call doBox()
 		call writeBasicInfo()
@@ -87,7 +93,6 @@ contains
  			!if(mod(k,skip_dump)==0)     call writeStepXYZ(iou_xyz)
 			if(mod(k,skip_neighbor)==0) call updateAllLists()
 			
-			!if(mod(k,1)==0) call test_diff(k) !output.f90 prints 
 			call velocityVerlet(dt)
 			call doBox()
 			
@@ -101,7 +106,17 @@ contains
  		!call showResults()  !output.f90
 		!call thermalConductivity() !calculates k
 		call specificHeat() !calculates Cp
+
+		!print *, "below should be same number:"
+		!write (*,*) convert(1.0_wp, 'eV', 'uA2/ps2')
+		!write (*,*) convert(1.6022E-19_wp, 'J', 'uA2/ps2')
+		!write (*,*) convert (1.0_wp, 'eV', 'J')
 		
+		!write(*,*) "u*A2/ps2 /K"
+		!write(*,*) "----------------------"
+		!write(*,*) "J/K = kg * m2/s2 /K"
+
+
 		print *, 
 		call doMessage(0, "test message, Check output.f90 doMessage subroutine.", [stdout])
 		

@@ -8,8 +8,14 @@ module settings_mod
 	!= Universal Constants =!
 	!=======================!
 	
-	real(wp),parameter::kB = 8.617342371E-5_wp !!1.3806488E-23_wp ![J/K] 
-		!! Boltzmann constant in metal units [eV/K]
+	real(wp),parameter::kB = 0.83144618021123218  !g/mole*A^2/ps^2/K
+	!!kg to g/mole = 6.022140857E+26
+	!!m2 to A2= 1E+20
+	!!s2 to ps2 = 1E+24
+	!!J = N * m; N = kg * m/s2; J = kg * m2/s2
+	!!8.617342371E-5_wp ![eV/K]
+	!!1.3806488E-23_wp  ![J/K] 
+	!! Boltzmann constant
 	
 	!=========!
 	!= Types =!
@@ -91,15 +97,15 @@ contains
 		lj%coeffs = [diff(E0,1),diff(S0,2)]
 		
 		!= Simulation =!
-		N_steps       = 11
+		N_steps       = 100000
 		N_slabs       = 10
-		skip_swap     = 1
-		skip_thermo   = 2!100
-		skip_dump     = 1
+		skip_swap     = 500
+		skip_thermo   = 100
+		skip_dump     = 5
 		skip_neighbor = 200
 		
 		lattice_const = convert(5.40_wp, 'A', 'A')
-		latM = [2,2,5]
+		latM = [5,5,5]
 		
 		T0 = convert(45.0_wp,'K','K')
 		P0 = convert(1.0_wp,'bar','bar')

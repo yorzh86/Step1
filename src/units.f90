@@ -5,7 +5,7 @@ module units_mod
 	implicit none
 	private
 	
-	integer,parameter::Nu = 31
+	integer,parameter::Nu = 35
 	
 	character(16),dimension(Nu),parameter::names = [ character(16):: &
 		& 'm','mm','um','nm','pm','fm','A', &
@@ -18,7 +18,9 @@ module units_mod
 		& 'm/s', 'A/ps', &
 		& 'W/m2', 'eV/ps/A2', &
 		& 'm/s2', 'A/ps2', &
-		& 'N', 'eV/A' &
+		& 'N', 'eV/A', &
+		& 'J', 'uA2/ps2', &
+		& 'eV', 'uA2/ps2' &
 		& ]
 	
 	interface convert
@@ -102,11 +104,15 @@ contains
 		
 		cf( getIndex('m/s' ) , getIndex('A/ps' ) ) = 1.0E-2_wp
 		
-		cf( getIndex('W/m2') , getIndex('eV/ps/A2') ) = 6.24150636309E-14
+		cf( getIndex('W/m2') , getIndex('eV/ps/A2') ) = 6.24150636309E-14 !dont use
 		
 		cf( getIndex('m/s2') , getIndex('A/ps2') ) = 1.0E-14_wp
 		
-		cf( getIndex('N') , getIndex('eV/A') ) = 6.24150636309E8_wp
+		cf( getIndex('N') , getIndex('eV/A') ) = 6.24150636309E8_wp !dont use
+		
+		cf( getIndex('J') , getIndex('uA2/ps2') ) = 6.0221410413077686E+022_wp
+		
+		cf( getIndex('eV') , getIndex('uA2/ps2') ) = 6.0221410413077686E+022_wp*1.6021773300010339E-019_wp
 		
 		! Assert inverse conversions
 		do j=1,Nu

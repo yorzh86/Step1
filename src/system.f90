@@ -164,6 +164,7 @@ contains
 		
 		integer::i,k,iou
 		real(wp)::E0,S0
+
 		
 		E0 = lj%coeffs(1)
 		S0 = lj%coeffs(2)
@@ -185,7 +186,7 @@ contains
 		write(iou,'(1A)') ''
 		write(iou,'(1A)') 'PairIJ Coeffs # lj/cut'
 		write(iou,'(1A)') ''
-		write(iou,'(2I3,3F13.6)') 1, 1 , convert(E0,'eV','eV'), convert(S0,'A','A'), convert(lj%cutoff,'A','A')
+		write(iou,'(2I3,3F13.6)') 1, 1 , convert(E0,'uA2/ps2','eV'), convert(S0,'A','A'), convert(lj%cutoff,'A','A')
 		write(iou,'(1A)') ''
 		write(iou,'(1A)') 'Atoms'
 		write(iou,'(1A)') ''
