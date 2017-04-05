@@ -105,7 +105,7 @@ contains
 		
  		!call showResults()  !output.f90
 		!call thermalConductivity() !calculates k
-		call specificHeat() !calculates Cp
+		!call specificHeat() !calculates Cp
 
 		!print *, "below should be same number:"
 		!write (*,*) convert(1.0_wp, 'eV', 'uA2/ps2')
